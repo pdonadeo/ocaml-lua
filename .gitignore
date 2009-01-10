@@ -1,0 +1,13 @@
+mirror-ex-nunc.sh
+
+session.vim
+Session.vim
+
+_build
+_log
+
+*.byte
+*.native
+*.pyc
+*.swp
+
