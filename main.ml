@@ -20,6 +20,9 @@ let thread_status_of_int = function
   | _ -> failwith "thread_status_of_int: unknown status value"
 
 exception Lua_error of thread_status
+exception Lua_type_error of string
+
+let _ = Callback.register_exception "Lua type error" (Lua_type_error "")
 
 external lua_open : unit -> lua_State = "lua_open__stub"
 external luaL_openlibs : lua_State -> unit = "luaL_openlibs__stub"
@@ -30,6 +33,12 @@ external luaL_loadbuffer__wrapper :
 external lua_pcall__wrapper :
   lua_State -> int -> int -> int -> int = "lua_pcall__stub"
 
+external lua_tolstring__wrapper :
+  lua_State -> int -> string = "lua_tolstring__stub"
+  (** Raises [Lua_type_error] *)
+
+external lua_pop : lua_State -> int -> unit = "lua_pop__stub"
+
 let luaL_loadbuffer l buff name =
   luaL_loadbuffer__wrapper l buff (String.length buff) name |>
     thread_status_of_int
@@ -38,6 +47,12 @@ let luaL_loadbuffer l buff name =
 let lua_pcall l nargs nresults errfunc =
   lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
 ;;
+
+let lua_tolstring l index =
+  lua_tolstring__wrapper l index
+;;
+
+let lua_tostring = lua_tolstring;;
 
 let l = lua_open ();;
 let () = luaL_openlibs l;;
@@ -55,7 +70,8 @@ try
           | err -> raise (Lua_error err)
       with
         | Lua_error err -> begin
-            Printf.eprintf "%s%!" "ERRORE!!!\n"
+            Printf.eprintf "%s\n%!" (lua_tostring l (-1));
+            lua_pop l 1;
           end
   done;
 with End_of_file -> ()
