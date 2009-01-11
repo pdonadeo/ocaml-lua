@@ -40,12 +40,19 @@ external lua_tolstring__wrapper :
 external lua_pop : lua_State -> int -> unit = "lua_pop__stub"
 
 let luaL_loadbuffer l buff name =
-  luaL_loadbuffer__wrapper l buff (String.length buff) name |>
-    thread_status_of_int
+  let ret_status = luaL_loadbuffer__wrapper l buff (String.length buff) name |>
+    thread_status_of_int in
+    match ret_status with
+      | LUA_OK -> ()
+      | err -> raise (Lua_error err)
 ;;
 
 let lua_pcall l nargs nresults errfunc =
-  lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
+  let ret_status = lua_pcall__wrapper l nargs nresults errfunc |>
+    thread_status_of_int in
+    match ret_status with
+      | LUA_OK -> ()
+      | err -> raise (Lua_error err)
 ;;
 
 let lua_tolstring l index =
@@ -54,6 +61,23 @@ let lua_tolstring l index =
 
 let lua_tostring = lua_tolstring;;
 
+module Exceptionless =
+struct
+  let lua_tolstring l index =
+    try `Ok (lua_tolstring__wrapper l index)
+    with Lua_type_error msg -> `Lua_type_error msg
+
+  let lua_tostring = lua_tolstring
+
+  let luaL_loadbuffer l buff name =
+    luaL_loadbuffer__wrapper l buff (String.length buff) name |>
+      thread_status_of_int
+
+  let lua_pcall l nargs nresults errfunc =
+    lua_pcall__wrapper l nargs nresults errfunc |>
+      thread_status_of_int
+end
+
 let l = lua_open ();;
 let () = luaL_openlibs l;;
 
@@ -61,13 +85,8 @@ try
   while true do
     let line = (read_line ()) ^ "\n" in
       try
-        match luaL_loadbuffer l line "line" with
-          | LUA_OK -> begin
-              match lua_pcall l 0 0 0 with
-                | LUA_OK -> ()
-                | err -> raise (Lua_error err)
-            end
-          | err -> raise (Lua_error err)
+        luaL_loadbuffer l line "line";
+        lua_pcall l 0 0 0;
       with
         | Lua_error err -> begin
             Printf.eprintf "%s\n%!" (lua_tostring l (-1));
