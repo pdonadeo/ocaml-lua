@@ -32,7 +32,8 @@ let _ = dispatch begin function
       flag ["c"; "compile"] &
         (*S[A"-ccopt"; A"-O3"; A"-ccopt"; A"-Wall"; A"-ccopt"; A"-pg"];*)
         S[ A"-ccopt"; A"-O3";
-           A"-ccopt"; A"-Wall" ];
+           A"-ccopt"; A"-Wall";
+           A"-ccopt"; A"-ggdb"; ];
 
       (* When one link an OCaml library/binary/package, one should use -linkpkg *)
       flag ["ocaml"; "link"] & S[A"-linkpkg"; A"-cclib"; A"-llua5.1"];

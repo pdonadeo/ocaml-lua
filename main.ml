@@ -2,6 +2,8 @@ let (|>) x f = f x
 
 type lua_State
 
+type lua_OCamlFunction = lua_State -> int
+
 type thread_status =
   | LUA_OK
   | LUA_YIELD
@@ -21,12 +23,13 @@ let thread_status_of_int = function
 
 exception Lua_error of thread_status
 exception Lua_type_error of string
+exception Lua_exception
 
 let _ = Callback.register_exception "Lua type error" (Lua_type_error "")
+let _ = Callback.register_exception "Not_found" Not_found
 
 external lua_open : unit -> lua_State = "lua_open__stub"
 external luaL_openlibs : lua_State -> unit = "luaL_openlibs__stub"
-external lua_close : lua_State -> unit = "lua_close__stub"
 external luaL_loadbuffer__wrapper :
   lua_State -> string -> int -> string -> int = "luaL_loadbuffer__stub"
 
@@ -37,7 +40,12 @@ external lua_tolstring__wrapper :
   lua_State -> int -> string = "lua_tolstring__stub"
   (** Raises [Lua_type_error] *)
 
+external lua_atpanic__wrapper :
+  lua_State -> lua_OCamlFunction -> lua_OCamlFunction = "lua_atpanic__stub"
+
 external lua_pop : lua_State -> int -> unit = "lua_pop__stub"
+
+external lua_error : lua_State -> unit = "lua_error__stub"
 
 let luaL_loadbuffer l buff name =
   let ret_status = luaL_loadbuffer__wrapper l buff (String.length buff) name |>
@@ -46,6 +54,14 @@ let luaL_loadbuffer l buff name =
       | LUA_OK -> ()
       | err -> raise (Lua_error err)
 ;;
+
+let default_panic_function l = 0;;
+
+let lua_atpanic l panicf =
+  try lua_atpanic__wrapper l panicf
+  with Not_found -> default_panic_function
+;;
+
 
 let lua_pcall l nargs nresults errfunc =
   let ret_status = lua_pcall__wrapper l nargs nresults errfunc |>
@@ -78,6 +94,9 @@ struct
       thread_status_of_int
 end
 
+
+(*
+(**** ESEMPIO 1 ***************************************************************)
 let l = lua_open ();;
 let () = luaL_openlibs l;;
 
@@ -87,13 +106,63 @@ try
       try
         luaL_loadbuffer l line "line";
         lua_pcall l 0 0 0;
+(*         lua_error l; *)
       with
         | Lua_error err -> begin
-            Printf.eprintf "%s\n%!" (lua_tostring l (-1));
+            Printf.printf "%s\n%!" (lua_tostring l (-1));
             lua_pop l 1;
           end
   done;
 with End_of_file -> ()
 
-let () = lua_close l
+(******************************************************************************)
+*)
+
+
+(**** ESEMPIO 2 ***************************************************************)
+let conta = ref 0;;
+
+let panicf1 l =
+  Printf.printf "panicf1: %d\n%!" !conta;
+  raise Lua_exception
+;;
+
+let closure () =
+  let l = lua_open () in
+    try
+      let n = Random.int 1024*1024 in
+      let str = String.create n in
+      let panicf2 l =
+        ignore str;
+        Printf.printf "panicf2: %d\n%!" !conta;
+        raise Lua_exception in
+      let n = Random.int 2 in
+      let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
+        lua_atpanic l f |> ignore;
+        luaL_openlibs l;
+        luaL_loadbuffer l "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+        lua_pcall l 0 0 0;
+        lua_error l;
+    with
+      | Lua_error err -> begin
+            Printf.printf "%s\n%!" (lua_tostring l (-1));
+            lua_pop l 1;
+            failwith "FATAL ERROR"
+          end;
+;;
+
+let sleep_float n =
+  let _ = Unix.select [] [] [] n in ()
+;;
+
+while true do
+  let () = try closure () with Lua_exception -> () in
+(*   Gc.minor (); *)
+(*   Gc.major_slice 0 |> ignore; *)
+(*   Gc.major (); *)
+(*   Gc.compact (); *)
+  conta := !conta + 1;
+  sleep_float (1./.((Random.float 900.0) +. 100.));
+done;;
+(******************************************************************************)
 
