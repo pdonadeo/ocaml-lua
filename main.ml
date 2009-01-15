@@ -21,7 +21,7 @@ let thread_status_of_int = function
   | 5 -> LUA_ERRERR
   | _ -> failwith "thread_status_of_int: unknown status value"
 
-exception Lua_error of thread_status
+exception Lua_error of thread_status (* TODO aggiungere lo stato L! *)
 exception Lua_type_error of string
 exception Lua_exception
 
@@ -128,7 +128,8 @@ let panicf1 l =
 ;;
 
 let closure () =
-  let l = lua_open () in
+  let l1 = lua_open () in
+  let l2 = lua_open () in
     try
       let n = Random.int 1024*1024 in
       let str = String.create n in
@@ -138,15 +139,20 @@ let closure () =
         raise Lua_exception in
       let n = Random.int 2 in
       let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
-        lua_atpanic l f |> ignore;
-        luaL_openlibs l;
-        luaL_loadbuffer l "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
-        lua_pcall l 0 0 0;
-        lua_error l;
+        lua_atpanic l1 f |> ignore;
+        lua_atpanic l2 f |> ignore;
+        luaL_openlibs l1;
+        luaL_openlibs l2;
+        luaL_loadbuffer l1 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+        luaL_loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+        lua_pcall l1 0 0 0;
+        lua_pcall l2 0 0 0;
+        let n = Random.int 2 in
+          match n with | 0 -> lua_error l1 | 1 -> lua_error l2 | _ -> failwith "IMPOSSIBILE"
     with
       | Lua_error err -> begin
-            Printf.printf "%s\n%!" (lua_tostring l (-1));
-            lua_pop l 1;
+            Printf.printf "%s\n%!" (lua_tostring l1 (-1));
+            lua_pop l1 1;
             failwith "FATAL ERROR"
           end;
 ;;
