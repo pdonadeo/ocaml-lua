@@ -185,6 +185,15 @@ value lua_pop__stub(value L, value n)
 
 
 CAMLprim
+value lua_call__stub(value L, value nargs, value nresults)
+{
+  CAMLparam3(L, nargs, nresults);
+  lua_call(lua_State_val(L), Int_val(nargs), Int_val(nresults));
+  CAMLreturn(Val_unit);
+}
+
+
+CAMLprim
 value luaL_loadbuffer__stub(value L, value buff, value sz, value name)
 {
   CAMLparam4(L, buff, sz, name);

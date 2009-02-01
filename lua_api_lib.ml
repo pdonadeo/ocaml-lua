@@ -1,3 +1,6 @@
+(*******************************)
+(* COMMON FUNCTIONAL OPERATORS *)
+(*******************************)
 let (|>) x f = f x
 
 type state
@@ -21,12 +24,45 @@ let thread_status_of_int = function
   | 5 -> LUA_ERRERR
   | _ -> failwith "thread_status_of_int: unknown status value"
 
+let int_of_thread_status = function
+  | LUA_OK -> 0
+  | LUA_YIELD -> 1
+  | LUA_ERRRUN -> 2
+  | LUA_ERRSYNTAX -> 3
+  | LUA_ERRMEM -> 4
+  | LUA_ERRERR -> 5
+  
+let lua_multret : int = -1
+
+
+(**************)
+(* EXCEPTIONS *)
+(**************)
 exception Error of thread_status (* TODO add the L state! *)
 exception Type_error of string
 
 let _ = Callback.register_exception "Lua_type_error" (Type_error "")
 let _ = Callback.register_exception "Not_found" Not_found
 
+(*************)
+(* FUNCTIONS *)
+(*************)
+external lua_atpanic__wrapper :
+  state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
+
+let default_panic_function (_ : state) = 0
+
+let atpanic l panicf =
+  try lua_atpanic__wrapper l panicf
+  with Not_found -> default_panic_function
+
+external call : state -> int -> int -> unit = "lua_call__stub"
+
+
+(******************************************************************************)
+(******************************************************************************)
+(******************************************************************************)
+(******************************************************************************)
 external lua_open : unit -> state = "lua_open__stub"
 
 external lua_pcall__wrapper :
@@ -49,16 +85,6 @@ let tolstring l index =
 ;;
 
 let tostring = tolstring;;
-
-external lua_atpanic__wrapper :
-  state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
-
-let default_panic_function (_ : state) = 0;;
-
-let atpanic l panicf =
-  try lua_atpanic__wrapper l panicf
-  with Not_found -> default_panic_function
-;;
 
 external pop : state -> int -> unit = "lua_pop__stub"
 

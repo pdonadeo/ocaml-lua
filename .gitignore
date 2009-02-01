@@ -1,4 +1,6 @@
-mirror-ex-nunc.sh
+git-mirror.sh
+
+lua_api.docdir
 
 session.vim
 Session.vim
