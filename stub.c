@@ -214,7 +214,7 @@ value lua_pcall__stub(value L, value nargs, value nresults, value errfunc)
 
 void raise_type_error(char *msg)
 {
-  caml_raise_with_string(*caml_named_value("Lua type error"), msg);
+  caml_raise_with_string(*caml_named_value("Lua_type_error"), msg);
 }
 
 
