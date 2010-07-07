@@ -58,6 +58,8 @@ let atpanic l panicf =
 
 external call : state -> int -> int -> unit = "lua_call__stub"
 
+external checkstack : state -> int -> bool = "lua_checkstack__stub"
+
 
 (******************************************************************************)
 (******************************************************************************)
@@ -88,7 +90,7 @@ let tostring = tolstring;;
 
 external pop : state -> int -> unit = "lua_pop__stub"
 
-external error : state -> unit = "lua_error__stub"
+external error : state -> 'a = "lua_error__stub"
 
 module Exceptionless =
 struct

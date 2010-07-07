@@ -57,9 +57,16 @@ val default_panic_function : state -> int
 val atpanic : state -> oCamlFunction -> oCamlFunction
 (** The first time you call [atpanic] returns [default_panic_function]. *)
 
-external call : state -> int -> int -> unit = "lua_call__stub"
+val call : state -> int -> int -> unit
 (** See {{:http://www.lua.org/manual/5.1/manual.html#lua_call}lua_call}
     documentation. *)
+
+val checkstack : state -> int -> bool
+(** See {{:http://www.lua.org/manual/5.1/manual.html#lua_checkstack}lua_checkstack}
+    documentation. *)
+
+(** {10 {b lua_close}} *)
+(** TODO BLA BLA BLA *)
 
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
@@ -80,7 +87,7 @@ external lua_tolstring__wrapper : state -> int -> string
 val tolstring : state -> int -> string
 val tostring : state -> int -> string
 external pop : state -> int -> unit = "lua_pop__stub"
-external error : state -> unit = "lua_error__stub"
+external error : state -> 'a = "lua_error__stub"
 module Exceptionless :
   sig
     val pcall : state -> int -> int -> int -> thread_status

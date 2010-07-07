@@ -194,6 +194,18 @@ value lua_call__stub(value L, value nargs, value nresults)
 
 
 CAMLprim
+value lua_checkstack__stub(value L, value extra)
+{
+  CAMLparam2(L, extra);
+  int retval = lua_checkstack(lua_State_val(L), Int_val(extra));
+  if (retval == 0)
+    CAMLreturn(Val_false);
+  else
+    CAMLreturn(Val_true);
+}
+
+
+CAMLprim
 value luaL_loadbuffer__stub(value L, value buff, value sz, value name)
 {
   CAMLparam4(L, buff, sz, name);
