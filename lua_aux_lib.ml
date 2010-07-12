@@ -2,7 +2,7 @@ open Lua_api_lib
 
 let (|>) x f = f x
 
-let newstate = Lua_api_lib.lua_open
+external newstate : unit -> state = "luaL_newstate__stub"
 
 external openlibs : state -> unit = "luaL_openlibs__stub"
 

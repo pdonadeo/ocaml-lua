@@ -51,17 +51,15 @@ val int_of_thread_status : thread_status -> int
 (** {2 Lua API functions} *)
 (**************************)
 
-val default_panic_function : state -> int
-(** This panic function does nothing but returning 0. *)
+external atpanic : state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#lua_atpanic}lua_atpanic}
+    documentation. *)
 
-val atpanic : state -> oCamlFunction -> oCamlFunction
-(** The first time you call [atpanic] returns [default_panic_function]. *)
-
-val call : state -> int -> int -> unit
+external call : state -> int -> int -> unit = "lua_call__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#lua_call}lua_call}
     documentation. *)
 
-val checkstack : state -> int -> bool
+external checkstack : state -> int -> bool = "lua_checkstack__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#lua_checkstack}lua_checkstack}
     documentation. *)
 
@@ -78,14 +76,14 @@ val checkstack : state -> int -> bool
 (**************************************************************************)
 (**************************************************************************)
 (**************************************************************************)
-external lua_open : unit -> state = "lua_open__stub"
 external lua_pcall__wrapper : state -> int -> int -> int -> int
   = "lua_pcall__stub"
 val pcall : state -> int -> int -> int -> unit
-external lua_tolstring__wrapper : state -> int -> string
-  = "lua_tolstring__stub"
-val tolstring : state -> int -> string
+external tolstring : state -> int -> string = "lua_tolstring__stub"
 val tostring : state -> int -> string
+external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
+val pushstring : state -> string -> unit
+
 external pop : state -> int -> unit = "lua_pop__stub"
 external error : state -> 'a = "lua_error__stub"
 module Exceptionless :

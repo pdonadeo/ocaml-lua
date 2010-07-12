@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdarg.h>
 
 #include <lua5.1/lua.h>
 #include <lua5.1/lauxlib.h>
@@ -12,19 +13,59 @@
 #include <caml/callback.h>
 #include <caml/signals.h>
 
+/******************************************************************************/
+/*****                           DEBUG FUNCTION                           *****/
+/******************************************************************************/
+/* Comment out the following line to enable debug */
+#define NO_DEBUG
+
+#if defined(NO_DEBUG) && defined(__GNUC__)
+#define debug(level, format, args...) ((void)0)
+#else
+void debug(int level, char *format, ...);
+#endif
+
+#ifndef NO_DEBUG
+static int msglevel = 2; /* the higher, the more messages... */
+#endif
+
+#if defined(NO_DEBUG) && defined(__GNUC__)
+/* Nothing */
+#else
+void debug(int level, char* format, ...)
+{
+#ifdef NO_DEBUG
+    /* Empty body, so a good compiler will optimise calls
+       to debug away */
+#else
+    va_list args;
+
+    if (level > msglevel)
+        return;
+
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    fflush(stderr);
+    va_end(args);
+#endif /* NO_DEBUG */
+}
+#endif /* NO_DEBUG && __GNUC__ */
+/******************************************************************************/
 
 typedef struct node
 {
-  lua_State *state;
+  lua_State *state; /* This is redundant, but it's handy */
   value state_value;
   value panic_callback;
   struct node *next;
 } node;
 
+static char UUID[] = "551087dd-4133-4097-87c6-79c27cde5c15";
+
 static void finalize_lua_State(value L);
 static struct custom_operations lua_State_ops =
 {
-  "org.ex-nunc.ocaml_lua",
+  UUID,
   finalize_lua_State,
   custom_compare_default,
   custom_hash_default,
@@ -32,74 +73,109 @@ static struct custom_operations lua_State_ops =
   custom_deserialize_default
 };
 
-#define lua_State_val(L) (*((lua_State **) Data_custom_val(L)))
+#define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
 
 static node *states_register = NULL;
 
 static int states_number = 0;
 
-CAMLprim
-value lua_open__stub (value unit)
+static void *custom_alloc ( void *ud,
+                            void *ptr,
+                            size_t osize,
+                            size_t nsize )
 {
-  CAMLparam1(unit);
-  CAMLlocal1(v_L);
+    (void)ud;
+    (void)osize;  /* not used */
+    void *realloc_result = NULL;
 
-  // create a fresh new Lua state
-  lua_State *L = lua_open();
-  if (L == NULL)
-  {
-    caml_failwith("MEMORY ERROR: not enough memory to allocate a new Lua state");
-  }
+    if (nsize == 0)
+    {
+        free(ptr);
+        return NULL;
+    }
+    else
+    {
+        realloc_result = caml_stat_resize(ptr, nsize);
+        return realloc_result;
+    }
+}
 
-  // alloc space for the register entry
-  node *new_node = (node*)caml_stat_alloc(sizeof(node));
-  new_node->state = L;
-  new_node->panic_callback = Val_unit;
-  new_node->next = states_register;
-  states_register = new_node;
-  states_number++;
+static int default_panic(lua_State *L)
+{
+    value *default_panic_v = caml_named_value("default_panic");
 
-  // wrap the lua_State* in a custom object
-  v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
-  lua_State_val(v_L) = L;
-  new_node->state_value = v_L;
+    node *current = states_register;
+    while (current != NULL)
+    {
+        if (current->state == L)
+            return Int_val(caml_callback(*default_panic_v, current->state_value));
+        else
+            current = current->next;
+    }
+    return 0;
+}
 
-  // return the lua_State value
-  CAMLreturn(v_L);
+CAMLprim
+value luaL_newstate__stub (value unit)
+{
+    CAMLparam1(unit);
+    CAMLlocal1(v_L);
+
+    value *default_panic_v = caml_named_value("default_panic");
+
+    // create a fresh new Lua state
+    lua_State *L = lua_newstate(custom_alloc, NULL);
+    lua_atpanic(L, &default_panic);
+
+    // alloc space for the register entry
+    node *new_node = (node*)caml_stat_alloc(sizeof(node));
+    new_node->state = L;
+    caml_register_global_root(&(new_node->panic_callback));
+    new_node->panic_callback = *default_panic_v;
+    new_node->next = states_register;
+    states_register = new_node;
+    states_number++;
+
+    // wrap the lua_State* in a custom object
+    v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
+    lua_State_val(v_L) = L;
+    new_node->state_value = v_L;
+
+    // return the lua_State value
+    CAMLreturn(v_L);
 }
 
 
 static void finalize_lua_State(value L)
 {
-  lua_State *state = lua_State_val(L);
-  node *current = states_register;
-  node *prev = NULL;
+    lua_State *state = lua_State_val(L);
+    node *current = states_register;
+    node *prev = NULL;
 
-  while (current != NULL)
-  {
-    if (current->state == state)
+    while (current != NULL)
     {
-      lua_close(state);
+        if (current->state == state)
+        {
+            lua_close(state);
 
-      if (prev != NULL)
-        prev->next = current->next;
-      else
-        states_register = current->next;
+            if (prev != NULL)
+                prev->next = current->next;
+            else
+                states_register = current->next;
 
-      if (current->panic_callback != Val_unit)
-          caml_remove_global_root(&(current->panic_callback));
-      caml_stat_free(current);
-      states_number--;
-      current = NULL;
+            caml_remove_global_root(&(current->panic_callback));
+            caml_stat_free(current);
+            states_number--;
+            current = NULL;
+        }
+        else
+        {
+            prev = current;
+            current = current->next;
+        }
     }
-    else
-    {
-      prev = current;
-      current = current->next;
-    }
-  }
 
-  return;
+    return;
 }
 
 
@@ -112,14 +188,14 @@ value luaL_openlibs__stub(value L)
 }
 
 
-int panic_prototype(lua_State *L)
+int panic_wrapper(lua_State *L)
 {
   node *current = states_register;
   while (current != NULL)
   {
     if (current->state == L)
-      return Int_val(caml_callback( current->panic_callback,  // callback
-                                    current->state_value ));  // Lua state
+      return Int_val(caml_callback( current->panic_callback,    // callback
+                                    current->state_value ));    // Lua state
     else
       current = current->next;
   }
@@ -130,39 +206,30 @@ int panic_prototype(lua_State *L)
 CAMLprim
 value lua_atpanic__stub(value L, value panicf)
 {
-  CAMLparam2(L, panicf);
-  CAMLlocal1(old_panicf);
+    CAMLparam2(L, panicf);
+    CAMLlocal1(old_panicf);
 
-  lua_State *state = lua_State_val(L);
-  node *current = states_register;
-  while (current != NULL)
-  {
-    if (current->state == state)
-    {
-      if (current->panic_callback == Val_unit)
-      {
-        current->panic_callback = panicf;
-        caml_register_global_root(&(current->panic_callback));
-        lua_atpanic(state, panic_prototype);
-        caml_raise_constant(*caml_named_value("Not_found"));
-      }
-      else
-      {
-        old_panicf = current->panic_callback;
-        caml_remove_global_root(&(current->panic_callback));
-        current->panic_callback = panicf;
-        caml_register_global_root(&(current->panic_callback));
-        lua_atpanic(state, panic_prototype);
-      }
-      current = NULL;
-    }
-    else
-    {
-      current = current->next;
-    }
-  }
+    lua_State *state = lua_State_val(L);
 
-  CAMLreturn(old_panicf);
+    node *current = states_register;
+    while (current != NULL)
+    {
+        if (current->state == state)
+        {
+            old_panicf = current->panic_callback;
+            caml_remove_global_root(&(current->panic_callback));
+            caml_register_global_root(&(current->panic_callback));
+            current->panic_callback = panicf;
+            lua_atpanic(state, panic_wrapper);
+            current = NULL;
+        }
+        else
+        {
+            current = current->next;
+        }
+    }
+
+    CAMLreturn(old_panicf);
 }
 
 
@@ -262,5 +329,13 @@ value lua_tolstring__stub(value L, value index)
   }
 
   CAMLreturn(ret_val);
+}
+
+CAMLprim
+value lua_pushlstring__stub(value L, value s)
+{
+    CAMLparam2(L, s);
+    lua_pushlstring(lua_State_val(L), String_val(s), caml_string_length(s));
+    CAMLreturn(Val_unit);
 }
 

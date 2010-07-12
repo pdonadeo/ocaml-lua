@@ -38,23 +38,32 @@ let lua_multret : int = -1
 (**************)
 (* EXCEPTIONS *)
 (**************)
-exception Error of thread_status (* TODO add the L state! *)
+exception Error of thread_status
 exception Type_error of string
 
 let _ = Callback.register_exception "Lua_type_error" (Type_error "")
-let _ = Callback.register_exception "Not_found" Not_found
 
 (*************)
 (* FUNCTIONS *)
 (*************)
-external lua_atpanic__wrapper :
-  state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
+external tolstring : state -> int -> string = "lua_tolstring__stub"
+  (** Raises [Type_error] *)
 
-let default_panic_function (_ : state) = 0
+let tostring = tolstring
 
-let atpanic l panicf =
-  try lua_atpanic__wrapper l panicf
-  with Not_found -> default_panic_function
+external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
+
+let pushstring = pushlstring
+
+(* This is the "porting" of the standard panic function from Lua source:
+   lua-5.1.4/src/lauxlib.c line 639 *)
+let default_panic (l : state) =
+  Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" (tostring l (-1));
+  0
+
+let _ = Callback.register "default_panic" default_panic
+
+external atpanic : state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
 
 external call : state -> int -> int -> unit = "lua_call__stub"
 
@@ -65,8 +74,6 @@ external checkstack : state -> int -> bool = "lua_checkstack__stub"
 (******************************************************************************)
 (******************************************************************************)
 (******************************************************************************)
-external lua_open : unit -> state = "lua_open__stub"
-
 external lua_pcall__wrapper :
   state -> int -> int -> int -> int = "lua_pcall__stub"
 
@@ -77,16 +84,6 @@ let pcall l nargs nresults errfunc =
       | LUA_OK -> ()
       | err -> raise (Error err)
 ;;
-
-external lua_tolstring__wrapper :
-  state -> int -> string = "lua_tolstring__stub"
-  (** Raises [Type_error] *)
-
-let tolstring l index =
-  lua_tolstring__wrapper l index
-;;
-
-let tostring = tolstring;;
 
 external pop : state -> int -> unit = "lua_pop__stub"
 
@@ -99,7 +96,7 @@ struct
       thread_status_of_int
 
   let tolstring l index =
-    try `Ok (lua_tolstring__wrapper l index)
+    try `Ok (tolstring l index)
     with Type_error msg -> `Type_error msg
 
   let tostring = tolstring

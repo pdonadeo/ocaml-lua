@@ -1,5 +1,7 @@
+open Lua_api_lib
+
 val ( |> ) : 'a -> ('a -> 'b) -> 'b
-val newstate : unit -> Lua_api_lib.state
+external newstate : unit -> state = "luaL_newstate__stub"
 external openlibs : Lua_api_lib.state -> unit = "luaL_openlibs__stub"
 external luaL_loadbuffer__wrapper :
   Lua_api_lib.state -> string -> int -> string -> int
