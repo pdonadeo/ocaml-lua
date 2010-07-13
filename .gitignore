@@ -1,5 +1,3 @@
-git-mirror.sh
-
 lua_api.docdir
 
 session.vim
@@ -10,6 +8,5 @@ _log
 
 *.byte
 *.native
-*.pyc
 *.swp
 
