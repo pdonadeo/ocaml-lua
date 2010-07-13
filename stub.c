@@ -52,17 +52,16 @@ void debug(int level, char* format, ...)
 #endif /* NO_DEBUG && __GNUC__ */
 /******************************************************************************/
 
-typedef struct node
+typedef struct ocaml_data
 {
-  lua_State *state; /* This is redundant, but it's handy */
   value state_value;
   value panic_callback;
-  struct node *next;
-} node;
+} ocaml_data;
 
-static char UUID[] = "551087dd-4133-4097-87c6-79c27cde5c15";
+#define UUID "551087dd-4133-4097-87c6-79c27cde5c15"
 
 static void finalize_lua_State(value L);
+
 static struct custom_operations lua_State_ops =
 {
   UUID,
@@ -74,10 +73,6 @@ static struct custom_operations lua_State_ops =
 };
 
 #define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
-
-static node *states_register = NULL;
-
-static int states_number = 0;
 
 static void *custom_alloc ( void *ud,
                             void *ptr,
@@ -100,20 +95,40 @@ static void *custom_alloc ( void *ud,
     }
 }
 
+
+static void set_ocaml_data(lua_State *L, ocaml_data* data)
+{
+    lua_newtable(L);
+    lua_pushstring(L, "ocaml_data");
+    lua_pushlightuserdata(L, (void *)data);
+    lua_settable(L, -3);
+    lua_pushstring(L, UUID);
+    lua_insert(L, -2);
+    lua_settable(L, LUA_REGISTRYINDEX);
+}
+
+
+static ocaml_data * get_ocaml_data(lua_State *L)
+{
+    lua_pushstring(L, UUID);
+    lua_gettable(L, LUA_REGISTRYINDEX);
+    lua_pushstring(L, "ocaml_data");
+    lua_gettable(L, -2);
+    ocaml_data *info = (ocaml_data*)lua_touserdata(L, -1);
+    lua_pop(L, 2);
+    return info;
+}
+
+
 static int default_panic(lua_State *L)
 {
     value *default_panic_v = caml_named_value("default_panic");
 
-    node *current = states_register;
-    while (current != NULL)
-    {
-        if (current->state == L)
-            return Int_val(caml_callback(*default_panic_v, current->state_value));
-        else
-            current = current->next;
-    }
-    return 0;
+    ocaml_data *data= get_ocaml_data(L);
+
+    return Int_val(caml_callback(*default_panic_v, data->state_value));
 }
+
 
 CAMLprim
 value luaL_newstate__stub (value unit)
@@ -128,18 +143,17 @@ value luaL_newstate__stub (value unit)
     lua_atpanic(L, &default_panic);
 
     // alloc space for the register entry
-    node *new_node = (node*)caml_stat_alloc(sizeof(node));
-    new_node->state = L;
-    caml_register_global_root(&(new_node->panic_callback));
-    new_node->panic_callback = *default_panic_v;
-    new_node->next = states_register;
-    states_register = new_node;
-    states_number++;
+    ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
+    caml_register_global_root(&(data->panic_callback));
+    data->panic_callback = *default_panic_v;
+
+    // create a new Lua table for binding informations
+    set_ocaml_data(L, data);
 
     // wrap the lua_State* in a custom object
     v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
     lua_State_val(v_L) = L;
-    new_node->state_value = v_L;
+    data->state_value = v_L;
 
     // return the lua_State value
     CAMLreturn(v_L);
@@ -149,33 +163,11 @@ value luaL_newstate__stub (value unit)
 static void finalize_lua_State(value L)
 {
     lua_State *state = lua_State_val(L);
-    node *current = states_register;
-    node *prev = NULL;
 
-    while (current != NULL)
-    {
-        if (current->state == state)
-        {
-            lua_close(state);
-
-            if (prev != NULL)
-                prev->next = current->next;
-            else
-                states_register = current->next;
-
-            caml_remove_global_root(&(current->panic_callback));
-            caml_stat_free(current);
-            states_number--;
-            current = NULL;
-        }
-        else
-        {
-            prev = current;
-            current = current->next;
-        }
-    }
-
-    return;
+    ocaml_data *data = get_ocaml_data(state);
+    caml_remove_global_root(&(data->panic_callback));
+    caml_stat_free(data);
+    lua_close(state);
 }
 
 
@@ -190,16 +182,9 @@ value luaL_openlibs__stub(value L)
 
 int panic_wrapper(lua_State *L)
 {
-  node *current = states_register;
-  while (current != NULL)
-  {
-    if (current->state == L)
-      return Int_val(caml_callback( current->panic_callback,    // callback
-                                    current->state_value ));    // Lua state
-    else
-      current = current->next;
-  }
-  return 0;
+    ocaml_data *data = get_ocaml_data(L);
+    return Int_val(caml_callback(data->panic_callback,  // callback
+                                 data->state_value));   // Lua state
 }
 
 
@@ -211,23 +196,13 @@ value lua_atpanic__stub(value L, value panicf)
 
     lua_State *state = lua_State_val(L);
 
-    node *current = states_register;
-    while (current != NULL)
-    {
-        if (current->state == state)
-        {
-            old_panicf = current->panic_callback;
-            caml_remove_global_root(&(current->panic_callback));
-            caml_register_global_root(&(current->panic_callback));
-            current->panic_callback = panicf;
-            lua_atpanic(state, panic_wrapper);
-            current = NULL;
-        }
-        else
-        {
-            current = current->next;
-        }
-    }
+    ocaml_data *data = get_ocaml_data(state);
+
+    old_panicf = data->panic_callback;
+    caml_remove_global_root(&(data->panic_callback));
+    caml_register_global_root(&(data->panic_callback));
+    data->panic_callback = panicf;
+    lua_atpanic(state, panic_wrapper);
 
     CAMLreturn(old_panicf);
 }
