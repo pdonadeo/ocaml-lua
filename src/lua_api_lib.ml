@@ -15,6 +15,18 @@ type thread_status =
   | LUA_ERRMEM
   | LUA_ERRERR
 
+type alloc (* TODO placeholder, not use, to be removed? *)
+
+type gc_command =
+  | GCSTOP
+  | GCRESTART
+  | GCCOLLECT
+  | GCCOUNT
+  | GCCOUNTB
+  | GCSTEP
+  | GCSETPAUSE
+  | GCSETSTEPMUL
+
 let thread_status_of_int = function
   | 0 -> LUA_OK
   | 1 -> LUA_YIELD
@@ -31,8 +43,21 @@ let int_of_thread_status = function
   | LUA_ERRSYNTAX -> 3
   | LUA_ERRMEM -> 4
   | LUA_ERRERR -> 5
+
+let int_of_gc_command = function
+  | GCSTOP -> 0
+  | GCRESTART -> 1
+  | GCCOLLECT -> 2
+  | GCCOUNT -> 3
+  | GCCOUNTB -> 4
+  | GCSTEP -> 5
+  | GCSETPAUSE -> 6
+  | GCSETSTEPMUL -> 7
   
-let lua_multret : int = -1
+let multret = -1
+let registryindex = -10000
+let environindex = -10001
+let globalsindex = -10002
 
 
 (**************)
@@ -69,6 +94,36 @@ external call : state -> int -> int -> unit = "lua_call__stub"
 
 external checkstack : state -> int -> bool = "lua_checkstack__stub"
 
+external concat : state -> int -> unit = "lua_concat__stub"
+
+(* TODO lua_cpcall *)
+
+external createtable : state -> int -> int -> unit = "lua_createtable__stub"
+
+(* TODO lua_dump *)
+
+external equal : state -> int -> int -> bool = "lua_equal__stub"
+
+external error : state -> 'a = "lua_error__stub"
+
+external gc_wrapper : state -> int -> int -> int = "lua_gc__stub"
+let gc l what data =
+  let what = int_of_gc_command what in
+    gc_wrapper l what data
+
+external getfenv : state -> int -> unit = "lua_getfenv__stub"
+
+external getfield : state -> int -> string -> unit = "lua_getfield__stub"
+
+let getglobal l name = getfield l globalsindex name
+
+external getmetatable : state -> int -> int = "lua_getmetatable__stub"
+
+external gettable : state -> int -> unit = "lua_gettable__stub"
+
+external gettop : state -> int = "lua_gettop__stub"
+
+external insert : state -> int -> unit = "lua_insert__stub"
 
 (******************************************************************************)
 (******************************************************************************)
@@ -87,18 +142,4 @@ let pcall l nargs nresults errfunc =
 
 external pop : state -> int -> unit = "lua_pop__stub"
 
-external error : state -> 'a = "lua_error__stub"
-
-module Exceptionless =
-struct
-  let pcall l nargs nresults errfunc =
-    lua_pcall__wrapper l nargs nresults errfunc |>
-      thread_status_of_int
-
-  let tolstring l index =
-    try `Ok (tolstring l index)
-    with Type_error msg -> `Type_error msg
-
-  let tostring = tolstring
-end
 

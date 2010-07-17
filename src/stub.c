@@ -50,17 +50,117 @@ void debug(int level, char* format, ...)
 #endif /* NO_DEBUG */
 }
 #endif /* NO_DEBUG && __GNUC__ */
-/******************************************************************************/
 
+
+/******************************************************************************/
+/*****                    MACROS FOR BOILERPLATE CODE                     *****/
+/******************************************************************************/
+/* For Lua function with signature : lua_State -> void */
+#define STUB_STATE_VOID(lua_function) \
+CAMLprim \
+value lua_function##__stub(value L) \
+{ \
+    CAMLparam1(L); \
+    lua_function(lua_State_val(L)); \
+    CAMLreturn(Val_unit); \
+}
+
+/* For Lua function with signature : lua_State -> int */
+#define STUB_STATE_INT(lua_function) \
+CAMLprim \
+value lua_function##__stub(value L) \
+{ \
+    CAMLparam1(L); \
+    int retval = lua_function(lua_State_val(L)); \
+    CAMLreturn(Val_int(retval)); \
+}
+
+/* For Lua function with signature : lua_State -> int -> int -> int */
+#define STUB_STATE_INT_INT_INT(lua_function, int1_name, int2_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int1_name, value int2_name) \
+{ \
+    CAMLparam3(L, int1_name, int2_name); \
+    int retval = lua_function(lua_State_val(L), Int_val(int1_name), Int_val(int2_name)); \
+    CAMLreturn(Val_int(retval)); \
+}
+
+/* For Lua function with signature : lua_State -> int -> int */
+#define STUB_STATE_INT_INT(lua_function, int_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int_name) \
+{ \
+    CAMLparam2(L, int_name); \
+    int retval = lua_function(lua_State_val(L), Int_val(int_name)); \
+    CAMLreturn(Val_int(retval)); \
+}
+
+/* For Lua function with signature : lua_State -> int -> void */
+#define STUB_STATE_INT_VOID(lua_function, int_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int_name) \
+{ \
+    CAMLparam2(L, int_name); \
+    lua_function(lua_State_val(L), Int_val(int_name)); \
+    CAMLreturn(Val_unit); \
+}
+
+/* For Lua function with signature : lua_State -> int -> int -> void */
+#define STUB_STATE_INT_INT_VOID(lua_function, int1_name, int2_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int1_name, value int2_name) \
+{ \
+  CAMLparam3(L, int1_name, int2_name); \
+  lua_function(lua_State_val(L), Int_val(int1_name), Int_val(int2_name)); \
+  CAMLreturn(Val_unit); \
+}
+
+/* For Lua function with signature : lua_State -> int -> bool */
+#define STUB_STATE_INT_BOOL(lua_function, int_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int_name) \
+{ \
+  CAMLparam2(L, int_name); \
+  int retval = lua_function(lua_State_val(L), Int_val(int_name)); \
+  if (retval == 0) \
+    CAMLreturn(Val_false); \
+  else \
+    CAMLreturn(Val_true); \
+}
+
+/* For Lua function with signature : lua_State -> int -> int -> bool */
+#define STUB_STATE_INT_INT_BOOL(lua_function, int1_name, int2_name) \
+CAMLprim \
+value lua_function##_stub(value L, value int1_name, value int2_name) \
+{ \
+  CAMLparam3(L, int1_name, int2_name); \
+  int retval = lua_function(lua_State_val(L), Int_val(int1_name), Int_val(int2_name)); \
+  if (retval == 0) \
+    CAMLreturn(Val_false); \
+  else \
+    CAMLreturn(Val_true); \
+}
+
+/******************************************************************************/
+/*****                           UTILITY MACROS                           *****/
+/******************************************************************************/
+/* Library unique ID */
+#define UUID "551087dd-4133-4097-87c6-79c27cde5c15"
+
+/* Access the lua_State inside an OCaml custom block */
+#define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
+
+
+/******************************************************************************/
+/*****                          DATA STRUCTURES                           *****/
+/******************************************************************************/
 typedef struct ocaml_data
 {
   value state_value;
   value panic_callback;
 } ocaml_data;
 
-#define UUID "551087dd-4133-4097-87c6-79c27cde5c15"
-
-static void finalize_lua_State(value L);
+static void finalize_lua_State(value L); /* Forward declaration */
 
 static struct custom_operations lua_State_ops =
 {
@@ -72,8 +172,10 @@ static struct custom_operations lua_State_ops =
   custom_deserialize_default
 };
 
-#define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
 
+/******************************************************************************/
+/*****                         UTILITY FUNCTIONS                          *****/
+/******************************************************************************/
 static void *custom_alloc ( void *ud,
                             void *ptr,
                             size_t osize,
@@ -120,6 +222,98 @@ static ocaml_data * get_ocaml_data(lua_State *L)
 }
 
 
+static int panic_wrapper(lua_State *L)
+{
+    ocaml_data *data = get_ocaml_data(L);
+    return Int_val(caml_callback(data->panic_callback,  // callback
+                                 data->state_value));   // Lua state
+}
+
+
+static void finalize_lua_State(value L)
+{
+    lua_State *state = lua_State_val(L);
+
+    ocaml_data *data = get_ocaml_data(state);
+    caml_remove_global_root(&(data->panic_callback));
+    caml_stat_free(data);
+    lua_close(state);
+}
+
+/******************************************************************************/
+/*****                           LUA API STUBS                            *****/
+/******************************************************************************/
+CAMLprim
+value lua_atpanic__stub(value L, value panicf)
+{
+    CAMLparam2(L, panicf);
+    CAMLlocal1(old_panicf);
+
+    lua_State *state = lua_State_val(L);
+
+    ocaml_data *data = get_ocaml_data(state);
+
+    old_panicf = data->panic_callback;
+    caml_remove_global_root(&(data->panic_callback));
+    caml_register_global_root(&(data->panic_callback));
+    data->panic_callback = panicf;
+    lua_atpanic(state, panic_wrapper);
+
+    CAMLreturn(old_panicf);
+}
+
+STUB_STATE_INT_INT_VOID(lua_call, nargs, nresults)
+
+STUB_STATE_INT_BOOL(lua_checkstack, extra)
+
+STUB_STATE_INT_VOID(lua_concat, n)
+
+STUB_STATE_INT_INT_VOID(lua_createtable, narr, nrec)
+
+STUB_STATE_INT_INT_BOOL(lua_equal, index1, index2)
+
+STUB_STATE_VOID(lua_error)
+
+STUB_STATE_INT_INT_INT(lua_gc, what, data)
+
+STUB_STATE_INT_VOID(lua_getfenv, index)
+
+CAMLprim
+value lua_getfield__stub(value L, value index, value k)
+{
+    CAMLparam3(L, index, k);
+    lua_getfield(lua_State_val(L), Int_val(index), String_val(k));
+    CAMLreturn(Val_unit);
+}
+
+STUB_STATE_INT_INT(lua_getmetatable, index)
+
+STUB_STATE_INT_VOID(lua_gettable, index)
+
+STUB_STATE_INT(lua_gettop)
+
+STUB_STATE_INT_VOID(lua_insert, index)
+
+
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
 static int default_panic(lua_State *L)
 {
     value *default_panic_v = caml_named_value("default_panic");
@@ -160,91 +354,11 @@ value luaL_newstate__stub (value unit)
 }
 
 
-static void finalize_lua_State(value L)
-{
-    lua_State *state = lua_State_val(L);
-
-    ocaml_data *data = get_ocaml_data(state);
-    caml_remove_global_root(&(data->panic_callback));
-    caml_stat_free(data);
-    lua_close(state);
-}
 
 
-CAMLprim
-value luaL_openlibs__stub(value L)
-{
-  CAMLparam1(L);
-  luaL_openlibs(lua_State_val(L));
-  CAMLreturn(Val_unit);
-}
 
 
-int panic_wrapper(lua_State *L)
-{
-    ocaml_data *data = get_ocaml_data(L);
-    return Int_val(caml_callback(data->panic_callback,  // callback
-                                 data->state_value));   // Lua state
-}
-
-
-CAMLprim
-value lua_atpanic__stub(value L, value panicf)
-{
-    CAMLparam2(L, panicf);
-    CAMLlocal1(old_panicf);
-
-    lua_State *state = lua_State_val(L);
-
-    ocaml_data *data = get_ocaml_data(state);
-
-    old_panicf = data->panic_callback;
-    caml_remove_global_root(&(data->panic_callback));
-    caml_register_global_root(&(data->panic_callback));
-    data->panic_callback = panicf;
-    lua_atpanic(state, panic_wrapper);
-
-    CAMLreturn(old_panicf);
-}
-
-
-CAMLprim
-value lua_error__stub(value L)
-{
-  CAMLparam1(L);
-  lua_error(lua_State_val(L));
-  CAMLreturn(Val_unit);
-}
-
-
-CAMLprim
-value lua_pop__stub(value L, value n)
-{
-  CAMLparam2(L, n);
-  lua_pop(lua_State_val(L), Int_val(n));
-  CAMLreturn(Val_unit);
-}
-
-
-CAMLprim
-value lua_call__stub(value L, value nargs, value nresults)
-{
-  CAMLparam3(L, nargs, nresults);
-  lua_call(lua_State_val(L), Int_val(nargs), Int_val(nresults));
-  CAMLreturn(Val_unit);
-}
-
-
-CAMLprim
-value lua_checkstack__stub(value L, value extra)
-{
-  CAMLparam2(L, extra);
-  int retval = lua_checkstack(lua_State_val(L), Int_val(extra));
-  if (retval == 0)
-    CAMLreturn(Val_false);
-  else
-    CAMLreturn(Val_true);
-}
+STUB_STATE_INT_VOID(lua_pop, n)
 
 
 CAMLprim
@@ -314,3 +428,11 @@ value lua_pushlstring__stub(value L, value s)
     CAMLreturn(Val_unit);
 }
 
+
+CAMLprim
+value luaL_openlibs__stub(value L)
+{
+  CAMLparam1(L);
+  luaL_openlibs(lua_State_val(L));
+  CAMLreturn(Val_unit);
+}

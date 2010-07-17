@@ -7,7 +7,8 @@ type state
     documentation. *)
 
 type oCamlFunction = state -> int
-(** See {{:http://www.lua.org/manual/5.1/manual.html#lua_CFunction}lua_CFunction}
+(** This type corresponds to lua_CFunction. See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_CFunction}lua_CFunction}
     documentation. *)
 
 type thread_status =
@@ -20,14 +21,45 @@ type thread_status =
 (** See {{:http://www.lua.org/manual/5.1/manual.html#pdf-LUA_YIELD}lua_status}
     documentation. *)
 
+type alloc
+(** This type corresponds to
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_Alloc}lua_Alloc} and is here
+    only as a placeholder, but it's not used in this binding because it makes
+    very little sense to write a low level allocator in Objective Caml. *)
+
+type gc_command =
+  | GCSTOP
+  | GCRESTART
+  | GCCOLLECT
+  | GCCOUNT
+  | GCCOUNTB
+  | GCSTEP
+  | GCSETPAUSE
+  | GCSETSTEPMUL
+(** This type is not present in the official API and is used by the function
+    [gc] *)
+
 (************************)
 (** {2 Constant values} *)
 (************************)
 
-val lua_multret : int
+val multret : int
 (** Option for multiple returns in `Lua.pcall' and `Lua.call'.
     See {{:http://www.lua.org/manual/5.1/manual.html#lua_call}lua_call}
     documentation. *)
+
+val registryindex : int
+(** Pseudo-index to access the registry.
+    See {{:http://www.lua.org/manual/5.1/manual.html#3.5}Registry} documentation. *)
+
+val environindex : int
+(** Pseudo-index to access the environment of the running C function.
+    See {{:http://www.lua.org/manual/5.1/manual.html#3.3}Registry} documentation. *)
+
+val globalsindex : int
+(** Pseudo-index to access the thread environment (where global variables live).
+    See {{:http://www.lua.org/manual/5.1/manual.html#3.3}Registry} documentation. *)
+
 
 (*******************)
 (** {2 Exceptions} *)
@@ -63,8 +95,78 @@ external checkstack : state -> int -> bool = "lua_checkstack__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#lua_checkstack}lua_checkstack}
     documentation. *)
 
-(** {10 {b lua_close}} *)
-(** TODO BLA BLA BLA *)
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_close}lua_close} is not
+    present because all the data structures of a Lua state are managed by the
+    OCaml garbage collector. *)
+
+external concat : state -> int -> unit = "lua_concat__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#lua_concat}lua_concat}
+    documentation. *)
+
+(* TODO lua_cpcall *)
+
+external createtable : state -> int -> int -> unit = "lua_createtable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_createtable}lua_createtable}
+    documentation. *)
+
+(* TODO lua_dump *)
+
+external equal : state -> int -> int -> bool = "lua_equal__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_equal}lua_equal}
+    documentation. *)
+
+external error : state -> 'a = "lua_error__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_error}lua_error}
+    documentation. *)
+
+val gc : state -> gc_command -> int -> int
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_gc}lua_gc}
+    documentation. *)
+
+(** {{:http://www.lua.org/manual/5.1/manual.html#lua_getallocf}lua_getallocf}
+    not implemented in this binding *)
+
+external getfenv : state -> int -> unit = "lua_getfenv__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_getfenv}lua_getfenv}
+    documentation. *)
+
+external getfield : state -> int -> string -> unit = "lua_getfield__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_getfield}lua_getfield}
+    documentation. *)
+
+val getglobal : state -> string -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_getglobal}lua_getglobal}
+    documentation. Like in the original Lua source code this function is
+    implemented in OCaml using [getfield]. *)
+
+external getmetatable : state -> int -> int = "lua_getmetatable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_getmetatable}lua_getmetatable}
+    documentation. *)
+
+external gettable : state -> int -> unit = "lua_gettable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_gettable}lua_gettable}
+    documentation. *)
+
+external gettop : state -> int = "lua_gettop__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_gettop}lua_gettop}
+    documentation. *)
+
+external insert : state -> int -> unit = "lua_insert__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_insert}lua_insert}
+    documentation. *)
+
 
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
@@ -85,11 +187,3 @@ external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
 val pushstring : state -> string -> unit
 
 external pop : state -> int -> unit = "lua_pop__stub"
-external error : state -> 'a = "lua_error__stub"
-module Exceptionless :
-  sig
-    val pcall : state -> int -> int -> int -> thread_status
-    val tolstring :
-      state -> int -> [> `Ok of string | `Type_error of string ]
-    val tostring : state -> int -> [> `Ok of string | `Type_error of string ]
-  end
