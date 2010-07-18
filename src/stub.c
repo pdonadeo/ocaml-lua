@@ -131,7 +131,7 @@ value lua_function##__stub(value L, value int_name) \
 /* For Lua function with signature : lua_State -> int -> int -> bool */
 #define STUB_STATE_INT_INT_BOOL(lua_function, int1_name, int2_name) \
 CAMLprim \
-value lua_function##_stub(value L, value int1_name, value int2_name) \
+value lua_function##__stub(value L, value int1_name, value int2_name) \
 { \
   CAMLparam3(L, int1_name, int2_name); \
   int retval = lua_function(lua_State_val(L), Int_val(int1_name), Int_val(int2_name)); \
