@@ -294,6 +294,31 @@ STUB_STATE_INT(lua_gettop)
 
 STUB_STATE_INT_VOID(lua_insert, index)
 
+STUB_STATE_INT_BOOL(lua_isboolean, index)
+
+STUB_STATE_INT_BOOL(lua_iscfunction, index)
+
+STUB_STATE_INT_BOOL(lua_isfunction, index)
+
+STUB_STATE_INT_BOOL(lua_islightuserdata, index)
+
+STUB_STATE_INT_BOOL(lua_isnil, index)
+
+STUB_STATE_INT_BOOL(lua_isnone, index)
+
+STUB_STATE_INT_BOOL(lua_isnoneornil, index)
+
+STUB_STATE_INT_BOOL(lua_isnumber, index)
+
+STUB_STATE_INT_BOOL(lua_isstring, index)
+
+STUB_STATE_INT_BOOL(lua_istable, index)
+
+STUB_STATE_INT_BOOL(lua_isthread, index)
+
+STUB_STATE_INT_BOOL(lua_isuserdata, index)
+
+STUB_STATE_INT_INT_BOOL(lua_lessthan, index1, index2)
 
 
 /******************************************************************************/

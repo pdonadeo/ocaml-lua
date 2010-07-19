@@ -125,6 +125,32 @@ external gettop : state -> int = "lua_gettop__stub"
 
 external insert : state -> int -> unit = "lua_insert__stub"
 
+external isboolean : state -> int -> bool = "lua_isboolean__stub"
+
+external iscfunction : state -> int -> bool = "lua_iscfunction__stub"
+
+external isfunction : state -> int -> bool = "lua_isfunction__stub"
+
+external islightuserdata : state -> int -> bool = "lua_islightuserdata__stub"
+
+external isnil : state -> int -> bool = "lua_isnil__stub"
+
+external isnone : state -> int -> bool = "lua_isnone__stub"
+
+external isnoneornil : state -> int -> bool = "lua_isnoneornil__stub"
+
+external isnumber : state -> int -> bool = "lua_isnumber__stub"
+
+external isstring : state -> int -> bool = "lua_isstring__stub"
+
+external istable : state -> int -> bool = "lua_istable__stub"
+
+external isthread : state -> int -> bool = "lua_isthread__stub"
+
+external isuserdata : state -> int -> bool = "lua_isuserdata__stub"
+
+external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
+
 (******************************************************************************)
 (******************************************************************************)
 (******************************************************************************)

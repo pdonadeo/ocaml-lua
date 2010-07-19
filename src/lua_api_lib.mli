@@ -167,6 +167,72 @@ external insert : state -> int -> unit = "lua_insert__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_insert}lua_insert}
     documentation. *)
 
+external isboolean : state -> int -> bool = "lua_isboolean__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isboolean}lua_isboolean}
+    documentation. *)
+
+external iscfunction : state -> int -> bool = "lua_iscfunction__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_iscfunction}lua_iscfunction}
+    documentation. *)
+
+external isfunction : state -> int -> bool = "lua_isfunction__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isfunction}lua_isfunction}
+    documentation. *)
+
+external islightuserdata : state -> int -> bool = "lua_islightuserdata__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_islightuserdata}lua_islightuserdata}
+    documentation. *)
+
+external isnil : state -> int -> bool = "lua_isnil__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isnil}lua_isnil}
+    documentation. *)
+
+external isnone : state -> int -> bool = "lua_isnone__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isnone}lua_isnone}
+    documentation. *)
+
+external isnoneornil : state -> int -> bool = "lua_isnoneornil__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isnoneornil}lua_isnoneornil}
+    documentation. *)
+
+external isnumber : state -> int -> bool = "lua_isnumber__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isnumber}lua_isnumber}
+    documentation. *)
+
+external isstring : state -> int -> bool = "lua_isstring__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isstring}lua_isstring}
+    documentation. *)
+
+external istable : state -> int -> bool = "lua_istable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_istable}lua_istable}
+    documentation. *)
+
+external isthread : state -> int -> bool = "lua_isthread__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isthread}lua_isthread}
+    documentation. *)
+
+external isuserdata : state -> int -> bool = "lua_isuserdata__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_isuserdata}lua_isuserdata}
+    documentation. *)
+
+external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_lessthan}lua_lessthan}
+    documentation. *)
+
+
 
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
