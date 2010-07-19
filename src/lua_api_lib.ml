@@ -151,21 +151,22 @@ external isuserdata : state -> int -> bool = "lua_isuserdata__stub"
 
 external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
 
-(******************************************************************************)
-(******************************************************************************)
-(******************************************************************************)
-(******************************************************************************)
-external lua_pcall__wrapper :
-  state -> int -> int -> int -> int = "lua_pcall__stub"
+(* TODO lua_load *)
+
+external newtable: state -> int -> int -> bool = "lua_newtable__stub"
+
+(* TODO lua_newthread *)
+
+(* TODO lua_newuserdata *)
+
+external next : state -> int -> int = "lua_next__stub"
+
+external objlen : state -> int -> int = "lua_objlen__stub"
+
+external lua_pcall__wrapper : state -> int -> int -> int -> int = "lua_pcall__stub"
 
 let pcall l nargs nresults errfunc =
-  let ret_status = lua_pcall__wrapper l nargs nresults errfunc |>
-    thread_status_of_int in
-    match ret_status with
-      | LUA_OK -> ()
-      | err -> raise (Error err)
-;;
+  lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
 
 external pop : state -> int -> unit = "lua_pop__stub"
-
 

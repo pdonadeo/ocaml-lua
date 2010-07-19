@@ -104,14 +104,16 @@ external concat : state -> int -> unit = "lua_concat__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#lua_concat}lua_concat}
     documentation. *)
 
-(* TODO lua_cpcall *)
+(* TODO lua_cpcall
+   http://www.lua.org/manual/5.1/manual.html#lua_cpcall *)
 
 external createtable : state -> int -> int -> unit = "lua_createtable__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_createtable}lua_createtable}
     documentation. *)
 
-(* TODO lua_dump *)
+(* TODO lua_dump
+   http://www.lua.org/manual/5.1/manual.html#lua_dump *)
 
 external equal : state -> int -> int -> bool = "lua_equal__stub"
 (** See
@@ -232,8 +234,45 @@ external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_lessthan}lua_lessthan}
     documentation. *)
 
+(* TODO lua_load
+   http://www.lua.org/manual/5.1/manual.html#lua_load *)
 
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_newstate}lua_newstate} is
+    not present because it makes very little sense to specify a custom allocator
+    written in OCaml. To create a new Lua state, use the function
+    {!Lua_aux_lib.newstate}. *)
 
+external newtable: state -> int -> int -> bool = "lua_newtable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_newtable}lua_newtable}
+    documentation. *)
+
+(* TODO lua_newthread
+   http://www.lua.org/manual/5.1/manual.html#lua_newthread *)
+
+(* TODO lua_newuserdata
+   http://www.lua.org/manual/5.1/manual.html#lua_newuserdata *)
+
+external next : state -> int -> int = "lua_next__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_next}lua_next}
+    documentation. *)
+
+external objlen : state -> int -> int = "lua_objlen__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_objlen}lua_objlen}
+    documentation. *)
+
+val pcall : state -> int -> int -> int -> thread_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pcall}lua_pcall}
+    documentation. *)
+
+external pop : state -> int -> unit = "lua_pop__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pop}lua_pop}
+    documentation. *)
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
@@ -244,12 +283,8 @@ external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
 (**************************************************************************)
 (**************************************************************************)
 (**************************************************************************)
-external lua_pcall__wrapper : state -> int -> int -> int -> int
-  = "lua_pcall__stub"
-val pcall : state -> int -> int -> int -> unit
 external tolstring : state -> int -> string = "lua_tolstring__stub"
 val tostring : state -> int -> string
 external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
 val pushstring : state -> string -> unit
 
-external pop : state -> int -> unit = "lua_pop__stub"

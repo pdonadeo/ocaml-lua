@@ -320,7 +320,26 @@ STUB_STATE_INT_BOOL(lua_isuserdata, index)
 
 STUB_STATE_INT_INT_BOOL(lua_lessthan, index1, index2)
 
+STUB_STATE_VOID(lua_newtable)
 
+STUB_STATE_INT_INT(lua_next, index)
+
+STUB_STATE_INT_INT(lua_objlen, index)
+
+CAMLprim
+value lua_pcall__stub(value L, value nargs, value nresults, value errfunc)
+{
+  CAMLparam4(L, nargs, nresults, errfunc);
+  CAMLlocal1(status);
+
+  status = Val_int(lua_pcall( lua_State_val(L),
+                              Int_val(nargs),
+                              Int_val(nresults),
+                              Int_val(errfunc)) );
+  CAMLreturn(status);
+}
+
+STUB_STATE_INT_VOID(lua_pop, n)
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -383,7 +402,6 @@ value luaL_newstate__stub (value unit)
 
 
 
-STUB_STATE_INT_VOID(lua_pop, n)
 
 
 CAMLprim
@@ -400,18 +418,6 @@ value luaL_loadbuffer__stub(value L, value buff, value sz, value name)
 }
 
 
-CAMLprim
-value lua_pcall__stub(value L, value nargs, value nresults, value errfunc)
-{
-  CAMLparam4(L, nargs, nresults, errfunc);
-  CAMLlocal1(status);
-
-  status = Val_int(lua_pcall( lua_State_val(L),
-                              Int_val(nargs),
-                              Int_val(nresults),
-                              Int_val(errfunc)) );
-  CAMLreturn(status);
-}
 
 
 void raise_type_error(char *msg)

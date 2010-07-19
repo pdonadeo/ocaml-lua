@@ -40,8 +40,12 @@ let closure () =
         LuaL.openlibs l2;
         LuaL.loadbuffer l1 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
         LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
-        Lua.pcall l1 0 0 0;
-        Lua.pcall l2 0 0 0;
+        let () = match Lua.pcall l1 0 0 0 with
+                  | Lua.LUA_OK -> ()
+                  | err -> raise (Lua.Error err) in
+        let () = match Lua.pcall l2 0 0 0 with
+                  | Lua.LUA_OK -> ()
+                  | err -> raise (Lua.Error err) in
         let n = Random.int 2 in
           match n with | 0 -> Lua.error l1 | 1 -> Lua.error l2 | _ -> failwith "IMPOSSIBILE"
     with
