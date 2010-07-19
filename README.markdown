@@ -7,9 +7,9 @@ Description
 This is a simple binding of the Lua C API library to the Objective Caml
 programming language.
 
-It's only a poof of concept and includes a very minimal subset of the Lua API,
-but what has been implemented is working as expected, in particular without
-memory leak. I hope :-)
+For now, it's only a poof of concept and includes a very minimal subset of the
+Lua API, but what has been implemented is working as expected, in particular
+without memory leak. I hope :-)
 
 
 Dependencies
