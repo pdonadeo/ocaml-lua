@@ -105,6 +105,16 @@ value lua_function##__stub(value L, value int_name) \
     CAMLreturn(Val_unit); \
 }
 
+/* For Lua function with signature : lua_State -> bool -> void */
+#define STUB_STATE_BOOL_VOID(lua_function, bool_name) \
+CAMLprim \
+value lua_function##__stub(value L, value bool_name) \
+{ \
+    CAMLparam2(L, bool_name); \
+    lua_function(lua_State_val(L), Bool_val(bool_name)); \
+    CAMLreturn(Val_unit); \
+}
+
 /* For Lua function with signature : lua_State -> int -> int -> void */
 #define STUB_STATE_INT_INT_VOID(lua_function, int1_name, int2_name) \
 CAMLprim \
@@ -340,6 +350,8 @@ value lua_pcall__stub(value L, value nargs, value nresults, value errfunc)
 }
 
 STUB_STATE_INT_VOID(lua_pop, n)
+
+STUB_STATE_BOOL_VOID(lua_pushboolean, b)
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/

@@ -170,3 +170,5 @@ let pcall l nargs nresults errfunc =
 
 external pop : state -> int -> unit = "lua_pop__stub"
 
+external pushboolean : state -> bool -> unit = "lua_pushboolean__stub"
+

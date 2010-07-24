@@ -273,6 +273,11 @@ external pop : state -> int -> unit = "lua_pop__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_pop}lua_pop}
     documentation. *)
+
+external pushboolean : state -> bool -> unit = "lua_pushboolean__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushboolean}lua_pushboolean}
+    documentation. *)
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
