@@ -11,6 +11,10 @@ let panicf1 l =
 ;;
 
 let closure () =
+  let simple_ocaml_function l =
+    let () = String.create (1024*1024) |> ignore in
+      Printf.printf "OCaml function called from Lua!!!:-)\n%!";
+      0 in
   let l1 = LuaL.newstate () in
   let l2 = LuaL.newstate () in
     try
@@ -36,9 +40,12 @@ let closure () =
 
         ignore(def_panic1, def_panic2);
 
+        ignore (Lua.pushocamlfunction l1 simple_ocaml_function);
+        Lua.setglobal l1 "simple_ocaml_function";
+
         LuaL.openlibs l1;
         LuaL.openlibs l2;
-        LuaL.loadbuffer l1 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+        LuaL.loadbuffer l1 "simple_ocaml_function()\n" "line";
         LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
         let () = match Lua.pcall l1 0 0 0 with
                   | Lua.LUA_OK -> ()
@@ -124,7 +131,7 @@ let main () =
 (*       Gc.minor (); *)
 (*       Gc.major_slice 0 |> ignore; *)
 (*       Gc.major (); *)
-(*       Gc.compact (); *)
+      Gc.compact ();
       conta := !conta + 1;
       sleep_float (1./.((Random.float 900.0) +. 100.));
   done

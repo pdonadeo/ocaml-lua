@@ -278,6 +278,22 @@ external pushboolean : state -> bool -> unit = "lua_pushboolean__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_pushboolean}lua_pushboolean}
     documentation. *)
+
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushcclosure}lua_pushcclosure}
+    is not present because it makes very little sense to specify a "closure"
+    written in OCaml, using the Lua
+    {{:http://www.lua.org/pil/27.3.3.html}upvalues} machinery. Use instead
+    {!Lua_api_lib.pushcfunction} *)
+
+external pushcfunction : state -> oCamlFunction -> unit = "lua_pushcfunction__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushcfunction}lua_pushcfunction}
+    documentation. *)
+
+val pushocamlfunction : state -> oCamlFunction -> unit
+(** Alias of {!Lua_api_lib.pushcfunction} *)
+
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
@@ -293,3 +309,4 @@ val tostring : state -> int -> string
 external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
 val pushstring : state -> string -> unit
 
+external setglobal : state -> string -> unit = "lua_setglobal__stub"

@@ -208,15 +208,33 @@ static void *custom_alloc ( void *ud,
 }
 
 
+static int closure_data_gc(lua_State *L)
+{
+    value *ocaml_closure = (value*)lua_touserdata(L, 1);
+    caml_remove_global_root(ocaml_closure);
+    return 0;
+}
+
+
 static void set_ocaml_data(lua_State *L, ocaml_data* data)
 {
-    lua_newtable(L);
+    lua_newtable(L);                          /* Table (t) for our private date */
     lua_pushstring(L, "ocaml_data");
     lua_pushlightuserdata(L, (void *)data);
+    lua_settable(L, -3);                      /* t["ocaml_data"] = our_private_data */
+
+    lua_newtable(L);                          /* metatable for userdata used by lua_pushcfunction__stub */
+    lua_pushstring(L, "__gc");
+    lua_pushcfunction(L, closure_data_gc);
     lua_settable(L, -3);
+
+    lua_pushstring(L, "closure_metatable");
+    lua_insert(L, -2);
+    lua_settable(L, -3);                      /* t["closure_metatable"] = metatable_for_closures */
+
     lua_pushstring(L, UUID);
     lua_insert(L, -2);
-    lua_settable(L, LUA_REGISTRYINDEX);
+    lua_settable(L, LUA_REGISTRYINDEX);       /* registry[UUID] = t */
 }
 
 
@@ -248,6 +266,14 @@ static void finalize_lua_State(value L)
     caml_remove_global_root(&(data->panic_callback));
     caml_stat_free(data);
     lua_close(state);
+}
+
+
+static int execute_ocaml_closure(lua_State *L)
+{
+    value *ocaml_closure = (value*)lua_touserdata(L, lua_upvalueindex(1));
+    ocaml_data *data = get_ocaml_data(L);
+    return Int_val(caml_callback(*ocaml_closure, data->state_value));
 }
 
 /******************************************************************************/
@@ -352,6 +378,31 @@ value lua_pcall__stub(value L, value nargs, value nresults, value errfunc)
 STUB_STATE_INT_VOID(lua_pop, n)
 
 STUB_STATE_BOOL_VOID(lua_pushboolean, b)
+
+CAMLprim
+value lua_pushcfunction__stub(value L, value f)
+{
+    CAMLparam2(L, f);
+
+    /* Create the new userdatum containing the OCaml value of the closure */
+    value *ocaml_closure = (value*)lua_newuserdata(lua_State_val(L), sizeof(value));
+    caml_register_global_root(ocaml_closure);
+    *ocaml_closure = f;
+
+    /* retrieve the metatable for this kind of userdata */
+    lua_pushstring(lua_State_val(L), UUID);
+    lua_gettable(lua_State_val(L), LUA_REGISTRYINDEX);
+    lua_pushstring(lua_State_val(L), "closure_metatable");
+    lua_gettable(lua_State_val(L), -2);
+    lua_setmetatable(lua_State_val(L), -3);
+    lua_pop(lua_State_val(L), 1);
+
+    /* at this point the stack has a userdatum on its top, with the correct metatable */
+
+    lua_pushcclosure(lua_State_val(L), execute_ocaml_closure, 1);
+
+    CAMLreturn(Val_unit);
+}
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -373,9 +424,7 @@ STUB_STATE_BOOL_VOID(lua_pushboolean, b)
 static int default_panic(lua_State *L)
 {
     value *default_panic_v = caml_named_value("default_panic");
-
-    ocaml_data *data= get_ocaml_data(L);
-
+    ocaml_data *data = get_ocaml_data(L);
     return Int_val(caml_callback(*default_panic_v, data->state_value));
 }
 
@@ -479,3 +528,13 @@ value luaL_openlibs__stub(value L)
   luaL_openlibs(lua_State_val(L));
   CAMLreturn(Val_unit);
 }
+
+
+CAMLprim
+value lua_setglobal__stub(value L, value name)
+{
+    CAMLparam2(L, name);
+    lua_setglobal(lua_State_val(L), String_val(name));
+    CAMLreturn(Val_unit);
+}
+
