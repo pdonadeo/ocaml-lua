@@ -30,7 +30,7 @@ let closure () =
       let def_panic1 = Lua.atpanic l1 f in
       let def_panic2 = Lua.atpanic l2 f in
 
-      Lua.pushstring l1 "Custom message on L1 stack";
+      Lua.pushfstring l1 "Custom message on %s%d stack" "L" 1 |> ignore;
       Lua.pushstring l2 "Custom message on L2 stack";
       let my_panic1 = Lua.atpanic l1 def_panic1 in
       let my_panic2 = Lua.atpanic l2 def_panic2 in

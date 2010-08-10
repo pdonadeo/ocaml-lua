@@ -294,6 +294,49 @@ external pushcfunction : state -> oCamlFunction -> unit = "lua_pushcfunction__st
 val pushocamlfunction : state -> oCamlFunction -> unit
 (** Alias of {!Lua_api_lib.pushcfunction} *)
 
+val pushfstring : state -> ('a, unit, string, string) format4 -> 'a
+(** Pushes onto the stack a formatted string and returns the string itself.
+    It is similar to the standard library function sprintf.
+
+    Warning: this function has a different behavior with respect to the original
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushfstring}lua_pushfstring}
+    because the conversion specifiers are not restricted as specified in the Lua
+    documentation, but you can use all the conversions of the
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}Printf module}. *)
+
+external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushinteger}lua_pushinteger}
+    documentation. *)
+
+(* TODO lua_pushlightuserdata
+   http://www.lua.org/manual/5.1/manual.html#lua_pushlightuserdata *)
+
+external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushliteral}lua_pushliteral}
+    documentation. *)
+
+external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushlstring}lua_pushlstring}
+    documentation. *)
+
+external pushnil : state -> unit = "lua_pushnil__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushnil}lua_pushnil}
+    documentation. *)
+
+external pushnumber : state -> float -> unit = "lua_pushnumber__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushnumber}lua_pushnumber}
+    documentation. *)
+
+val pushstring : state -> string -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushstring}lua_pushstring}
+    documentation. *)
+
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
@@ -306,7 +349,5 @@ val pushocamlfunction : state -> oCamlFunction -> unit
 (**************************************************************************)
 external tolstring : state -> int -> string = "lua_tolstring__stub"
 val tostring : state -> int -> string
-external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
-val pushstring : state -> string -> unit
 
 external setglobal : state -> string -> unit = "lua_setglobal__stub"

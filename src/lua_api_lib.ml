@@ -53,7 +53,7 @@ let int_of_gc_command = function
   | GCSTEP -> 5
   | GCSETPAUSE -> 6
   | GCSETSTEPMUL -> 7
-  
+
 let multret = -1
 let registryindex = -10000
 let environindex = -10001
@@ -176,6 +176,17 @@ external pushcfunction : state -> oCamlFunction -> unit = "lua_pushcfunction__st
 
 let pushocamlfunction = pushcfunction
 
+let pushfstring (state : state) =
+  let k s = pushstring state s; s in
+    Printf.kprintf k
+
+external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
+
+external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
+
+external pushnil : state -> unit = "lua_pushnil__stub"
+
+external pushnumber : state -> float -> unit = "lua_pushnumber__stub"
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
