@@ -11,3 +11,4 @@ _log
 *.swp
 setup.data
 setup.log
+api-lua.docdir
