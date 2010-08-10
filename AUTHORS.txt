@@ -1,0 +1,6 @@
+(* OASIS_START *)
+(* DO NOT EDIT (digest: d6f5c4668b4345b814c55019567e5976) *)
+Authors of ocaml-lua
+Paolo Donadeo
+Sylvain Le Gall
+(* OASIS_STOP *)
