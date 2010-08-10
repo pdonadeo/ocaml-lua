@@ -1,0 +1,67 @@
+OASISFormat:  0.1
+OCamlVersion: >= 3.11.1
+Name:         ocaml-lua
+Version:      0.1.0
+Synopsis:     Lua bindings
+Authors:      Paolo Donadeo, 
+              Sylvain Le Gall
+License:      LGPL-2.1 with OCaml linking exception
+BuildTools:   ocamlbuild
+Plugins:      META (0.2.0~alpha1), 
+              StdFiles (0.2.0~alpha1), 
+              DevFiles (0.2.0~alpha1)
+Homepage:     http://ocaml-lua.forge.ocamlcore.org
+
+Description:
+  Lua is a powerful, light-weight programming language designed for extending
+  applications. It provides a good general purpose programming language to 
+  replace DSL that don't really need to be specific.
+  .
+  This library provides bindings to Lua API which allows the application to
+  exchange data with Lua programs and also to extend Lua with C functions.
+  .
+  [Lua homepage](http://www.lua.org)
+
+# 
+# Lua bindings and their documentation
+#
+
+Library lua
+  Path:     src
+  Modules:  Lua_api, 
+            Lua_api_lib, 
+            Lua_aux_lib
+  CSources: stub.c
+  BuildDepends: unix
+  CCopt: -O3 -Wall -ggdb
+  CClib: -llua5.1
+
+Document "api-lua"
+  Title:                API reference for Lua
+  Type:                 ocamlbuild (0.2.0~alpha1)
+  InstallDir:           $htmldir/lua
+  XOCamlbuildPath:      src/
+  XOCamlbuildLibraries: lua
+  BuildTools+:          ocamldoc
+
+#
+# Benchmarks
+#
+
+Flag bench
+  Description: Create and run benchmark tests
+  Default:     false
+
+Executable bench
+  Path:         tests
+  Build$:       flag(bench)
+  Install:      false
+  MainIs:       main.ml
+  Custom:       true
+  BuildDepends: lua
+  
+Test bench
+  Run$:      flag(bench)
+  Command:   $bench
+  TestTools: bench
+ 

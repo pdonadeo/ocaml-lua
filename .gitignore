@@ -9,4 +9,6 @@ _log
 *.byte
 *.native
 *.swp
-
+setup.data
+setup.log
+api-lua.docdir
