@@ -427,6 +427,71 @@ value lua_pushlstring__stub(value L, value s)
 STUB_STATE_VOID(lua_pushnil)
 
 STUB_STATE_DOUBLE_VOID(lua_pushnumber, n)
+
+STUB_STATE_INT_VOID(lua_pushvalue, index)
+
+STUB_STATE_INT_INT_BOOL(lua_rawequal, index1, index2)
+
+STUB_STATE_INT_VOID(lua_rawget, index)
+
+STUB_STATE_INT_INT_VOID(lua_rawgeti, index, n)
+
+STUB_STATE_INT_VOID(lua_rawset, index)
+
+STUB_STATE_INT_INT_VOID(lua_rawseti, index, n)
+
+STUB_STATE_INT_VOID(lua_remove, index)
+
+STUB_STATE_INT_VOID(lua_replace, index)
+
+STUB_STATE_INT_BOOL(lua_setfenv, index)
+
+CAMLprim
+value lua_setfield__stub(value L, value index, value k)
+{
+    CAMLparam3(L, index, k);
+    lua_setfield(lua_State_val(L), Int_val(index), String_val(k));
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim
+value lua_setglobal__stub(value L, value name)
+{
+    CAMLparam2(L, name);
+    lua_setglobal(lua_State_val(L), String_val(name));
+    CAMLreturn(Val_unit);
+}
+
+STUB_STATE_INT_INT(lua_setmetatable, index)
+
+STUB_STATE_INT_VOID(lua_settable, index)
+
+STUB_STATE_INT_VOID(lua_settop, index)
+
+STUB_STATE_INT(lua_status)
+
+STUB_STATE_INT_BOOL(lua_toboolean, index)
+
+/* external lua_tocfunction : state -> int -> oCamlFunction = "lua_tocfunction__stub" */
+CAMLprim
+value lua_tocfunction__stub(value L, value index)
+{
+    CAMLparam2(L, index);
+    lua_CFunction f = lua_tocfunction(lua_State_val(L), Int_val(index));
+    if (f == NULL)
+    {
+        caml_raise_constant(*caml_named_value("Not_a_C_function"));
+    }
+    else
+    {
+        /* TODO TODO TODO TODO TODO TODO TODO */
+        /* HOW CAN I BUILD THE RIGHT CLOSURE? */
+        /* TODO TODO TODO TODO TODO TODO TODO */
+        CAMLreturn(Val_unit);
+    }
+}
+
+
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -482,13 +547,6 @@ value luaL_newstate__stub (value unit)
     CAMLreturn(v_L);
 }
 
-
-
-
-
-
-
-
 CAMLprim
 value luaL_loadbuffer__stub(value L, value buff, value sz, value name)
 {
@@ -542,14 +600,5 @@ value luaL_openlibs__stub(value L)
   CAMLparam1(L);
   luaL_openlibs(lua_State_val(L));
   CAMLreturn(Val_unit);
-}
-
-
-CAMLprim
-value lua_setglobal__stub(value L, value name)
-{
-    CAMLparam2(L, name);
-    lua_setglobal(lua_State_val(L), String_val(name));
-    CAMLreturn(Val_unit);
 }
 

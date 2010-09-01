@@ -65,8 +65,10 @@ let globalsindex = -10002
 (**************)
 exception Error of thread_status
 exception Type_error of string
+exception Not_a_C_function
 
 let _ = Callback.register_exception "Lua_type_error" (Type_error "")
+let _ = Callback.register_exception "Not_a_C_function" Not_a_C_function
 
 (*************)
 (* FUNCTIONS *)
@@ -182,21 +184,61 @@ let pushfstring (state : state) =
 
 external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
 
+(* TODO lua_pushlightuserdata *)
+
 external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
 
 external pushnil : state -> unit = "lua_pushnil__stub"
 
 external pushnumber : state -> float -> unit = "lua_pushnumber__stub"
-(****************************)
-(** {1 TODO TODO TODO TODO} *)
-(****************************)
 
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
+(* TODO lua_pushthread *)
+
+external pushvalue : state -> int -> unit = "lua_pushvalue__stub"
+
+let pushvfstring = pushfstring
+
+external rawequal : state -> int -> int -> bool = "lua_rawequal__stub"
+
+external rawget : state -> int -> unit = "lua_rawget__stub"
+
+external rawgeti : state -> int -> int -> unit = "lua_rawgeti__stub"
+
+external rawset : state -> int -> unit = "lua_rawset__stub"
+
+external rawseti : state -> int -> int -> unit = "lua_rawseti__stub"
 
 external setglobal : state -> string -> unit = "lua_setglobal__stub"
+
+let register l name f =
+  pushcfunction l f;
+  setglobal l name
+
+external remove : state -> int -> unit = "lua_remove__stub"
+
+external replace : state -> int -> unit = "lua_replace__stub"
+
+(* TODO lua_resume *)
+
+external setfenv : state -> int -> bool = "lua_setfenv__stub"
+
+external setfield : state -> int -> string -> unit = "lua_setfield__stub"
+
+external setmetatable : state -> int -> int = "lua_setmetatable__stub"
+
+external settable : state -> int -> int = "lua_settable__stub"
+
+external settop : state -> int -> int = "lua_settop__stub"
+
+external status_aux : state -> int = "lua_status__stub"
+
+let status l = l |> status_aux |> thread_status_of_int
+
+external toboolean : state -> int -> bool = "lua_toboolean__stub"
+
+external tocfunction_aux : state -> int -> oCamlFunction = "lua_tocfunction__stub"
+
+let tocfunction l index =
+  try Some (tocfunction_aux l index)
+  with Not_a_C_function -> None
 

@@ -337,6 +337,109 @@ val pushstring : state -> string -> unit
     {{:http://www.lua.org/manual/5.1/manual.html#lua_pushstring}lua_pushstring}
     documentation. *)
 
+(* TODO lua_pushthread
+   http://www.lua.org/manual/5.1/manual.html#lua_pushthread *)
+
+external pushvalue : state -> int -> unit = "lua_pushvalue__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushvalue}lua_pushvalue}
+    documentation. *)
+
+val pushvfstring : state -> ('a, unit, string, string) format4 -> 'a
+(** Alias of {!Lua_api_lib.pushfstring} *)
+
+external rawequal : state -> int -> int -> bool = "lua_rawequal__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_rawequal}lua_rawequal}
+    documentation. *)
+
+external rawget : state -> int -> unit = "lua_rawget__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_rawget}lua_rawget}
+    documentation. *)
+
+external rawgeti : state -> int -> int -> unit = "lua_rawgeti__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_rawgeti}lua_rawgeti}
+    documentation. *)
+
+external rawset : state -> int -> unit = "lua_rawset__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_rawset}lua_rawset}
+    documentation. *)
+
+external rawseti : state -> int -> int -> unit = "lua_rawseti__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_rawseti}lua_rawseti}
+    documentation. *)
+
+val register : state -> string -> oCamlFunction -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_register}lua_register}
+    documentation. The function is implemented in OCaml using pushcfunction
+    and setglobal. *)
+
+external remove : state -> int -> unit = "lua_remove__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_remove}lua_remove}
+    documentation. *)
+
+external replace : state -> int -> unit = "lua_replace__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_replace}lua_replace}
+    documentation. *)
+
+(* TODO lua_resume
+   http://www.lua.org/manual/5.1/manual.html#lua_resume *)
+
+(** {{:http://www.lua.org/manual/5.1/manual.html#lua_setallocf}lua_setallocf}
+    not implemented in this binding *)
+
+external setfenv : state -> int -> bool = "lua_setfenv__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_setfenv}lua_setfenv}
+    documentation. *)
+
+external setfield : state -> int -> string -> unit = "lua_setfield__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_setfield}lua_setfield}
+    documentation. *)
+
+external setglobal : state -> string -> unit = "lua_setglobal__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_setglobal}lua_setglobal}
+    documentation. *)
+
+external setmetatable : state -> int -> int = "lua_setmetatable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_setmetatable}lua_setmetatable}
+    documentation. *)
+
+external settable : state -> int -> int = "lua_settable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_settable}lua_settable}
+    documentation. *)
+
+external settop : state -> int -> int = "lua_settop__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_settop}lua_settop}
+    documentation. *)
+
+val status : state -> thread_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_status}lua_status}
+    documentation. *)
+
+external toboolean : state -> int -> bool = "lua_toboolean__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_toboolean}lua_toboolean}
+    documentation. *)
+
+val tocfunction : state -> int -> oCamlFunction option
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_tocfunction}lua_tocfunction}
+    documentation. *)
+
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
@@ -350,4 +453,4 @@ val pushstring : state -> string -> unit
 external tolstring : state -> int -> string = "lua_tolstring__stub"
 val tostring : state -> int -> string
 
-external setglobal : state -> string -> unit = "lua_setglobal__stub"
+
