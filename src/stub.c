@@ -263,8 +263,8 @@ static ocaml_data * get_ocaml_data(lua_State *L)
 static int panic_wrapper(lua_State *L)
 {
     ocaml_data *data = get_ocaml_data(L);
-    return Int_val(caml_callback(data->panic_callback,  // callback
-                                 data->state_value));   // Lua state
+    return Int_val(caml_callback(data->panic_callback,  /* callback */
+                                 data->state_value));   /* Lua state */
 }
 
 
@@ -472,22 +472,43 @@ STUB_STATE_INT(lua_status)
 
 STUB_STATE_INT_BOOL(lua_toboolean, index)
 
-/* external lua_tocfunction : state -> int -> oCamlFunction = "lua_tocfunction__stub" */
 CAMLprim
 value lua_tocfunction__stub(value L, value index)
 {
     CAMLparam2(L, index);
+
+    /* 1ST: get the C function pointer */
     lua_CFunction f = lua_tocfunction(lua_State_val(L), Int_val(index));
-    if (f == NULL)
+
+    /* If the Lua object at position "index" of the stack is not a C function,
+       raise an exception (will be catched on the OCaml side */
+    if (f == NULL) caml_raise_constant(*caml_named_value("Not_a_C_function"));
+
+    /* 2ND: if the function is an OCaml closure, pushed in the Lua world using
+       Lua.pushcfunction, the pointer returned here is actually
+       execute_ocaml_closure. This is a static function defined in this file and
+       without a context it's useless. Instead of returning a "value" version of
+       execute_ocaml_closure we get the upvalue, which is the original value of
+       the OCaml closure, and return it. */
+
+    /* lua_getupvalue (from the Lua debugging interface) pushes the upvalue on
+       the stack (+1) */
+    const char *name = lua_getupvalue(lua_State_val(L), Int_val(index), 1);
+    if (name == NULL)
     {
+        /* In case of error, raise an exception */
         caml_raise_constant(*caml_named_value("Not_a_C_function"));
     }
     else
     {
-        /* TODO TODO TODO TODO TODO TODO TODO */
-        /* HOW CAN I BUILD THE RIGHT CLOSURE? */
-        /* TODO TODO TODO TODO TODO TODO TODO */
-        CAMLreturn(Val_unit);
+        /* Convert the userdatum to an OCaml value */
+        value *ocaml_closure = (value*)lua_touserdata(lua_State_val(L), -1);
+
+        /* remove the userdatum from the stack (-1) */
+        lua_pop(lua_State_val(L), 1);
+
+        /* return it */
+        CAMLreturn (*ocaml_closure);
     }
 }
 
@@ -526,24 +547,24 @@ value luaL_newstate__stub (value unit)
 
     value *default_panic_v = caml_named_value("default_panic");
 
-    // create a fresh new Lua state
+    /* create a fresh new Lua state */
     lua_State *L = lua_newstate(custom_alloc, NULL);
     lua_atpanic(L, &default_panic);
 
-    // alloc space for the register entry
+    /* alloc space for the register entry */
     ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
     caml_register_global_root(&(data->panic_callback));
     data->panic_callback = *default_panic_v;
 
-    // create a new Lua table for binding informations
+    /* create a new Lua table for binding informations */
     set_ocaml_data(L, data);
 
-    // wrap the lua_State* in a custom object
+    /* wrap the lua_State* in a custom object */
     v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
     lua_State_val(v_L) = L;
     data->state_value = v_L;
 
-    // return the lua_State value
+    /* return the lua_State value */
     CAMLreturn(v_L);
 }
 

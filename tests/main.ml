@@ -12,7 +12,7 @@ let panicf1 l =
 
 let closure () =
   let simple_ocaml_function l =
-    let () = String.create (1024*1024) |> ignore in
+    let () = String.create (997*991) |> ignore in
       Printf.printf "OCaml function called from Lua!!!:-)\n%!";
       0 in
   let l1 = LuaL.newstate () in

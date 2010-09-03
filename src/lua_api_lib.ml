@@ -242,3 +242,5 @@ let tocfunction l index =
   try Some (tocfunction_aux l index)
   with Not_a_C_function -> None
 
+let toocamlfunction = tocfunction
+

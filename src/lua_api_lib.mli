@@ -440,6 +440,9 @@ val tocfunction : state -> int -> oCamlFunction option
     {{:http://www.lua.org/manual/5.1/manual.html#lua_tocfunction}lua_tocfunction}
     documentation. *)
 
+val toocamlfunction : state -> int -> oCamlFunction option
+(** Alias of {!Lua_api_lib.tocfunction} *)
+
 (****************************)
 (** {1 TODO TODO TODO TODO} *)
 (****************************)
