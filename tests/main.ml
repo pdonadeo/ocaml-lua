@@ -17,50 +17,56 @@ let closure () =
       0 in
   let l1 = LuaL.newstate () in
   let l2 = LuaL.newstate () in
-    try
-      let n = Random.int 1024*1024 in
-      let str = String.create n in
-      let panicf2 l =
-        ignore str;
-        Printf.printf "panicf2: %d\n%!" !conta;
-        raise Test_exception in
-      let n = Random.int 2 in
-      let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
+  try
+    let n = Random.int 1024*1024 in
+    let str = String.create n in
+    let panicf2 l =
+      ignore str;
+      Printf.printf "panicf2: %d\n%!" !conta;
+      raise Test_exception in
+    let n = Random.int 2 in
+    let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
 
-      let def_panic1 = Lua.atpanic l1 f in
-      let def_panic2 = Lua.atpanic l2 f in
+    let def_panic1 = Lua.atpanic l1 f in
+    let def_panic2 = Lua.atpanic l2 f in
 
-      Lua.pushfstring l1 "Custom message on %s%d stack" "L" 1 |> ignore;
-      Lua.pushstring l2 "Custom message on L2 stack";
-      let my_panic1 = Lua.atpanic l1 def_panic1 in
-      let my_panic2 = Lua.atpanic l2 def_panic2 in
+    Lua.pushfstring l1 "Custom message on %s%d stack" "L" 1 |> ignore;
+    Lua.pushstring l2 "Custom message on L2 stack";
+    let my_panic1 = Lua.atpanic l1 def_panic1 in
+    let my_panic2 = Lua.atpanic l2 def_panic2 in
 
-      let def_panic1 = Lua.atpanic l1 my_panic1 in
-      let def_panic2 = Lua.atpanic l2 my_panic2 in
+    let def_panic1 = Lua.atpanic l1 my_panic1 in
+    let def_panic2 = Lua.atpanic l2 my_panic2 in
 
-        ignore(def_panic1, def_panic2);
+    ignore(def_panic1, def_panic2);
 
-        ignore (Lua.pushocamlfunction l1 simple_ocaml_function);
-        Lua.setglobal l1 "simple_ocaml_function";
+    ignore (Lua.pushocamlfunction l1 simple_ocaml_function);
+    Lua.setglobal l1 "simple_ocaml_function";
 
-        LuaL.openlibs l1;
-        LuaL.openlibs l2;
-        LuaL.loadbuffer l1 "simple_ocaml_function()\n" "line";
-        LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
-        let () = match Lua.pcall l1 0 0 0 with
-                  | Lua.LUA_OK -> ()
-                  | err -> raise (Lua.Error err) in
-        let () = match Lua.pcall l2 0 0 0 with
-                  | Lua.LUA_OK -> ()
-                  | err -> raise (Lua.Error err) in
-        let n = Random.int 2 in
-          match n with | 0 -> Lua.error l1 | 1 -> Lua.error l2 | _ -> failwith "IMPOSSIBILE"
-    with
-      | Lua.Error err -> begin
-            Printf.printf "%s\n%!" (Lua.tostring l1 (-1));
-            Lua.pop l1 1;
-            failwith "FATAL ERROR"
-          end;
+    LuaL.openlibs l1;
+    LuaL.openlibs l2;
+    LuaL.loadbuffer l1 "simple_ocaml_function()\n" "line";
+    LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+    let () =
+      match Lua.pcall l1 0 0 0 with
+      | Lua.LUA_OK -> ()
+      | err -> raise (Lua.Error err) in
+    let () =
+      match Lua.pcall l2 0 0 0 with
+      | Lua.LUA_OK -> ()
+      | err -> raise (Lua.Error err) in
+    let n = Random.int 2 in
+    match n with
+    | 0 -> Lua.error l1
+    | 1 -> Lua.error l2
+    | _ -> failwith "IMPOSSIBILE"
+  with
+  | Lua.Error err ->
+    begin
+      Printf.printf "%s\n%!" (Lua.tostring l1 (-1));
+      Lua.pop l1 1;
+      failwith "FATAL ERROR"
+    end;
 ;;
 
 let sleep_float n =
@@ -118,8 +124,8 @@ let run func args =
     try func args
     with e -> print_timings start_space start_wtime start_ptime;
               raise e in
-    print_timings start_space start_wtime start_ptime;
-    ret
+  print_timings start_space start_wtime start_ptime;
+  ret
 ;;
 
 let timeout = 60.0 *. 10.0;;
@@ -128,12 +134,12 @@ let max_run = int_of_float (timeout /. (33.0 /. 10000.0));;
 let main () =
   while !conta <  max_run do
     let () = try closure () with Test_exception -> () in
-(*       Gc.minor (); *)
-(*       Gc.major_slice 0 |> ignore; *)
-(*       Gc.major (); *)
-      Gc.compact ();
-      conta := !conta + 1;
-      sleep_float (1./.((Random.float 900.0) +. 100.));
+(*     Gc.minor (); *)
+(*     Gc.major_slice 0 |> ignore; *)
+(*     Gc.major (); *)
+    Gc.compact ();
+    conta := !conta + 1;
+    sleep_float (1./.((Random.float 900.0) +. 100.));
   done
 ;;
 
