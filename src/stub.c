@@ -17,7 +17,7 @@
 /*****                           DEBUG FUNCTION                           *****/
 /******************************************************************************/
 /* Comment out the following line to enable debug */
-#define NO_DEBUG
+//#define NO_DEBUG
 
 #if defined(NO_DEBUG) && defined(__GNUC__)
 #define debug(level, format, args...) ((void)0)
@@ -26,7 +26,7 @@ void debug(int level, char *format, ...);
 #endif
 
 #ifndef NO_DEBUG
-static int msglevel = 2; /* the higher, the more messages... */
+static int msglevel = 4; /* the higher, the more messages... */
 #endif
 
 #if defined(NO_DEBUG) && defined(__GNUC__)
@@ -50,6 +50,16 @@ void debug(int level, char* format, ...)
 #endif /* NO_DEBUG */
 }
 #endif /* NO_DEBUG && __GNUC__ */
+
+
+/******************************************************************************/
+/*****                           UTILITY MACROS                           *****/
+/******************************************************************************/
+/* Library unique ID */
+#define UUID "551087dd-4133-4097-87c6-79c27cde5c15"
+
+/* Access the lua_State inside an OCaml custom block */
+#define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
 
 
 /******************************************************************************/
@@ -161,15 +171,6 @@ value lua_function##__stub(value L, value int1_name, value int2_name) \
     CAMLreturn(Val_true); \
 }
 
-/******************************************************************************/
-/*****                           UTILITY MACROS                           *****/
-/******************************************************************************/
-/* Library unique ID */
-#define UUID "551087dd-4133-4097-87c6-79c27cde5c15"
-
-/* Access the lua_State inside an OCaml custom block */
-#define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
-
 
 /******************************************************************************/
 /*****                          DATA STRUCTURES                           *****/
@@ -205,14 +206,20 @@ static void *custom_alloc ( void *ud,
     (void)osize;  /* not used */
     void *realloc_result = NULL;
 
+    debug(3, "custom_alloc(%p, %p, %d, %d)\n", ud, ptr, osize, nsize);
+
     if (nsize == 0)
     {
+        debug(4, "    custom_alloc: calling free(%p)\n", ptr);
         free(ptr);
+        debug(4, "    custom_alloc: returning NULL\n");
         return NULL;
     }
     else
     {
+        debug(4, "    custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
         realloc_result = caml_stat_resize(ptr, nsize);
+        debug(4, "    custom_alloc: returning %p\n", realloc_result);
         return realloc_result;
     }
 }
@@ -395,21 +402,23 @@ value lua_pushcfunction__stub(value L, value f)
     CAMLparam2(L, f);
 
     /* Create the new userdatum containing the OCaml value of the closure */
-    value *ocaml_closure = (value*)lua_newuserdata(lua_State_val(L), sizeof(value));
+    lua_State *LL = lua_State_val(L);
+    value *ocaml_closure = (value*)lua_newuserdata(LL, sizeof(value));
+    
     caml_register_global_root(ocaml_closure);
     *ocaml_closure = f;
 
     /* retrieve the metatable for this kind of userdata */
-    lua_pushstring(lua_State_val(L), UUID);
-    lua_gettable(lua_State_val(L), LUA_REGISTRYINDEX);
-    lua_pushstring(lua_State_val(L), "closure_metatable");
-    lua_gettable(lua_State_val(L), -2);
-    lua_setmetatable(lua_State_val(L), -3);
-    lua_pop(lua_State_val(L), 1);
+    lua_pushstring(LL, UUID);
+    lua_gettable(LL, LUA_REGISTRYINDEX);
+    lua_pushstring(LL, "closure_metatable");
+    lua_gettable(LL, -2);
+    lua_setmetatable(LL, -3);
+    lua_pop(LL, 1);
 
     /* at this point the stack has a userdatum on its top, with the correct metatable */
 
-    lua_pushcclosure(lua_State_val(L), execute_ocaml_closure, 1);
+    lua_pushcclosure(LL, execute_ocaml_closure, 1);
 
     CAMLreturn(Val_unit);
 }
@@ -477,8 +486,10 @@ value lua_tocfunction__stub(value L, value index)
 {
     CAMLparam2(L, index);
 
+    lua_State *LL = lua_State_val(L);
+
     /* 1ST: get the C function pointer */
-    lua_CFunction f = lua_tocfunction(lua_State_val(L), Int_val(index));
+    lua_CFunction f = lua_tocfunction(LL, Int_val(index));
 
     /* If the Lua object at position "index" of the stack is not a C function,
        raise an exception (will be catched on the OCaml side */
@@ -493,7 +504,7 @@ value lua_tocfunction__stub(value L, value index)
 
     /* lua_getupvalue (from the Lua debugging interface) pushes the upvalue on
        the stack (+1) */
-    const char *name = lua_getupvalue(lua_State_val(L), Int_val(index), 1);
+    const char *name = lua_getupvalue(LL, Int_val(index), 1);
     if (name == NULL)
     {
         /* In case of error, raise an exception */
@@ -502,10 +513,10 @@ value lua_tocfunction__stub(value L, value index)
     else
     {
         /* Convert the userdatum to an OCaml value */
-        value *ocaml_closure = (value*)lua_touserdata(lua_State_val(L), -1);
+        value *ocaml_closure = (value*)lua_touserdata(LL, -1);
 
         /* remove the userdatum from the stack (-1) */
-        lua_pop(lua_State_val(L), 1);
+        lua_pop(LL, 1);
 
         /* return it */
         CAMLreturn (*ocaml_closure);
@@ -549,6 +560,7 @@ value luaL_newstate__stub (value unit)
 
     /* create a fresh new Lua state */
     lua_State *L = lua_newstate(custom_alloc, NULL);
+    debug(3, "luaL_newstate__stub: calling lua_newstate -> %p\n", (void*)L);
     lua_atpanic(L, &default_panic);
 
     /* alloc space for the register entry */

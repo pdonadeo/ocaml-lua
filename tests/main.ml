@@ -3,11 +3,24 @@ open Lua_api
 let (|>) x f = f x
 
 exception Test_exception
-let conta = ref 0;;
+let counter = ref 0;;
 
 let panicf1 l =
-  Printf.printf "panicf1: %d\n%!" !conta;
+  Printf.printf "panicf1: %d\n%!" !counter;
   raise Test_exception
+;;
+
+let push_get_call_c_function l f =
+  Lua.pushocamlfunction l f;
+  let f' = Lua.tocfunction l (-1) in
+  Lua.pop l 1;
+  match f' with
+  | None -> failwith "This should be a function, something went wrong!"
+  | Some f ->
+      begin
+        Printf.printf "Calling an OCaml function obtained from Lua: %!";
+        f l |> ignore;
+      end
 ;;
 
 let closure () =
@@ -22,7 +35,10 @@ let closure () =
     let str = String.create n in
     let panicf2 l =
       ignore str;
-      Printf.printf "panicf2: %d\n%!" !conta;
+
+      push_get_call_c_function l simple_ocaml_function;
+
+      Printf.printf "panicf2: %d\n%!" !counter;
       raise Test_exception in
     let n = Random.int 2 in
     let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
@@ -128,17 +144,17 @@ let run func args =
   ret
 ;;
 
-let timeout = 60.0 *. 10.0;;
-let max_run = int_of_float (timeout /. (33.0 /. 10000.0));;
+let test_duration = 60.0 *. 10.0;;
+let time_start = Unix.gettimeofday ();;
 
 let main () =
-  while !conta <  max_run do
+  while Unix.gettimeofday () <  time_start +. test_duration do
     let () = try closure () with Test_exception -> () in
 (*     Gc.minor (); *)
 (*     Gc.major_slice 0 |> ignore; *)
 (*     Gc.major (); *)
-    Gc.compact ();
-    conta := !conta + 1;
+(*     Gc.compact (); *)
+    counter := !counter + 1;
     sleep_float (1./.((Random.float 900.0) +. 100.));
   done
 ;;
