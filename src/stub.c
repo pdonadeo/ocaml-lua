@@ -17,7 +17,7 @@
 /*****                           DEBUG FUNCTION                           *****/
 /******************************************************************************/
 /* Comment out the following line to enable debug */
-//#define NO_DEBUG
+#define NO_DEBUG
 
 #if defined(NO_DEBUG) && defined(__GNUC__)
 #define debug(level, format, args...) ((void)0)
@@ -177,8 +177,8 @@ value lua_function##__stub(value L, value int1_name, value int2_name) \
 /******************************************************************************/
 typedef struct ocaml_data
 {
-  value state_value;
-  value panic_callback;
+    value panic_callback;
+    int ref_counter;
 } ocaml_data;
 
 static void finalize_lua_State(value L); /* Forward declaration */
@@ -269,28 +269,49 @@ static ocaml_data * get_ocaml_data(lua_State *L)
 
 static int panic_wrapper(lua_State *L)
 {
+    CAMLlocal1(v_L);
     ocaml_data *data = get_ocaml_data(L);
-    return Int_val(caml_callback(data->panic_callback,  /* callback */
-                                 data->state_value));   /* Lua state */
+
+    /* wrap the lua_State* in a custom object */
+    v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
+    lua_State_val(v_L) = L;
+    data->ref_counter++;
+
+    return Int_val(caml_callback(data->panic_callback, v_L));
 }
 
 
 static void finalize_lua_State(value L)
 {
     lua_State *state = lua_State_val(L);
-
     ocaml_data *data = get_ocaml_data(state);
-    caml_remove_global_root(&(data->panic_callback));
-    caml_stat_free(data);
-    lua_close(state);
+
+    if (data->ref_counter == 1)
+    {
+        caml_remove_global_root(&(data->panic_callback));
+        caml_stat_free(data);
+        lua_close(state);
+    }
+    else
+    {
+        data->ref_counter--;
+    }
 }
 
 
 static int execute_ocaml_closure(lua_State *L)
 {
+    CAMLlocal1(v_L);
+
     value *ocaml_closure = (value*)lua_touserdata(L, lua_upvalueindex(1));
     ocaml_data *data = get_ocaml_data(L);
-    return Int_val(caml_callback(*ocaml_closure, data->state_value));
+
+    /* wrap the lua_State* in a custom object */
+    v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
+    lua_State_val(v_L) = L;
+    data->ref_counter++;
+
+    return Int_val(caml_callback(*ocaml_closure, v_L));
 }
 
 /******************************************************************************/
@@ -544,9 +565,17 @@ value lua_tocfunction__stub(value L, value index)
 /******************************************************************************/
 static int default_panic(lua_State *L)
 {
+    CAMLlocal1(v_L);
+
     value *default_panic_v = caml_named_value("default_panic");
     ocaml_data *data = get_ocaml_data(L);
-    return Int_val(caml_callback(*default_panic_v, data->state_value));
+
+    /* wrap the lua_State* in a custom object */
+    v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
+    lua_State_val(v_L) = L;
+    data->ref_counter++;
+
+    return Int_val(caml_callback(*default_panic_v, v_L));
 }
 
 
@@ -567,6 +596,7 @@ value luaL_newstate__stub (value unit)
     ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
     caml_register_global_root(&(data->panic_callback));
     data->panic_callback = *default_panic_v;
+    data->ref_counter = 1;
 
     /* create a new Lua table for binding informations */
     set_ocaml_data(L, data);
@@ -574,7 +604,6 @@ value luaL_newstate__stub (value unit)
     /* wrap the lua_State* in a custom object */
     v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
     lua_State_val(v_L) = L;
-    data->state_value = v_L;
 
     /* return the lua_State value */
     CAMLreturn(v_L);
