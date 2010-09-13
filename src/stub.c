@@ -1,9 +1,9 @@
 #include <string.h>
 #include <stdarg.h>
 
-#include <lua5.1/lua.h>
-#include <lua5.1/lauxlib.h>
-#include <lua5.1/lualib.h>
+#include <lua.h>
+#include <lauxlib.h>
+#include <lualib.h>
 
 #include <caml/mlvalues.h>
 #include <caml/memory.h>

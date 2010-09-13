@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 94a71ed00f00348246e2c638acc7d3fb) *)
+(* DO NOT EDIT (digest: e7709f5a1b3c9c4b75df3db10ac80ee6) *)
 module OASISGettext = struct
 # 21 "/home/gildor/programmation/oasis/src/oasis/OASISGettext.ml"
   
@@ -400,19 +400,19 @@ module MyOCamlbuildBase = struct
               (fun (lib, dir, headers) ->
                    (* Handle C part of library *)
                    flag ["link"; "library"; "ocaml"; "byte"; "use_lib"^lib]
-                     (S[A"-dllib"; A("-l"^lib); A"-cclib"; A("-l"^lib)]);
+                     (S[A"-dllib"; A("-l"^lib^"_stubs"); A"-cclib"; A("-l"^lib^"_stubs")]);
   
                    flag ["link"; "library"; "ocaml"; "native"; "use_lib"^lib]
-                     (S[A"-cclib"; A("-l"^lib)]);
+                     (S[A"-cclib"; A("-l"^lib^"_stubs")]);
                         
                    flag ["link"; "program"; "ocaml"; "byte"; "use_lib"^lib]
-                     (S[A"-dllib"; A("dll"^lib)]);
+                     (S[A"-dllib"; A("dll"^lib^"_stubs")]);
   
                    (* When ocaml link something that use the C library, then one
                       need that file to be up to date.
                     *)
                    dep  ["link"; "ocaml"; "use_lib"^lib] 
-                     [dir/"lib"^lib^"."^(!Options.ext_lib)];
+                     [dir/"lib"^lib^"_stubs."^(!Options.ext_lib)];
   
                    (* TODO: be more specific about what depends on headers *)
                    (* Depends on .h files *)
@@ -464,6 +464,18 @@ let package_default =
                       A "-Wall";
                       A "-ccopt";
                       A "-ggdb"
+                   ]);
+               (OASISExpr.EFlag "lua51",
+                 S
+                   [
+                      A "-ccopt";
+                      A "-O3";
+                      A "-ccopt";
+                      A "-Wall";
+                      A "-ccopt";
+                      A "-ggdb";
+                      A "-ccopt";
+                      A "-I/usr/include/lua5.1"
                    ])
             ]);
           (["oasis_library_lua_cclib"; "link"],
@@ -471,13 +483,14 @@ let package_default =
                (OASISExpr.EBool true, S []);
                (OASISExpr.EFlag "lua51", S [A "-cclib"; A "-llua5.1"]);
                (OASISExpr.ENot (OASISExpr.EFlag "lua51"),
-                 S [A "-cclib"; A "-llua"])
+                 S [A "-cclib"; A "-llua"; A "-cclib"; A "-lm"])
             ]);
           (["oasis_library_lua_cclib"; "ocamlmklib"; "c"],
             [
                (OASISExpr.EBool true, S []);
                (OASISExpr.EFlag "lua51", S [A "-llua5.1"]);
-               (OASISExpr.ENot (OASISExpr.EFlag "lua51"), S [A "-llua"])
+               (OASISExpr.ENot (OASISExpr.EFlag "lua51"),
+                 S [A "-llua"; A "-lm"])
             ])
        ];
      }

@@ -40,9 +40,10 @@ Library lua
   BuildDepends: unix
   CCopt: -O3 -Wall -ggdb
   if flag(lua51)
+    CCopt+: -I/usr/include/lua5.1
     CClib: -llua5.1
   else
-    CClib: -llua
+    CClib: -llua -lm
 
 
 Document "api-lua"
@@ -61,7 +62,7 @@ Flag bench
   Description: Create and run benchmark tests
   Default:     false
 
-Executable bench
+Executable bench_exec
   Path:         tests
   Build$:       flag(bench)
   Install:      false
@@ -71,6 +72,6 @@ Executable bench
   
 Test bench
   Run$:      flag(bench)
-  Command:   $bench
-  TestTools: bench
+  Command:   $bench_exec
+  TestTools: bench_exec
  
