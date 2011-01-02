@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 9f6974de262aaffcc7e26c981c61fb14)
+# DO NOT EDIT (digest: 952e04674dec28a238997371cc938f6b)
 # Library lua
 "src": include
 <src/*.ml{,i}>: oasis_library_lua_ccopt
@@ -12,7 +12,7 @@
 <src/lua.{cma,cmxa}>: use_liblua
 <src/*.ml{,i}>: pkg_unix
 "src/stub.c": pkg_unix
-# Executable bench
+# Executable bench_exec
 "tests/main.byte": use_lua
 "tests/main.byte": pkg_unix
 <tests/*.ml{,i}>: use_lua

@@ -22,6 +22,11 @@ Description:
   .
   [Lua homepage](http://www.lua.org)
 
+Flag lua51
+  Description: The pkg-config name of lua can be lua5.1 or lua. If you are in
+               the first case, disable this flag.
+  Default: true
+
 # 
 # Lua bindings and their documentation
 #
@@ -34,7 +39,12 @@ Library lua
   CSources: stub.c
   BuildDepends: unix
   CCopt: -O3 -Wall -ggdb
-  CClib: -llua5.1
+  if flag(lua51)
+    CCopt+: -I/usr/include/lua5.1
+    CClib: -llua5.1
+  else
+    CClib: -llua -lm
+
 
 Document "api-lua"
   Title:                API reference for Lua
@@ -52,7 +62,7 @@ Flag bench
   Description: Create and run benchmark tests
   Default:     false
 
-Executable bench
+Executable bench_exec
   Path:         tests
   Build$:       flag(bench)
   Install:      false
@@ -62,6 +72,6 @@ Executable bench
   
 Test bench
   Run$:      flag(bench)
-  Command:   $bench
-  TestTools: bench
+  Command:   $bench_exec
+  TestTools: bench_exec
  
