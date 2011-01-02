@@ -10,6 +10,15 @@ let panicf1 l =
   raise Test_exception
 ;;
 
+let allocate_a_lot () =
+  let l = ref [] in
+  for i = 1 to 500
+  do
+    let s = String.create 33455 in
+    l := s::(!l);
+  done;
+  !l
+
 let push_get_call_c_function l f =
   Lua.pushocamlfunction l f;
   let f' = Lua.tocfunction l (-1) in
@@ -25,16 +34,15 @@ let push_get_call_c_function l f =
 
 let closure () =
   let simple_ocaml_function l =
-    let () = String.create (997*991) |> ignore in
+    let () = allocate_a_lot () |> ignore in
       Printf.printf "OCaml function called from Lua!!!:-)\n%!";
       0 in
   let l1 = LuaL.newstate () in
   let l2 = LuaL.newstate () in
   try
-    let n = Random.int 1024*1024 in
-    let str = String.create n in
+    let str_list = allocate_a_lot () in
     let panicf2 l =
-      ignore str;
+      ignore str_list;
 
       push_get_call_c_function l simple_ocaml_function;
 
@@ -155,7 +163,6 @@ let main () =
 (*     Gc.major (); *)
 (*     Gc.compact (); *)
     counter := !counter + 1;
-    sleep_float (1./.((Random.float 900.0) +. 100.));
   done
 ;;
 
