@@ -1,13 +1,15 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: e7709f5a1b3c9c4b75df3db10ac80ee6) *)
+(* DO NOT EDIT (digest: 10491eb0807c62d7a3bfc91a076b6b98) *)
 module OASISGettext = struct
 # 21 "/home/gildor/programmation/oasis/src/oasis/OASISGettext.ml"
   
+  let ns_ str = 
+    str
   
   let s_ str = 
     str
   
-  let f_ (str : ('a, 'b, 'c) format) =
+  let f_ (str : ('a, 'b, 'c, 'd) format4) =
     str
   
   let fn_ fmt1 fmt2 n =
@@ -400,19 +402,19 @@ module MyOCamlbuildBase = struct
               (fun (lib, dir, headers) ->
                    (* Handle C part of library *)
                    flag ["link"; "library"; "ocaml"; "byte"; "use_lib"^lib]
-                     (S[A"-dllib"; A("-l"^lib^"_stubs"); A"-cclib"; A("-l"^lib^"_stubs")]);
+                     (S[A"-dllib"; A("-l"^lib); A"-cclib"; A("-l"^lib)]);
   
                    flag ["link"; "library"; "ocaml"; "native"; "use_lib"^lib]
-                     (S[A"-cclib"; A("-l"^lib^"_stubs")]);
+                     (S[A"-cclib"; A("-l"^lib)]);
                         
                    flag ["link"; "program"; "ocaml"; "byte"; "use_lib"^lib]
-                     (S[A"-dllib"; A("dll"^lib^"_stubs")]);
+                     (S[A"-dllib"; A("dll"^lib)]);
   
                    (* When ocaml link something that use the C library, then one
                       need that file to be up to date.
                     *)
                    dep  ["link"; "ocaml"; "use_lib"^lib] 
-                     [dir/"lib"^lib^"_stubs."^(!Options.ext_lib)];
+                     [dir/"lib"^lib^"."^(!Options.ext_lib)];
   
                    (* TODO: be more specific about what depends on headers *)
                    (* Depends on .h files *)

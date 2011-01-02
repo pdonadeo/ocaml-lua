@@ -7,9 +7,9 @@ Authors:      Paolo Donadeo,
               Sylvain Le Gall
 License:      LGPL-2.1 with OCaml linking exception
 BuildTools:   ocamlbuild
-Plugins:      META (0.2.0~alpha1), 
-              StdFiles (0.2.0~alpha1), 
-              DevFiles (0.2.0~alpha1)
+Plugins:      META (0.2),
+              StdFiles (0.2),
+              DevFiles (0.2)
 Homepage:     http://ocaml-lua.forge.ocamlcore.org
 
 Description:
@@ -48,7 +48,7 @@ Library lua
 
 Document "api-lua"
   Title:                API reference for Lua
-  Type:                 ocamlbuild (0.2.0~alpha1)
+  Type:                 ocamlbuild (0.2)
   InstallDir:           $htmldir/lua
   XOCamlbuildPath:      src/
   XOCamlbuildLibraries: lua
