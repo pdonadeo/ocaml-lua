@@ -57,7 +57,7 @@ void debug(int level, char* format, ...)
 /******************************************************************************/
 /* Library unique ID */
 #define UUID              "551087dd-4133-4097-87c6-79c27cde5c15"
-#define DEFAULT_OPS_UUID  "551087dd-4133-4097-87c6-79c27cde5c15_DEFAULT"
+#define DEFAULT_OPS_UUID  (UUID "_DEFAULT")
 
 /* Access the lua_State inside an OCaml custom block */
 #define lua_State_val(L) (*((lua_State **) Data_custom_val(L))) /* also l-value */
@@ -124,6 +124,16 @@ value lua_function##__stub(value L, value double_name) \
     CAMLparam2(L, double_name); \
     lua_function(lua_State_val(L), Double_val(double_name)); \
     CAMLreturn(Val_unit); \
+}
+
+/* For Lua function with signature : lua_State -> int -> double */
+#define STUB_STATE_INT_DOUBLE(lua_function, int_name) \
+CAMLprim \
+value lua_function##__stub(value L, value int_name) \
+{ \
+    CAMLparam2(L, int_name); \
+    double retval = lua_function(lua_State_val(L), Int_val(int_name)); \
+    CAMLreturn(caml_copy_double(retval)); \
 }
 
 /* For Lua function with signature : lua_State -> bool -> void */
@@ -534,6 +544,51 @@ value lua_tocfunction__stub(value L, value index)
     }
 }
 
+STUB_STATE_INT_INT(lua_tointeger, index)
+
+void raise_type_error(char *msg)
+{
+  caml_raise_with_string(*caml_named_value("Lua_type_error"), msg);
+}
+
+CAMLprim
+value lua_tolstring__stub(value L, value index)
+{
+  size_t len = 0;
+  const char *value_from_lua;
+  CAMLparam2(L, index);
+  CAMLlocal1(ret_val);
+
+  value_from_lua = lua_tolstring( lua_State_val(L),
+                                  Int_val(index),
+                                  &len );
+  if (value_from_lua != NULL)
+  {
+    ret_val = caml_alloc_string(len);
+    char *s = String_val(ret_val);
+    memcpy(s, value_from_lua, len);
+  }
+  else
+  {
+    raise_type_error("lua_tolstring: not a string value!");
+  }
+
+  CAMLreturn(ret_val);
+}
+
+STUB_STATE_INT_DOUBLE(lua_tonumber, index)
+
+STUB_STATE_INT_INT(lua_type, index)
+
+CAMLprim
+value lua_xmove__stub(value from, value to, value n)
+{
+    CAMLparam3(from, to, n);
+    lua_xmove(lua_State_val(from), lua_State_val(to), Int_val(n));
+    CAMLreturn(Val_unit);
+}
+
+STUB_STATE_INT_INT(lua_yield, nresults)
 
 /******************************************************************************/
 /******************************************************************************/
@@ -610,38 +665,17 @@ value luaL_loadbuffer__stub(value L, value buff, value sz, value name)
 }
 
 
-
-
-void raise_type_error(char *msg)
-{
-  caml_raise_with_string(*caml_named_value("Lua_type_error"), msg);
-}
-
-
 CAMLprim
-value lua_tolstring__stub(value L, value index)
+value luaL_loadfile__stub(value L, value filename)
 {
-  size_t len = 0;
-  const char *value_from_lua;
-  CAMLparam2(L, index);
-  CAMLlocal1(ret_val);
+  CAMLparam2(L, filename);
+  CAMLlocal1(status);
 
-  value_from_lua = lua_tolstring( lua_State_val(L),
-                                  Int_val(index),
-                                  &len );
-  if (value_from_lua != NULL)
-  {
-    ret_val = caml_alloc_string(len);
-    char *s = String_val(ret_val);
-    memcpy(s, value_from_lua, len);
-  }
-  else
-  {
-    raise_type_error("lua_tolstring: not a string value!");
-  }
-
-  CAMLreturn(ret_val);
+  status = Val_int(luaL_loadfile( lua_State_val(L),
+                                  String_val(filename) ));
+  CAMLreturn(status);
 }
+
 
 CAMLprim
 value luaL_openlibs__stub(value L)

@@ -27,6 +27,18 @@ type gc_command =
   | GCSETPAUSE
   | GCSETSTEPMUL
 
+type lua_type =
+  | LUA_TNONE
+  | LUA_TNIL
+  | LUA_TBOOLEAN
+  | LUA_TLIGHTUSERDATA
+  | LUA_TNUMBER
+  | LUA_TSTRING
+  | LUA_TTABLE
+  | LUA_TFUNCTION
+  | LUA_TUSERDATA
+  | LUA_TTHREAD
+
 let thread_status_of_int = function
   | 0 -> LUA_OK
   | 1 -> LUA_YIELD
@@ -53,6 +65,31 @@ let int_of_gc_command = function
   | GCSTEP -> 5
   | GCSETPAUSE -> 6
   | GCSETSTEPMUL -> 7
+
+let lua_type_of_int = function
+  | -1 -> LUA_TNONE
+  |  0 -> LUA_TNIL
+  |  1 -> LUA_TBOOLEAN
+  |  2 -> LUA_TLIGHTUSERDATA
+  |  3 -> LUA_TNUMBER
+  |  4 -> LUA_TSTRING
+  |  5 -> LUA_TTABLE
+  |  6 -> LUA_TFUNCTION
+  |  7 -> LUA_TUSERDATA
+  |  8 -> LUA_TTHREAD
+  |  _ -> failwith "lua_type_of_int: unknown type"
+
+let int_of_lua_type = function
+  | LUA_TNONE -> -1
+  | LUA_TNIL -> 0
+  | LUA_TBOOLEAN -> 1
+  | LUA_TLIGHTUSERDATA -> 2
+  | LUA_TNUMBER -> 3
+  | LUA_TSTRING -> 4
+  | LUA_TTABLE -> 5
+  | LUA_TFUNCTION -> 6
+  | LUA_TUSERDATA -> 7
+  | LUA_TTHREAD -> 8
 
 let multret = -1
 let registryindex = -10000
@@ -228,7 +265,7 @@ external setmetatable : state -> int -> int = "lua_setmetatable__stub"
 
 external settable : state -> int -> int = "lua_settable__stub"
 
-external settop : state -> int -> int = "lua_settop__stub"
+external settop : state -> int -> unit = "lua_settop__stub"
 
 external status_aux : state -> int = "lua_status__stub"
 
@@ -243,4 +280,29 @@ let tocfunction l index =
   with Not_a_C_function -> None
 
 let toocamlfunction = tocfunction
+
+external tointeger : state -> int -> int = "lua_tointeger__stub"
+
+external tonumber : state -> int -> float = "lua_tonumber__stub"
+
+external lua_type_wrapper : state -> int -> int = "lua_type__stub"
+
+let type_ state index =
+  lua_type_wrapper state index |> lua_type_of_int
+
+let typename _ = function
+  | LUA_TNONE -> "no value"
+  | LUA_TNIL -> "nil"
+  | LUA_TBOOLEAN -> "boolean"
+  | LUA_TLIGHTUSERDATA -> "userdata"
+  | LUA_TNUMBER -> "number"
+  | LUA_TSTRING -> "string"
+  | LUA_TTABLE -> "table"
+  | LUA_TFUNCTION -> "function"
+  | LUA_TUSERDATA -> "userdata"
+  | LUA_TTHREAD -> "thread"
+
+external xmove : state -> state -> int -> unit = "lua_xmove__stub"
+
+external yield : state -> int -> int = "lua_yield__stub"
 

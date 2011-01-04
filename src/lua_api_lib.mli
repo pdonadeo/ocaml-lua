@@ -39,6 +39,22 @@ type gc_command =
 (** This type is not present in the official API and is used by the function
     [gc] *)
 
+type lua_type =
+  | LUA_TNONE
+  | LUA_TNIL
+  | LUA_TBOOLEAN
+  | LUA_TLIGHTUSERDATA
+  | LUA_TNUMBER
+  | LUA_TSTRING
+  | LUA_TTABLE
+  | LUA_TFUNCTION
+  | LUA_TUSERDATA
+  | LUA_TTHREAD
+(** This type is a collection of the possible types of a Lua value, as defined
+    by the macros in lua.h. As a reference, see the documentation of the 
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_type}lua_type function},
+    and the corresponding OCaml {!Lua_api_lib.type_}. *)
+
 (************************)
 (** {2 Constant values} *)
 (************************)
@@ -69,7 +85,7 @@ exception Error of thread_status
 exception Type_error of string
 
 (*********************************************)
-(** {2 Functions non present in the Lua API} *)
+(** {2 Functions not present in the Lua API} *)
 (*********************************************)
 
 val thread_status_of_int : int -> thread_status
@@ -78,6 +94,13 @@ val thread_status_of_int : int -> thread_status
 
 val int_of_thread_status : thread_status -> int
 (** Convert a [thread_status] into an integer. *)
+
+val lua_type_of_int : int -> lua_type
+(** Convert an integer into a [lua_type]. Raises [failure] on
+    invalid parameter. *)
+
+val int_of_lua_type : lua_type -> int
+(** Convert a [lua_type] into an integer. *)
 
 (**************************)
 (** {2 Lua API functions} *)
@@ -420,7 +443,7 @@ external settable : state -> int -> int = "lua_settable__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_settable}lua_settable}
     documentation. *)
 
-external settop : state -> int -> int = "lua_settop__stub"
+external settop : state -> int -> unit = "lua_settop__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_settop}lua_settop}
     documentation. *)
@@ -443,17 +466,52 @@ val tocfunction : state -> int -> oCamlFunction option
 val toocamlfunction : state -> int -> oCamlFunction option
 (** Alias of {!Lua_api_lib.tocfunction} *)
 
-(****************************)
-(** {1 TODO TODO TODO TODO} *)
-(****************************)
+val tointeger : state -> int -> int
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_tointeger}lua_tointeger}
+    documentation. *)
 
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-(**************************************************************************)
-external tolstring : state -> int -> string = "lua_tolstring__stub"
+val tolstring : state -> int -> string
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_tolstring}lua_tolstring}
+    documentation. The original [len] argument is missing because, unlike in C,
+    there is no impedance mismatch between OCaml and Lua strings *)
+
+val tonumber : state -> int -> float
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_tonumber}lua_tonumber}
+    documentation. *)
+
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_topointer}lua_topointer}
+    is not available *)
+
 val tostring : state -> int -> string
+(** Alias of {!Lua_api_lib.tolstring} *)
 
+(* TODO lua_tothread
+   http://www.lua.org/manual/5.1/manual.html#lua_tothread *)
+
+(* TODO lua_touserdata
+   http://www.lua.org/manual/5.1/manual.html#lua_touserdata *)
+
+val type_ : state -> int -> lua_type
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_type}lua_type}
+    documentation. *)
+
+val typename : state -> lua_type -> string
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_typename}lua_typename}
+    documentation. *)
+
+val xmove : state -> state -> int -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_xmove}lua_xmove}
+    documentation. *)
+
+val yield : state -> int -> int
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_yield}lua_yield}
+    documentation. *)
 
