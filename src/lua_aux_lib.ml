@@ -10,18 +10,12 @@ external luaL_loadbuffer__wrapper :
   state -> string -> int -> string -> int = "luaL_loadbuffer__stub"
 
 let loadbuffer l buff name =
-  let ret_status = luaL_loadbuffer__wrapper l buff (String.length buff) name |>
-    thread_status_of_int in
-    match ret_status with
-      | LUA_OK -> ()
-      | err -> raise (Error err)
+  luaL_loadbuffer__wrapper l buff (String.length buff) name |> thread_status_of_int
 ;;
 
-module Exceptionless =
-struct
-  let loadbuffer l buff name =
-    luaL_loadbuffer__wrapper l buff (String.length buff) name |>
-      thread_status_of_int
+external luaL_loadfile__wrapper : state -> string -> int = "luaL_loadfile__stub"
 
-end
+let loadfile l filename =
+  luaL_loadfile__wrapper l filename |> thread_status_of_int
+;;
 

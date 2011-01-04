@@ -69,8 +69,8 @@ let closure () =
 
     LuaL.openlibs l1;
     LuaL.openlibs l2;
-    LuaL.loadbuffer l1 "simple_ocaml_function()\n" "line";
-    LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line";
+    LuaL.loadbuffer l1 "simple_ocaml_function()\n" "line" |> ignore;
+    LuaL.loadbuffer l2 "a = 42\nb = 43\nc = a + b\n-- print(c)" "line" |> ignore;
     let () =
       match Lua.pcall l1 0 0 0 with
       | Lua.LUA_OK -> ()
