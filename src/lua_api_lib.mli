@@ -271,8 +271,26 @@ external newtable: state -> int -> int -> bool = "lua_newtable__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newtable}lua_newtable}
     documentation. *)
 
-(* TODO lua_newthread
-   http://www.lua.org/manual/5.1/manual.html#lua_newthread *)
+val newthread : state -> state
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_newthread}lua_newthread}
+    documentation.
+
+    When you create a new thread, this binding guaranties that the Lua object
+    will remain "living" (protected from both the Lua and the OCaml garbage
+    collectors) until a valid copy exists in at least one of the two contexts.
+    
+    Remember that all the threads obtained by [newthread] and
+    {!Lua_api_lib.tothread} are copies sharing all the data, for example:
+    {[
+let state = LuaL.newstate ();;
+let th = Lua.newthread state;;
+let th' = match Lua.tothread state 1 with Some s -> s | None -> failwith "not an option!";;
+Lua.settop state 0;;
+    ]}
+    Now the stack of [state] is empty and you have two threads, [th] and [th'],
+    but they are actually the {e very same data structure} and operation performed
+    on the first will be visible on the second! *)
 
 (* TODO lua_newuserdata
    http://www.lua.org/manual/5.1/manual.html#lua_newuserdata *)
@@ -360,8 +378,10 @@ val pushstring : state -> string -> unit
     {{:http://www.lua.org/manual/5.1/manual.html#lua_pushstring}lua_pushstring}
     documentation. *)
 
-(* TODO lua_pushthread
-   http://www.lua.org/manual/5.1/manual.html#lua_pushthread *)
+val pushthread : state -> bool
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushthread}lua_pushthread}
+    documentation. *)
 
 external pushvalue : state -> int -> unit = "lua_pushvalue__stub"
 (** See
@@ -412,8 +432,10 @@ external replace : state -> int -> unit = "lua_replace__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_replace}lua_replace}
     documentation. *)
 
-(* TODO lua_resume
-   http://www.lua.org/manual/5.1/manual.html#lua_resume *)
+val resume : state -> int -> thread_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_resume}lua_resume}
+    documentation. *)
 
 (** {{:http://www.lua.org/manual/5.1/manual.html#lua_setallocf}lua_setallocf}
     not implemented in this binding *)
@@ -489,8 +511,10 @@ val tonumber : state -> int -> float
 val tostring : state -> int -> string
 (** Alias of {!Lua_api_lib.tolstring} *)
 
-(* TODO lua_tothread
-   http://www.lua.org/manual/5.1/manual.html#lua_tothread *)
+val tothread : state -> int -> state option
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_tothread}lua_tothread}
+    documentation. *)
 
 (* TODO lua_touserdata
    http://www.lua.org/manual/5.1/manual.html#lua_touserdata *)

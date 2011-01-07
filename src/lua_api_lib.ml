@@ -103,9 +103,11 @@ let globalsindex = -10002
 exception Error of thread_status
 exception Type_error of string
 exception Not_a_C_function
+exception Not_a_Lua_thread
 
 let _ = Callback.register_exception "Lua_type_error" (Type_error "")
 let _ = Callback.register_exception "Not_a_C_function" Not_a_C_function
+let _ = Callback.register_exception "Not_a_Lua_thread" Not_a_Lua_thread
 
 (*************)
 (* FUNCTIONS *)
@@ -194,7 +196,7 @@ external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
 
 external newtable: state -> int -> int -> bool = "lua_newtable__stub"
 
-(* TODO lua_newthread *)
+external newthread : state -> state = "lua_newthread__stub"
 
 (* TODO lua_newuserdata *)
 
@@ -229,7 +231,7 @@ external pushnil : state -> unit = "lua_pushnil__stub"
 
 external pushnumber : state -> float -> unit = "lua_pushnumber__stub"
 
-(* TODO lua_pushthread *)
+external pushthread : state -> bool = "lua_pushthread__stub"
 
 external pushvalue : state -> int -> unit = "lua_pushvalue__stub"
 
@@ -255,7 +257,10 @@ external remove : state -> int -> unit = "lua_remove__stub"
 
 external replace : state -> int -> unit = "lua_replace__stub"
 
-(* TODO lua_resume *)
+external lua_resume__wrapper : state -> int -> int = "lua_resume__stub"
+
+let resume l narg =
+  lua_resume__wrapper l narg |> thread_status_of_int
 
 external setfenv : state -> int -> bool = "lua_setfenv__stub"
 
@@ -284,6 +289,12 @@ let toocamlfunction = tocfunction
 external tointeger : state -> int -> int = "lua_tointeger__stub"
 
 external tonumber : state -> int -> float = "lua_tonumber__stub"
+
+external tothread_aux : state -> int -> state = "lua_tothread__stub"
+
+let tothread l index =
+  try Some (tothread_aux l index)
+  with Not_a_Lua_thread -> None
 
 external lua_type_wrapper : state -> int -> int = "lua_type__stub"
 
