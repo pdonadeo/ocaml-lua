@@ -281,7 +281,7 @@ val newthread : state -> state
     collectors) until a valid copy exists in at least one of the two contexts.
     
     Remember that all the threads obtained by [newthread] and
-    {!Lua_api_lib.tothread} are copies sharing all the data, for example:
+    {!Lua_api_lib.tothread} are shared copies, for example:
     {[
 let state = LuaL.newstate ();;
 let th = Lua.newthread state;;
@@ -289,8 +289,27 @@ let th' = match Lua.tothread state 1 with Some s -> s | None -> failwith "not an
 Lua.settop state 0;;
     ]}
     Now the stack of [state] is empty and you have two threads, [th] and [th'],
-    but they are actually the {e very same data structure} and operation performed
-    on the first will be visible on the second! *)
+    but they are actually the {e very same data structure} and operations performed
+    on the first will be visible on the second!
+    
+    Another important issue regarding the scope of a state object representing a
+    thread (coroutine): this binding don't prevent you from accessing invalid
+    memory in case of misuse of the library. Please, carefully consider this
+    fragment:
+    {[
+let f () =
+  let state = LuaL.newstate () in
+  let th = Lua.newthread state in
+  th;;
+
+let th' = f ();;
+Gc.compact ();; (* This will collect [state] inside [f] *)
+(* Here something using [th'] *)
+    ]}
+    After [Gc.compact] the value inside [th'] has lost any possible meaning,
+    because it's a thread (a coroutine) of a state object that has been already
+    collected. Using [th'] will lead to a {e segmentation fault}, at best, and
+    to an {e undefined behaviour} if you are unlucky. *)
 
 (* TODO lua_newuserdata
    http://www.lua.org/manual/5.1/manual.html#lua_newuserdata *)
