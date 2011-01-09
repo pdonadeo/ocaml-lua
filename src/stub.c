@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdarg.h>
+#include <pthread.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -244,6 +245,12 @@ static struct custom_operations thread_lua_State_ops =
 
 
 /******************************************************************************/
+/*****                           GLOBAL LOCKS                             *****/
+/******************************************************************************/
+static pthread_mutex_t alloc_lock = PTHREAD_MUTEX_INITIALIZER;
+
+
+/******************************************************************************/
 /*****                         UTILITY FUNCTIONS                          *****/
 /******************************************************************************/
 static void *custom_alloc ( void *ud,
@@ -255,6 +262,8 @@ static void *custom_alloc ( void *ud,
     (void)osize;  /* not used */
     void *realloc_result = NULL;
 
+    pthread_mutex_lock(&alloc_lock);
+
     debug(3, "custom_alloc(%p, %p, %d, %d)\n", ud, ptr, osize, nsize);
 
     if (nsize == 0)
@@ -262,6 +271,8 @@ static void *custom_alloc ( void *ud,
         debug(4, "    custom_alloc: calling free(%p)\n", ptr);
         free(ptr);
         debug(4, "    custom_alloc: returning NULL\n");
+
+        pthread_mutex_unlock(&alloc_lock);
         return NULL;
     }
     else
@@ -269,6 +280,8 @@ static void *custom_alloc ( void *ud,
         debug(4, "    custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
         realloc_result = caml_stat_resize(ptr, nsize);
         debug(4, "    custom_alloc: returning %p\n", realloc_result);
+
+        pthread_mutex_unlock(&alloc_lock);
         return realloc_result;
     }
 }
@@ -317,6 +330,8 @@ static void create_private_data(lua_State *L, ocaml_data* data)
  */
 static void push_threads_array(lua_State *L)
 {
+    debug(3, "push_threads_array(%p)\n", (void*)L);
+
     lua_pushstring(L, UUID);
     lua_gettable(L, LUA_REGISTRYINDEX);
     lua_pushstring(L, "threads_array");
@@ -347,12 +362,16 @@ static int panic_wrapper(lua_State *L)
 
 static void finalize_lua_State(value L)
 {
+    debug(3, "finalize_lua_State(value L)\n");
+
     lua_State *state = lua_State_val(L);
     ocaml_data *data = get_ocaml_data(state);
     caml_remove_global_root(&(data->panic_callback));
     caml_remove_global_root(&(data->state_value));
     caml_stat_free(data);
     lua_close(state);
+
+    debug(4, "    EXIT finalize_lua_State(value L)\n");
 }
 
 /* This function is taken from the Lua source code, file ltablib.c line 118 */
@@ -375,6 +394,8 @@ static int tremove (lua_State *L)
 
 static void finalize_thread(value L)
 {
+    debug(3, "finalize_thread(value L)\n");
+
     lua_State *thread = lua_State_val(L);
     push_threads_array(thread);
     int table_pos = lua_gettop(thread);
