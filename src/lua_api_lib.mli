@@ -55,6 +55,20 @@ type lua_type =
     {{:http://www.lua.org/manual/5.1/manual.html#lua_type}lua_type function},
     and the corresponding OCaml {!Lua_api_lib.type_}. *)
 
+type 'a lua_Reader = state -> 'a -> string option
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_Reader}lua_Reader}
+    documentation. *)
+
+type writer_status =
+  | NO_WRITING_ERROR  (** No errors, go on writing *)
+  | WRITING_ERROR     (** An error occurred, stop writing *)
+
+type 'a lua_Writer = state -> string -> 'a -> writer_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_Writer}lua_Writer}
+    documentation. *)
+
 (************************)
 (** {2 Constant values} *)
 (************************)
@@ -135,8 +149,10 @@ external createtable : state -> int -> int -> unit = "lua_createtable__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_createtable}lua_createtable}
     documentation. *)
 
-(* TODO lua_dump
-   http://www.lua.org/manual/5.1/manual.html#lua_dump *)
+val dump : state -> 'a lua_Writer -> 'a -> writer_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_dump}lua_dump}
+    documentation. *)
 
 external equal : state -> int -> int -> bool = "lua_equal__stub"
 (** See
@@ -257,8 +273,10 @@ external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_lessthan}lua_lessthan}
     documentation. *)
 
-(* TODO lua_load
-   http://www.lua.org/manual/5.1/manual.html#lua_load *)
+val load : state -> 'a lua_Reader -> 'a -> string -> thread_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_load}lua_load}
+    documentation. *)
 
 (** The function
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newstate}lua_newstate} is

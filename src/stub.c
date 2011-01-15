@@ -210,6 +210,20 @@ typedef struct ocaml_data
     value panic_callback;
 } ocaml_data;
 
+typedef struct reader_data
+{
+    value state_value;
+    value reader_function;
+    value reader_data;
+} reader_data;
+
+typedef struct writer_data
+{
+    value writer_function;
+    value state_value;
+    value writer_data;
+} writer_data;
+
 static void finalize_lua_State(value L);  /* Forward declaration */
 static void finalize_thread(value L);     /* Forward declaration */
 
@@ -264,22 +278,22 @@ static void *custom_alloc ( void *ud,
 
     pthread_mutex_lock(&alloc_lock);
 
-    debug(3, "custom_alloc(%p, %p, %d, %d)\n", ud, ptr, osize, nsize);
+    debug(5, "custom_alloc(%p, %p, %d, %d)\n", ud, ptr, osize, nsize);
 
     if (nsize == 0)
     {
-        debug(4, "    custom_alloc: calling free(%p)\n", ptr);
+        debug(6, "    custom_alloc: calling free(%p)\n", ptr);
         free(ptr);
-        debug(4, "    custom_alloc: returning NULL\n");
+        debug(6, "    custom_alloc: returning NULL\n");
 
         pthread_mutex_unlock(&alloc_lock);
         return NULL;
     }
     else
     {
-        debug(4, "    custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
+        debug(5, "    custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
         realloc_result = caml_stat_resize(ptr, nsize);
-        debug(4, "    custom_alloc: returning %p\n", realloc_result);
+        debug(5, "    custom_alloc: returning %p\n", realloc_result);
 
         pthread_mutex_unlock(&alloc_lock);
         return realloc_result;
@@ -469,6 +483,64 @@ STUB_STATE_INT_VOID(lua_concat, n)
 
 STUB_STATE_INT_INT_VOID(lua_createtable, narr, nrec)
 
+static int writer_function(lua_State *L, const void *p, size_t sz, void* ud)
+{
+    CAMLlocal2(writer_status_value, buffer);
+
+    debug(3, "writer_function(%p, %p, %d, %p)\n", L, p, sz, ud);
+
+    writer_data *internal_data = (writer_data*)ud;
+    buffer = caml_alloc_string(sz);
+    memcpy(String_val(buffer), p, sz);
+
+    writer_status_value =
+        caml_callback3( internal_data->writer_function,
+                        internal_data->state_value,
+                        buffer,
+                        internal_data->writer_data );
+
+    if (writer_status_value == Val_int(0))
+    {
+        debug(4, "    writer_function returns 0\n");
+        return 0;
+    }
+    else
+    {
+        debug(4, "    writer_function returns 1\n");
+        return 1;
+    }
+}
+
+CAMLprim
+value lua_dump__stub(value L, value writer, value data)
+{
+    CAMLparam3(L, writer, data);
+
+    debug(3, "lua_dump__stub(value L, value writer, value data)\n");
+
+    writer_data *internal_data = (writer_data*)caml_stat_alloc(sizeof(writer_data));
+
+    caml_register_global_root(&(internal_data->writer_function));
+    caml_register_global_root(&(internal_data->state_value));
+    caml_register_global_root(&(internal_data->writer_data));
+
+    internal_data->writer_function = writer;
+    internal_data->state_value = L;
+    internal_data->writer_data = data;
+
+    int result = lua_dump(  lua_State_val(L),
+                            writer_function,
+                            (void*)internal_data  );
+
+    caml_remove_global_root(&(internal_data->writer_function));
+    caml_remove_global_root(&(internal_data->state_value));
+    caml_remove_global_root(&(internal_data->writer_data));
+
+    caml_stat_free(internal_data);
+
+    CAMLreturn(Val_int(result));
+}
+
 STUB_STATE_INT_INT_BOOL(lua_equal, index1, index2)
 
 STUB_STATE_VOID(lua_error)
@@ -518,6 +590,64 @@ STUB_STATE_INT_BOOL(lua_isthread, index)
 STUB_STATE_INT_BOOL(lua_isuserdata, index)
 
 STUB_STATE_INT_INT_BOOL(lua_lessthan, index1, index2)
+
+static const char* reader_function(lua_State *L, void *data, size_t *size)
+{
+    value string_option_res;
+
+    debug(3, "reader_function(%p, %p, %p)\n", L, data, size);
+
+    reader_data *internal_data = (reader_data*)data;
+    string_option_res = caml_callback2( internal_data->reader_function,
+                                        internal_data->state_value,
+                                        internal_data->reader_data );
+    if (string_option_res == Val_int(0))
+    {
+        // string_option_res = None
+        *size = 0;
+        debug(4, "    reader_function() returns NULL\n");
+        return NULL;
+    }
+    else
+    {
+        // string_option_res = (Some "string")
+        value str = Field(string_option_res, 0);
+        *size = caml_string_length(str);
+        debug(4, "    reader_function() returns \"%s\", len = %d\n", String_val(str), *size);
+        return String_val(str);
+    }
+}
+
+CAMLprim
+value lua_load__stub(value L, value reader, value data, value chunkname)
+{
+    CAMLparam4(L, reader, data, chunkname);
+
+    debug(3, "lua_load__stub(value L, value reader, value data, value chunkname)\n");
+
+    reader_data *internal_data = (reader_data*)caml_stat_alloc(sizeof(reader_data));
+
+    caml_register_global_root(&(internal_data->state_value));
+    caml_register_global_root(&(internal_data->reader_function));
+    caml_register_global_root(&(internal_data->reader_data));
+
+    internal_data->state_value = L;
+    internal_data->reader_function = reader;
+    internal_data->reader_data = data;
+
+    int result = lua_load(  lua_State_val(L),
+                            reader_function,
+                            (void*)internal_data,
+                            String_val(chunkname)  );
+
+    caml_remove_global_root(&(internal_data->state_value));
+    caml_remove_global_root(&(internal_data->reader_function));
+    caml_remove_global_root(&(internal_data->reader_data));
+
+    caml_stat_free(internal_data);
+
+    CAMLreturn(Val_int(result));
+}
 
 STUB_STATE_VOID(lua_newtable)
 

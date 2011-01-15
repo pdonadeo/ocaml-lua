@@ -68,7 +68,8 @@ Executable bench_exec
   Install:      false
   MainIs:       main.ml
   Custom:       true
-  BuildDepends: lua
+  BuildDepends: lua, batteries
+  CompiledObject: native
   
 Test bench
   Run$:      flag(bench)

@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: ada6f393c33556632e8cb654658f61d4) *)
+(* DO NOT EDIT (digest: 831f094604d2fc6f00c826ff94237983) *)
 This is the INSTALL file for the ocaml-lua distribution.
 
 This package uses OASIS to generate its build system. See section OASIS for
@@ -11,6 +11,7 @@ Dependencies
 In order to compile this package, you will need:
 * ocaml (>= 3.11.1) for all, test bench, doc api-lua
 * findlib
+* batteries for executable bench_exec
 
 Installing
 ==========

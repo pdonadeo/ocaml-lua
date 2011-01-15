@@ -39,6 +39,14 @@ type lua_type =
   | LUA_TUSERDATA
   | LUA_TTHREAD
 
+type 'a lua_Reader = state -> 'a -> string option
+
+type writer_status =
+  | NO_WRITING_ERROR  (** No errors, go on writing *)
+  | WRITING_ERROR     (** An error occurred, stop writing *)
+
+type 'a lua_Writer = state -> string -> 'a -> writer_status
+
 let thread_status_of_int = function
   | 0 -> LUA_OK
   | 1 -> LUA_YIELD
@@ -141,7 +149,7 @@ external concat : state -> int -> unit = "lua_concat__stub"
 
 external createtable : state -> int -> int -> unit = "lua_createtable__stub"
 
-(* TODO lua_dump *)
+external dump : state -> 'a lua_Writer -> 'a -> writer_status = "lua_dump__stub"
 
 external equal : state -> int -> int -> bool = "lua_equal__stub"
 
@@ -192,7 +200,10 @@ external isuserdata : state -> int -> bool = "lua_isuserdata__stub"
 
 external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
 
-(* TODO lua_load *)
+external lua_load__wrapper : state -> 'a lua_Reader -> 'a -> string -> int = "lua_load__stub"
+
+let load l reader data chunkname =
+  lua_load__wrapper l reader data chunkname |> thread_status_of_int
 
 external newtable: state -> int -> int -> bool = "lua_newtable__stub"
 
