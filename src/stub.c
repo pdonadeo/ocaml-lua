@@ -18,7 +18,7 @@
 /*****                           DEBUG FUNCTION                           *****/
 /******************************************************************************/
 /* Comment out the following line to enable debug */
-#define NO_DEBUG
+//#define NO_DEBUG
 
 #if defined(NO_DEBUG) && defined(__GNUC__)
 #define debug(level, format, args...) ((void)0)
@@ -309,6 +309,15 @@ static int closure_data_gc(lua_State *L)
 }
 
 
+static int userdata_default_gc(lua_State *L)
+{
+    debug(3, "userdata_default_gc(%p)\n", (void*)L);
+    value *lua_ud = (value*)lua_touserdata(L, 1);
+    caml_remove_global_root(lua_ud);
+    return 0;
+}
+
+
 static void create_private_data(lua_State *L, ocaml_data* data)
 {
     lua_newtable(L);                          /* Table (t) for our private data */
@@ -330,6 +339,16 @@ static void create_private_data(lua_State *L, ocaml_data* data)
     lua_pushstring(L, "threads_array");
     lua_newtable(L);                          /* a table for copies of threads */
     lua_settable(L, -3);                      /* t["threads_array"] = metatable_for_threads */
+
+    /* Here the stack contains only 1 element, at index -1, the table t */
+
+    lua_newtable(L);                          /* metatable for userdata used by lua_newuserdata and companion */
+    lua_pushstring(L, "__gc");
+    lua_pushcfunction(L, userdata_default_gc);
+    lua_settable(L, -3);
+    lua_pushstring(L, "userdata_metatable");
+    lua_insert(L, -2);
+    lua_settable(L, -3);                      /* t["userdata_metatable"] = metatable_for_userdata */
 
     /* Here the stack contains only 1 element, at index -1, the table t */
 
@@ -686,6 +705,29 @@ value lua_newthread__stub(value L)
 
     /* Return the thread value */
     CAMLreturn(thread_value);
+}
+
+CAMLprim
+value lua_newuserdata__stub(value L, value ud)
+{
+    CAMLparam2(L, ud);
+
+    lua_State *LL = lua_State_val(L);
+
+    /* Create the new userdatum containing the OCaml value ud */
+    value *lua_ud = (value*)lua_newuserdata(LL, sizeof(value));
+    caml_register_global_root(lua_ud);
+    *lua_ud = ud;
+
+    /* retrieve the metatable for this kind of userdata */
+    lua_pushstring(LL, UUID);
+    lua_gettable(LL, LUA_REGISTRYINDEX);
+    lua_pushstring(LL, "userdata_metatable");
+    lua_gettable(LL, -2);
+    lua_setmetatable(LL, -3);
+    lua_pop(LL, 1);
+
+    CAMLreturn(Val_unit);
 }
 
 STUB_STATE_INT_INT(lua_next, index)

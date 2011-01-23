@@ -69,6 +69,10 @@ type 'a lua_Writer = state -> string -> 'a -> writer_status
     {{:http://www.lua.org/manual/5.1/manual.html#lua_Writer}lua_Writer}
     documentation. *)
 
+type 'a userdata
+(** This is an opaque type representing a Lua userdata encapsulating an OCaml
+    value of type 'a *)
+
 (************************)
 (** {2 Constant values} *)
 (************************)
@@ -329,8 +333,12 @@ Gc.compact ();; (* This will collect [state] inside [f] *)
     collected. Using [th'] will lead to a {e segmentation fault}, at best, and
     to an {e undefined behaviour} if you are unlucky. *)
 
-(* TODO lua_newuserdata
-   http://www.lua.org/manual/5.1/manual.html#lua_newuserdata *)
+val newuserdata : state -> 'a -> 'a userdata
+(** [newuserdata] is the binding of
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_newuserdata}lua_newuserdata}
+    but it works in a different way if compared to the original function, and the
+    signature is slightly different.
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO *)
 
 external next : state -> int -> int = "lua_next__stub"
 (** See

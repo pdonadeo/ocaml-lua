@@ -2,6 +2,34 @@ open Lua_api
 
 let (|>) x f = f x
 
+let invoke timeout (f : 'a -> 'b) x : unit -> 'b =
+  let input, output = Unix.pipe() in
+  match Unix.fork() with
+  | -1 ->
+      (let v = f x in fun () -> v)
+  | 0 ->
+      Unix.close input;
+      let output = Unix.out_channel_of_descr output in
+      Marshal.to_channel output (try `Res(f x) with e -> `Exn e) [];
+      close_out output;
+      exit 0
+  | pid ->
+      Unix.close output;
+      let handler _ =
+        Unix.kill pid 15;
+        ignore (Unix.waitpid [] pid) in
+      Sys.set_signal Sys.sigalrm (Sys.Signal_handle handler);
+      let _ = Unix.alarm timeout in
+      let input = Unix.in_channel_of_descr input in
+      fun () ->
+        let v = Marshal.from_channel input in
+      ignore (Unix.waitpid [] pid);
+      close_in input;
+  match v with
+  | `Res x -> x
+  | `Exn e -> raise e
+;;
+
 exception Test_exception
 let counter = ref 0;;
 

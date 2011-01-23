@@ -47,6 +47,12 @@ type writer_status =
 
 type 'a lua_Writer = state -> string -> 'a -> writer_status
 
+type 'a userdata =
+    {
+      mutable valid_pointer : bool;
+      mutable ocaml_value : 'a;
+    }
+
 let thread_status_of_int = function
   | 0 -> LUA_OK
   | 1 -> LUA_YIELD
@@ -209,7 +215,12 @@ external newtable: state -> int -> int -> bool = "lua_newtable__stub"
 
 external newthread : state -> state = "lua_newthread__stub"
 
-(* TODO lua_newuserdata *)
+external newuserdata__wrapper : state -> 'a userdata -> unit = "lua_newuserdata__stub"
+
+let newuserdata state data =
+  let ud = { valid_pointer = true; ocaml_value = data; } in
+  newuserdata__wrapper state ud;
+  ud
 
 external next : state -> int -> int = "lua_next__stub"
 
