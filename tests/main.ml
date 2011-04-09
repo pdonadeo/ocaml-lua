@@ -38,14 +38,18 @@ let panicf1 l =
   raise Test_exception
 ;;
 
-let allocate_a_lot () =
+let allocate how_many str_len =
   let l = ref [] in
-  for i = 1 to 500
+  for i = 1 to how_many
   do
-    let s = String.create 33455 in
+    let s = String.create str_len in
     l := s::(!l);
   done;
   !l
+
+let allocate_a_lot () = allocate 500 33455
+
+let allocate_many_small () = allocate 33455 500
 
 let push_get_call_c_function l f =
   Lua.pushocamlfunction l f;
@@ -78,6 +82,21 @@ let closure () =
       raise Test_exception in
     let n = Random.int 2 in
     let f = match n with | 0 -> panicf1 | 1 -> panicf2 | _ -> failwith "IMPOSSIBILE" in
+
+    (* Light userdata test *)
+    for i = 1 to 50 do
+      let something = allocate_many_small () in
+      Lua.pushlightuserdata l1 something;
+      let something' : string list =
+        match Lua.touserdata l1 (-1) with
+        | Some `Userdata v -> failwith "USERDATA"
+        | Some `Light_userdata v -> v
+        | None -> failwith "NOT A USER DATUM" in
+      Lua.pop l1 1;
+      List.iter2
+        (fun s s' -> if s <> s' then failwith (Printf.sprintf "\"%s\" <> \"%s\"" s s'))
+        something something'
+    done;
 
     let def_panic1 = Lua.atpanic l1 f in
     let def_panic2 = Lua.atpanic l2 f in

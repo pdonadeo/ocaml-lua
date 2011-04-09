@@ -118,10 +118,12 @@ exception Error of thread_status
 exception Type_error of string
 exception Not_a_C_function
 exception Not_a_Lua_thread
+exception Not_a_block_value
 
 let _ = Callback.register_exception "Lua_type_error" (Type_error "")
 let _ = Callback.register_exception "Not_a_C_function" Not_a_C_function
 let _ = Callback.register_exception "Not_a_Lua_thread" Not_a_Lua_thread
+let _ = Callback.register_exception "Not_a_block_value" Not_a_block_value
 
 (*************)
 (* FUNCTIONS *)
@@ -245,7 +247,7 @@ let pushfstring (state : state) =
 
 external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
 
-(* TODO lua_pushlightuserdata *)
+external pushlightuserdata : state -> 'a -> unit = "lua_pushlightuserdata__stub"
 
 external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
 
@@ -317,6 +319,17 @@ external tothread_aux : state -> int -> state = "lua_tothread__stub"
 let tothread l index =
   try Some (tothread_aux l index)
   with Not_a_Lua_thread -> None
+
+external tolightuserdata_aux : state -> int -> 'a = "tolightuserdata__stub"
+
+let touserdata l index =
+  if islightuserdata l index then begin
+      Some (`Light_userdata (tolightuserdata_aux l index))
+    end else
+  if isuserdata l index then begin
+      Some (Obj.magic (`Userdata 42))                       (* TODO TODO TODO *)
+    end else
+      None
 
 external lua_type_wrapper : state -> int -> int = "lua_type__stub"
 

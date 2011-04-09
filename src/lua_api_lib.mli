@@ -395,8 +395,44 @@ external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_pushinteger}lua_pushinteger}
     documentation. *)
 
-(* TODO lua_pushlightuserdata
-   http://www.lua.org/manual/5.1/manual.html#lua_pushlightuserdata *)
+val pushlightuserdata : state -> 'a -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#lua_pushlightuserdata}lua_pushlightuserdata}
+    documentation. Raises [Not_a_block_value] if you try to push a non-block value
+    (e.g. an immediate integer) as a light userdata.
+
+    In Lua a light userdata is a way to store inside the Lua state a C pointer.
+    It's up the programmer to carefully check for the lifetime of the data
+    structures passed to Lua via a light userdata. If you malloc a pointer and
+    pass it to Lua, then you free it from C and then you retrieve the same pointer
+    from Lua (using lua_touserdata), you are most probably shooting yourself
+    in the foot.
+
+    To avoid this class of problems I decided to implement some logic in the binding
+    of this function. When you push an OCaml value as a Lua light userdata, a
+    global reference to that (OCaml) value is kept inside the Lua state L. So, if
+    the original value goes out of scope it is {e not} collected by the garbage
+    collector. In this scenario:
+    {[
+let push_something state =
+  let ocaml_value = get_some_complex_value () in
+  pushlightuserdata state ocaml_value;
+  state
+;;
+    ]}
+    when the [push_something] function returns the Lua state, the [ocaml_value]
+    is {e not} collected and can be retrieved in a second moment from [state].
+
+    This behaviour has a major drawback: while ensuring the lifetime of objects,
+    it wastes memory. All the OCaml values pushed as light userdata will in fact
+    be collected when the garbage collector decide to collect the Lua state itself.
+    This means that if you have a long running task (e.g. a server) with a Lua
+    state and you use [pushlightuserdata], the values pushed will be {e never}
+    collected!
+
+    Moreover, if you push a value that have some resources associated with it
+    (e.g. a channel, a socket or a DB handler) the resources will be released
+    only when the Lua state goes out of scope. *)
 
 external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
 (** See
@@ -561,8 +597,19 @@ val tothread : state -> int -> state option
     {{:http://www.lua.org/manual/5.1/manual.html#lua_tothread}lua_tothread}
     documentation. *)
 
-(* TODO lua_touserdata
-   http://www.lua.org/manual/5.1/manual.html#lua_touserdata *)
+val touserdata : state -> int -> [> `Userdata of 'a | `Light_userdata of 'a ] option
+(** If the value at the given acceptable index is a full userdata, returns its
+    value as [Some `Userdata v]. If the value is a light userdata, returns its
+    value as [Some `Light_userdata v].
+    Otherwise, returns [None].
+
+    {b WARNING}: using this function could be harmful because it actually breaks
+    the type system. It has the same semantics of [Obj.magic], allowing the
+    programmer to push an OCaml value into the Lua state, and then retrieve it
+    with a different type. Be very careful!
+
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    `Userdata STILL TO BE DONE *)
 
 val type_ : state -> int -> lua_type
 (** See

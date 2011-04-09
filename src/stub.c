@@ -338,7 +338,13 @@ static void create_private_data(lua_State *L, ocaml_data* data)
 
     lua_pushstring(L, "threads_array");
     lua_newtable(L);                          /* a table for copies of threads */
-    lua_settable(L, -3);                      /* t["threads_array"] = metatable_for_threads */
+    lua_settable(L, -3);                      /* t["threads_array"] = table_for_threads */
+
+    /* Here the stack contains only 1 element, at index -1, the table t */
+
+    lua_pushstring(L, "light_userdata_array");
+    lua_newtable(L);                          /* a table for copies of all light userdata */
+    lua_settable(L, -3);                      /* t["light_userdata_array"] = table_for_l_ud */
 
     /* Here the stack contains only 1 element, at index -1, the table t */
 
@@ -373,6 +379,24 @@ static void push_threads_array(lua_State *L)
     lua_pop(L, 1);
 }
 
+
+/*
+ * Pushes on the stack of L the array used to track the light userdata created via
+ * lua_pushlightuserdata
+ */
+static void push_lud_array(lua_State *L)
+{
+    debug(3, "push_lud_array(%p)\n", (void*)L);
+
+    lua_pushstring(L, UUID);
+    lua_gettable(L, LUA_REGISTRYINDEX);
+    lua_pushstring(L, "light_userdata_array");
+    lua_gettable(L, -2);
+    lua_insert(L, -2);
+    lua_pop(L, 1);
+}
+
+
 static ocaml_data * get_ocaml_data(lua_State *L)
 {
     lua_pushstring(L, UUID);
@@ -398,6 +422,20 @@ static void finalize_lua_State(value L)
     debug(3, "finalize_lua_State(value L)\n");
 
     lua_State *state = lua_State_val(L);
+
+    push_lud_array(state);
+    int table_pos = lua_gettop(state);
+    lua_pushnil(state);  /* first key */
+    while (lua_next(state, table_pos) != 0)
+    {
+        /* key at -2, value (light userdata) at -1 */
+        value *ocaml_lud_value = (value*)lua_touserdata(state, -1);
+        caml_remove_global_root(ocaml_lud_value);
+        debug(4, "    caml_stat_free(%p)\n", (void*)ocaml_lud_value);
+        caml_stat_free(ocaml_lud_value);
+        lua_pop(state, 1);
+    }
+
     ocaml_data *data = get_ocaml_data(state);
     caml_remove_global_root(&(data->panic_callback));
     caml_remove_global_root(&(data->state_value));
@@ -781,6 +819,45 @@ value lua_pushcfunction__stub(value L, value f)
 STUB_STATE_INT_VOID(lua_pushinteger, n)
 
 CAMLprim
+value lua_pushlightuserdata__stub(value L, value p)
+{
+    debug(3, "lua_pushlightuserdata__stub(%p, %p)\n", (void*)L, (void*)p);
+
+    CAMLparam2(L, p);
+
+    lua_State *LL = lua_State_val(L);
+
+    if (Is_block(p))
+    {
+        /* the p value is an OCaml block */
+
+        /* Create the new userdatum containing the OCaml value ud */
+        value *lua_light_ud = (value*)caml_stat_alloc(sizeof(value));
+        debug(4, "caml_stat_alloc -> %p\n", (void*)(lua_light_ud));
+        caml_register_global_root(lua_light_ud);
+        *lua_light_ud = p;
+
+        push_lud_array(LL);
+        lua_pushlightuserdata(LL, (void *)lua_light_ud);
+        lua_pushvalue(LL, -1);
+        int n = lua_objlen(LL, -3);
+        lua_pushinteger(LL, n + 1);
+        lua_insert(LL, -2);
+        lua_settable(LL, -4); /* the light user data inserted in our registry */
+        lua_insert(LL, -2);
+        lua_pop(LL, 1);
+    }
+    else
+    {
+        /* the p value is an immediate integer: in this case calling
+         * pushlightuserdata is a nonsense, I prefer to raise an exception */
+        caml_raise_constant(*caml_named_value("Not_a_block_value"));
+    }
+
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim
 value lua_pushlstring__stub(value L, value s)
 {
     CAMLparam2(L, s);
@@ -946,6 +1023,21 @@ value lua_tothread__stub(value L, value index)
     }
 
     CAMLreturn(thread_value);
+}
+
+CAMLprim
+value tolightuserdata__stub(value L, value index)
+{
+    CAMLparam2(L, index);
+    CAMLlocal1(ret_val);
+
+    lua_State *LL = lua_State_val(L);
+    int int_index = Int_val(index);
+
+    value *lua_light_ud = (value*)lua_touserdata(LL, int_index);
+    ret_val = *lua_light_ud;
+
+    CAMLreturn(ret_val);
 }
 
 STUB_STATE_INT_INT(lua_type, index)
