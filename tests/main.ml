@@ -1,6 +1,8 @@
 open Lua_api
 
-let (|>) x f = f x
+let (|>) x f = f x;;
+
+Random.self_init ();;
 
 let invoke timeout (f : 'a -> 'b) x : unit -> 'b =
   let input, output = Unix.pipe() in
@@ -43,6 +45,9 @@ let allocate how_many str_len =
   for i = 1 to how_many
   do
     let s = String.create str_len in
+    for j = 0 to (str_len - 1) do
+      s.[j] <- Char.chr (Random.int 256)
+    done;
     l := s::(!l);
   done;
   !l
@@ -93,6 +98,21 @@ let closure () =
         | Some `Light_userdata v -> v
         | None -> failwith "NOT A USER DATUM" in
       Lua.pop l1 1;
+      List.iter2
+        (fun s s' -> if s <> s' then failwith (Printf.sprintf "\"%s\" <> \"%s\"" s s'))
+        something something'
+    done;
+
+    (* Userdata test *)
+    for i = 1 to 50 do
+      let something = allocate_many_small () in
+      Lua.newuserdata l2 something;
+      let something' : string list =
+        match Lua.touserdata l2 (-1) with
+        | Some `Userdata v -> v
+        | Some `Light_userdata v -> failwith "LIGHT USERDATA"
+        | None -> failwith "NOT A USER DATUM" in
+      Lua.pop l2 1;
       List.iter2
         (fun s s' -> if s <> s' then failwith (Printf.sprintf "\"%s\" <> \"%s\"" s s'))
         something something'

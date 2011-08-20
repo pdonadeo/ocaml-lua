@@ -15,7 +15,7 @@ type thread_status =
   | LUA_ERRMEM
   | LUA_ERRERR
 
-type alloc (* TODO placeholder, not use, to be removed? *)
+type alloc (* TODO placeholder, not used, to be removed? *)
 
 type gc_command =
   | GCSTOP
@@ -46,12 +46,6 @@ type writer_status =
   | WRITING_ERROR     (** An error occurred, stop writing *)
 
 type 'a lua_Writer = state -> string -> 'a -> writer_status
-
-type 'a userdata =
-    {
-      mutable valid_pointer : bool;
-      mutable ocaml_value : 'a;
-    }
 
 let thread_status_of_int = function
   | 0 -> LUA_OK
@@ -217,12 +211,16 @@ external newtable: state -> int -> int -> bool = "lua_newtable__stub"
 
 external newthread : state -> state = "lua_newthread__stub"
 
-external newuserdata__wrapper : state -> 'a userdata -> unit = "lua_newuserdata__stub"
+external default_gc : state -> int = "default_gc__stub"
 
-let newuserdata state data =
-  let ud = { valid_pointer = true; ocaml_value = data; } in
-  newuserdata__wrapper state ud;
-  ud
+let make_gc_function user_gc_function =
+  let new_gc l =
+    let res = user_gc_function l in
+    let _ = default_gc l in
+    res in
+  new_gc
+
+external newuserdata : state -> 'a -> unit = "lua_newuserdata__stub"
 
 external next : state -> int -> int = "lua_next__stub"
 
@@ -320,14 +318,14 @@ let tothread l index =
   try Some (tothread_aux l index)
   with Not_a_Lua_thread -> None
 
-external tolightuserdata_aux : state -> int -> 'a = "tolightuserdata__stub"
+external touserdata_aux : state -> int -> 'a = "touserdata__stub"
 
 let touserdata l index =
   if islightuserdata l index then begin
-      Some (`Light_userdata (tolightuserdata_aux l index))
+      Some (`Light_userdata (touserdata_aux l index))
     end else
   if isuserdata l index then begin
-      Some (Obj.magic (`Userdata 42))                       (* TODO TODO TODO *)
+      Some (`Userdata (touserdata_aux l index))
     end else
       None
 

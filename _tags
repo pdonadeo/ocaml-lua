@@ -1,9 +1,10 @@
 # OASIS_START
-# DO NOT EDIT (digest: f701cabc3078e2d417a0098c3a5be8a0)
+# DO NOT EDIT (digest: 5d9ae46098752da045d3f7c6c5136f84)
 # Library lua
 "src": include
 <src/*.ml{,i}>: oasis_library_lua_ccopt
 "src/stub.c": oasis_library_lua_ccopt
+"src/aux_stub.c": oasis_library_lua_ccopt
 <src/lua.{cma,cmxa}>: oasis_library_lua_cclib
 "src/liblua.lib": oasis_library_lua_cclib
 "src/dlllua.dll": oasis_library_lua_cclib
@@ -12,6 +13,7 @@
 <src/lua.{cma,cmxa}>: use_liblua
 <src/*.ml{,i}>: pkg_unix
 "src/stub.c": pkg_unix
+"src/aux_stub.c": pkg_unix
 # Executable bench_exec
 "tests/main.native": use_lua
 "tests/main.native": pkg_unix

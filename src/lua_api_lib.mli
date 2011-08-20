@@ -69,10 +69,6 @@ type 'a lua_Writer = state -> string -> 'a -> writer_status
     {{:http://www.lua.org/manual/5.1/manual.html#lua_Writer}lua_Writer}
     documentation. *)
 
-type 'a userdata
-(** This is an opaque type representing a Lua userdata encapsulating an OCaml
-    value of type 'a *)
-
 (************************)
 (** {2 Constant values} *)
 (************************)
@@ -333,7 +329,10 @@ Gc.compact ();; (* This will collect [state] inside [f] *)
     collected. Using [th'] will lead to a {e segmentation fault}, at best, and
     to an {e undefined behaviour} if you are unlucky. *)
 
-val newuserdata : state -> 'a -> 'a userdata
+val make_gc_function : oCamlFunction -> oCamlFunction
+(** TODO WRITE A DECENT COMMENT *)
+
+external newuserdata : state -> 'a -> unit = "lua_newuserdata__stub"
 (** [newuserdata] is the binding of
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newuserdata}lua_newuserdata}
     but it works in a different way if compared to the original function, and the
@@ -606,10 +605,7 @@ val touserdata : state -> int -> [> `Userdata of 'a | `Light_userdata of 'a ] op
     {b WARNING}: using this function could be harmful because it actually breaks
     the type system. It has the same semantics of [Obj.magic], allowing the
     programmer to push an OCaml value into the Lua state, and then retrieve it
-    with a different type. Be very careful!
-
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    `Userdata STILL TO BE DONE *)
+    with a different type. Be very careful! *)
 
 val type_ : state -> int -> lua_type
 (** See
