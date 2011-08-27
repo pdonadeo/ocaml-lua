@@ -188,7 +188,7 @@ val getglobal : state -> string -> unit
     documentation. Like in the original Lua source code this function is
     implemented in OCaml using [getfield]. *)
 
-external getmetatable : state -> int -> int = "lua_getmetatable__stub"
+external getmetatable : state -> int -> bool = "lua_getmetatable__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_getmetatable}lua_getmetatable}
     documentation. *)
@@ -329,6 +329,9 @@ Gc.compact ();; (* This will collect [state] inside [f] *)
     collected. Using [th'] will lead to a {e segmentation fault}, at best, and
     to an {e undefined behaviour} if you are unlucky. *)
 
+external default_gc : state -> int = "default_gc__stub"
+(** TODO WRITE A DECENT COMMENT *)
+
 val make_gc_function : oCamlFunction -> oCamlFunction
 (** TODO WRITE A DECENT COMMENT *)
 
@@ -337,7 +340,7 @@ external newuserdata : state -> 'a -> unit = "lua_newuserdata__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newuserdata}lua_newuserdata}
     but it works in a different way if compared to the original function, and the
     signature is slightly different.
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO *)
+  * TODO WRITE A DECENT COMMENT *)
 
 external next : state -> int -> int = "lua_next__stub"
 (** See

@@ -66,37 +66,56 @@ static void *custom_alloc ( void *ud,
 
     if (nsize == 0)
     {
-        debug(6, "    custom_alloc: calling free(%p)\n", ptr);
+        debug(6, "custom_alloc: calling free(%p)\n", ptr);
         free(ptr);
-        debug(6, "    custom_alloc: returning NULL\n");
+        debug(6, "custom_alloc: returning NULL\n");
 
         pthread_mutex_unlock(&alloc_lock);
         return NULL;
     }
     else
     {
-        debug(5, "    custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
+        debug(6, "custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
         realloc_result = caml_stat_resize(ptr, nsize);
-        debug(5, "    custom_alloc: returning %p\n", realloc_result);
+        debug(6, "custom_alloc: returning %p\n", realloc_result);
 
         pthread_mutex_unlock(&alloc_lock);
         return realloc_result;
     }
 }
 
+
+/* While "closure_data_gc" and "default_gc" are the same function (see the
+ * code), I still decided to keep them separate and copy&paste the code, to
+ * leave me open to possible future differentiations.
+ */
+static int closure_data_gc(lua_State *L)
+{
+    debug(3, "closure_data_gc(%p)\n", (void*)L);
+    value *ocaml_closure = (value*)lua_touserdata(L, 1);
+    debug(5, "closure_data_gc: ocaml_closure == %p\n", (void*)ocaml_closure);
+    caml_remove_global_root(ocaml_closure);
+    debug(4, "closure_data_gc: RETURN 0\n");
+    return 0;
+}
+
 static int default_gc(lua_State *L)
 {
     debug(3, "default_gc(%p)\n", (void*)L);
     value *lua_ud = (value*)lua_touserdata(L, 1);
+    debug(5, "default_gc: lua_ud == %p\n", (void*)lua_ud);
     caml_remove_global_root(lua_ud);
+    debug(4, "default_gc: RETURN 0\n");
     return 0;
 }
 
 CAMLprim
 value default_gc__stub(value L)
 {
+    debug(3, "default_gc__stub(%p)\n", (void*)L);
     CAMLparam1(L);
     int retval = default_gc(lua_State_val(L));
+    debug(4, "default_gc__stub: RETURN %d\n", retval);
     CAMLreturn(Val_int(retval));
 }
 
@@ -109,7 +128,7 @@ static void create_private_data(lua_State *L, ocaml_data* data)
 
     lua_newtable(L);                          /* metatable for userdata used by lua_pushcfunction__stub */
     lua_pushstring(L, "__gc");
-    lua_pushcfunction(L, default_gc);
+    lua_pushcfunction(L, closure_data_gc);
     lua_settable(L, -3);
 
     lua_pushstring(L, "closure_metatable");
@@ -147,7 +166,7 @@ static void create_private_data(lua_State *L, ocaml_data* data)
 
 static void finalize_lua_State(value L)
 {
-    debug(3, "finalize_lua_State(value L)\n");
+    debug(3, "finalize_lua_State(%p)\n", (void*)L);
 
     lua_State *state = lua_State_val(L);
 
@@ -159,18 +178,17 @@ static void finalize_lua_State(value L)
         /* key at -2, value (light userdata) at -1 */
         value *ocaml_lud_value = (value*)lua_touserdata(state, -1);
         caml_remove_global_root(ocaml_lud_value);
-        debug(4, "    caml_stat_free(%p)\n", (void*)ocaml_lud_value);
+        debug(5, "finalize_lua_State: caml_stat_free(%p)\n", (void*)ocaml_lud_value);
         caml_stat_free(ocaml_lud_value);
         lua_pop(state, 1);
     }
 
     ocaml_data *data = get_ocaml_data(state);
+    lua_close(state);
     caml_remove_global_root(&(data->panic_callback));
     caml_remove_global_root(&(data->state_value));
     caml_stat_free(data);
-    lua_close(state);
-
-    debug(4, "    EXIT finalize_lua_State(value L)\n");
+    debug(4, "finalize_lua_State: RETURN\n");
 }
 
 static int default_panic(lua_State *L)
@@ -191,11 +209,13 @@ value luaL_newstate__stub (value unit)
     CAMLparam1(unit);
     CAMLlocal2(v_L, v_L_mirror);
 
+    debug(3, "luaL_newstate__stub: BEGIN\n");
+
     value *default_panic_v = caml_named_value("default_panic");
 
     /* create a fresh new Lua state */
     lua_State *L = lua_newstate(custom_alloc, NULL);
-    debug(3, "luaL_newstate__stub: calling lua_newstate -> %p\n", (void*)L);
+    debug(5, "luaL_newstate__stub: calling lua_newstate -> %p\n", (void*)L);
     lua_atpanic(L, &default_panic);
 
     /* alloc space for the register entry */
@@ -216,6 +236,7 @@ value luaL_newstate__stub (value unit)
     /* create a new Lua table for binding informations */
     create_private_data(L, data);
 
+    debug(4, "luaL_newstate__stub: RETURN %p\n", (void*)v_L);
     /* return the lua_State value */
     CAMLreturn(v_L);
 }
@@ -251,6 +272,64 @@ value luaL_openlibs__stub(value L)
 {
   CAMLparam1(L);
   luaL_openlibs(lua_State_val(L));
+  CAMLreturn(Val_unit);
+}
+
+CAMLprim
+value luaL_newmetatable__stub(value L, value tname)
+{
+  CAMLparam2(L, tname);
+  CAMLlocal1(retval);
+
+  retval = Val_int(luaL_newmetatable( lua_State_val(L), String_val(tname) ));
+  if (retval == 0)
+    CAMLreturn(Val_false);
+  else
+    CAMLreturn(Val_true);
+}
+
+CAMLprim
+value luaL_getmetatable__stub(value L, value tname)
+{
+  CAMLparam2(L, tname);
+  luaL_getmetatable(lua_State_val(L), String_val(tname));
+  CAMLreturn(Val_unit);
+}
+
+CAMLprim
+value luaL_typerror__stub(value L, value narg, value tname)
+{
+  CAMLparam3(L, narg, tname);
+  CAMLlocal1(retval);
+
+  retval = Val_int(luaL_typerror(lua_State_val(L), Int_val(narg), String_val(tname)));
+
+  CAMLreturn(retval);
+}
+
+CAMLprim
+value luaL_checkstring__stub(value L, value narg)
+{
+  size_t len = 0;
+  const char *value_from_lua;
+
+  CAMLparam2(L, narg);
+  CAMLlocal1(ret_val);
+
+  value_from_lua = luaL_checkstring(lua_State_val(L), Int_val(narg));
+  len = strlen(value_from_lua);
+  ret_val = caml_alloc_string(len);
+  char *s = String_val(ret_val);
+  memcpy(s, value_from_lua, len);
+
+  CAMLreturn(ret_val);
+}
+
+CAMLprim
+value luaL_error__stub(value L, value message)
+{
+  CAMLparam2(L, message);
+  luaL_error(lua_State_val(L), String_val(message));
   CAMLreturn(Val_unit);
 }
 

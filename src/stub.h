@@ -13,32 +13,6 @@
 void debug(int level, char *format, ...);
 #endif
 
-#ifndef NO_DEBUG
-static int msglevel = 4; /* the higher, the more messages... */
-#endif
-
-#if defined(NO_DEBUG) && defined(__GNUC__)
-/* Nothing */
-#else
-void debug(int level, char* format, ...)
-{
-#ifdef NO_DEBUG
-    /* Empty body, so a good compiler will optimise calls
-       to debug away */
-#else
-    va_list args;
-
-    if (level > msglevel)
-        return;
-
-    va_start(args, format);
-    vfprintf(stderr, format, args);
-    fflush(stderr);
-    va_end(args);
-#endif /* NO_DEBUG */
-}
-#endif /* NO_DEBUG && __GNUC__ */
-
 
 /******************************************************************************/
 /*****                           UTILITY MACROS                           *****/
@@ -91,7 +65,9 @@ CAMLprim \
 value lua_function##__stub(value L) \
 { \
     CAMLparam1(L); \
+    debug(3, #lua_function "__stub(%p)\n", (void*)(lua_State_val(L))); \
     int retval = lua_function(lua_State_val(L)); \
+    debug(4, #lua_function ": RETURN %d\n", retval); \
     CAMLreturn(Val_int(retval)); \
 }
 
@@ -184,11 +160,18 @@ CAMLprim \
 value lua_function##__stub(value L, value int_name) \
 { \
   CAMLparam2(L, int_name); \
+  debug(3, #lua_function "__stub(%p, %d)\n", (void*)(lua_State_val(L)), Int_val(int_name)); \
   int retval = lua_function(lua_State_val(L), Int_val(int_name)); \
   if (retval == 0) \
+  { \
+    debug(4, #lua_function ": RETURN FALSE\n"); \
     CAMLreturn(Val_false); \
+  } \
   else \
+  { \
+    debug(4, #lua_function ": RETURN TRUE\n"); \
     CAMLreturn(Val_true); \
+  } \
 }
 
 /* For Lua function with signature : lua_State -> int -> int -> bool */

@@ -168,7 +168,7 @@ external getfield : state -> int -> string -> unit = "lua_getfield__stub"
 
 let getglobal l name = getfield l globalsindex name
 
-external getmetatable : state -> int -> int = "lua_getmetatable__stub"
+external getmetatable : state -> int -> bool = "lua_getmetatable__stub"
 
 external gettable : state -> int -> unit = "lua_gettable__stub"
 
@@ -318,16 +318,12 @@ let tothread l index =
   try Some (tothread_aux l index)
   with Not_a_Lua_thread -> None
 
-external touserdata_aux : state -> int -> 'a = "touserdata__stub"
+external touserdata_aux : state -> int -> 'a = "lua_touserdata__stub"
 
 let touserdata l index =
-  if islightuserdata l index then begin
-      Some (`Light_userdata (touserdata_aux l index))
-    end else
-  if isuserdata l index then begin
-      Some (`Userdata (touserdata_aux l index))
-    end else
-      None
+  if      islightuserdata l index then (Some (`Light_userdata (touserdata_aux l index)))
+  else if isuserdata      l index then (Some (`Userdata (touserdata_aux l index)))
+  else None
 
 external lua_type_wrapper : state -> int -> int = "lua_type__stub"
 

@@ -16,6 +16,37 @@
 
 #include "stub.h"
 
+
+/******************************************************************************/
+/*****                           DEBUG FUNCTION                           *****/
+/******************************************************************************/
+#ifndef NO_DEBUG
+static int msglevel = 10; /* the higher, the more messages... */
+#endif
+
+#if defined(NO_DEBUG) && defined(__GNUC__)
+/* Nothing */
+#else
+void debug(int level, char* format, ...)
+{
+#ifdef NO_DEBUG
+    /* Empty body, so a good compiler will optimise calls
+       to debug away */
+#else
+    va_list args;
+
+    if (level > msglevel)
+        return;
+
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    fflush(stderr);
+    va_end(args);
+#endif /* NO_DEBUG */
+}
+#endif /* NO_DEBUG && __GNUC__ */
+
+
 /******************************************************************************/
 /*****                          DATA STRUCTURES                           *****/
 /******************************************************************************/
@@ -63,6 +94,8 @@ static void push_threads_array(lua_State *L)
     lua_gettable(L, -2);
     lua_insert(L, -2);
     lua_pop(L, 1);
+
+    debug(4, "push_threads_array: RETURN\n");
 }
 
 
@@ -80,6 +113,8 @@ void push_lud_array(lua_State *L)
     lua_gettable(L, -2);
     lua_insert(L, -2);
     lua_pop(L, 1);
+
+    debug(4, "push_lud_array: RETURN\n");
 }
 
 
@@ -157,6 +192,7 @@ static void finalize_thread(value L)
         }
         lua_pop(thread, 2);
     }
+    debug(4, "finalize_thread: RETURN\n");
     return;
 }
 
@@ -215,12 +251,12 @@ static int writer_function(lua_State *L, const void *p, size_t sz, void* ud)
 
     if (writer_status_value == Val_int(0))
     {
-        debug(4, "    writer_function returns 0\n");
+        debug(4, "writer_function: RETURN 0\n");
         return 0;
     }
     else
     {
-        debug(4, "    writer_function returns 1\n");
+        debug(4, "writer_function: RETURN 1\n");
         return 1;
     }
 }
@@ -252,6 +288,7 @@ value lua_dump__stub(value L, value writer, value data)
 
     caml_stat_free(internal_data);
 
+    debug(4, "lua_dump__stub: RETURN %d\n", result);
     CAMLreturn(Val_int(result));
 }
 
@@ -271,7 +308,7 @@ value lua_getfield__stub(value L, value index, value k)
     CAMLreturn(Val_unit);
 }
 
-STUB_STATE_INT_INT(lua_getmetatable, index)
+STUB_STATE_INT_BOOL(lua_getmetatable, index)
 
 STUB_STATE_INT_VOID(lua_gettable, index)
 
@@ -319,7 +356,7 @@ static const char* reader_function(lua_State *L, void *data, size_t *size)
     {
         // string_option_res = None
         *size = 0;
-        debug(4, "    reader_function() returns NULL\n");
+        debug(4, "reader_function: RETURN NULL\n");
         return NULL;
     }
     else
@@ -327,7 +364,7 @@ static const char* reader_function(lua_State *L, void *data, size_t *size)
         // string_option_res = (Some "string")
         value str = Field(string_option_res, 0);
         *size = caml_string_length(str);
-        debug(4, "    reader_function() returns \"%s\", len = %d\n", String_val(str), *size);
+        debug(4, "reader_function: RETURN \"%s\", len = %d\n", String_val(str), *size);
         return String_val(str);
     }
 }
@@ -336,8 +373,6 @@ CAMLprim
 value lua_load__stub(value L, value reader, value data, value chunkname)
 {
     CAMLparam4(L, reader, data, chunkname);
-
-    debug(3, "lua_load__stub(value L, value reader, value data, value chunkname)\n");
 
     reader_data *internal_data = (reader_data*)caml_stat_alloc(sizeof(reader_data));
 
@@ -405,12 +440,15 @@ value lua_newthread__stub(value L)
 CAMLprim
 value lua_newuserdata__stub(value L, value ud)
 {
+    debug(3, "lua_newuserdata__stub(%p, %p)\n", (void*)L, (void*)ud);
     CAMLparam2(L, ud);
 
     lua_State *LL = lua_State_val(L);
 
     /* Create the new userdatum containing the OCaml value ud */
     value *lua_ud = (value*)lua_newuserdata(LL, sizeof(value));
+    debug(5, "lua_newuserdata__stub: calling lua_newuserdata(%p, %d) -> %p\n",
+             (void*)LL, sizeof(value), (void*)lua_ud);
     caml_register_global_root(lua_ud);
     *lua_ud = ud;
 
@@ -422,6 +460,7 @@ value lua_newuserdata__stub(value L, value ud)
     lua_setmetatable(LL, -3);
     lua_pop(LL, 1);
 
+    debug(4, "lua_newuserdata__stub: RETURNS\n");
     CAMLreturn(Val_unit);
 }
 
@@ -451,9 +490,13 @@ value lua_pushcfunction__stub(value L, value f)
 {
     CAMLparam2(L, f);
 
+    debug(3, "lua_pushcfunction__stub(%p, %p)\n", (void*)L, (void*)f);
+
     /* Create the new userdatum containing the OCaml value of the closure */
     lua_State *LL = lua_State_val(L);
     value *ocaml_closure = (value*)lua_newuserdata(LL, sizeof(value));
+    debug(5, "lua_pushcfunction__stub: calling lua_newuserdata(%p, %d) -> %p\n",
+             (void*)LL, sizeof(value), (void*)ocaml_closure);
     
     caml_register_global_root(ocaml_closure);
     *ocaml_closure = f;
@@ -470,6 +513,7 @@ value lua_pushcfunction__stub(value L, value f)
 
     lua_pushcclosure(LL, execute_ocaml_closure, 1);
 
+    debug(4, "lua_pushcfunction__stub: RETURN\n");
     CAMLreturn(Val_unit);
 }
 
@@ -490,7 +534,7 @@ value lua_pushlightuserdata__stub(value L, value p)
 
         /* Create the new userdatum containing the OCaml value ud */
         value *lua_light_ud = (value*)caml_stat_alloc(sizeof(value));
-        debug(4, "caml_stat_alloc -> %p\n", (void*)(lua_light_ud));
+        debug(5, "lua_pushlightuserdata__stub: caml_stat_alloc -> %p\n", (void*)(lua_light_ud));
         caml_register_global_root(lua_light_ud);
         *lua_light_ud = p;
 
@@ -511,6 +555,7 @@ value lua_pushlightuserdata__stub(value L, value p)
         caml_raise_constant(*caml_named_value("Not_a_block_value"));
     }
 
+    debug(4, "lua_pushlightuserdata__stub: RETURN\n");
     CAMLreturn(Val_unit);
 }
 
@@ -683,17 +728,22 @@ value lua_tothread__stub(value L, value index)
 }
 
 CAMLprim
-value touserdata__stub(value L, value index)
+value lua_touserdata__stub(value L, value index)
 {
     CAMLparam2(L, index);
     CAMLlocal1(ret_val);
+
+    debug(3, "lua_touserdata__stub(%p, %p)\n", (void*)L, (void*)index);
 
     lua_State *LL = lua_State_val(L);
     int int_index = Int_val(index);
 
     value *lua_ud = (value*)lua_touserdata(LL, int_index);
+    debug(5, "lua_touserdata__stub: calling lua_touserdata(%p, %d) -> %p\n",
+             (void*)LL, int_index, (void*)lua_ud);
     ret_val = *lua_ud;
 
+    debug(4, "lua_touserdata__stub: RETURN %p\n", (void*)ret_val);
     CAMLreturn(ret_val);
 }
 
