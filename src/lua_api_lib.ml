@@ -147,7 +147,38 @@ external checkstack : state -> int -> bool = "lua_checkstack__stub"
 
 external concat : state -> int -> unit = "lua_concat__stub"
 
-(* TODO lua_cpcall *)
+external pushcfunction : state -> oCamlFunction -> unit = "lua_pushcfunction__stub"
+
+external pushlightuserdata : state -> 'a -> unit = "lua_pushlightuserdata__stub"
+
+external lua_pcall__wrapper : state -> int -> int -> int -> int = "lua_pcall__stub"
+
+let pcall l nargs nresults errfunc =
+  lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
+
+exception Memory_allocation_error
+
+let cpcall l func ud =
+  let cpcall_panic l = raise Memory_allocation_error in
+  let old_panic = atpanic l cpcall_panic in
+  try
+    match checkstack l 2 with (* ALLOCATES MEMORY, COULD FAIL! *)
+    | true -> begin
+        pushcfunction l func;
+        pushlightuserdata l ud; (* ALLOCATES MEMORY, COULD FAIL! *)
+        let _ = atpanic l old_panic in
+        pcall l 1 0 0
+      end
+    | false ->
+        let _ = atpanic l old_panic in
+        LUA_ERRMEM
+  with
+  | Memory_allocation_error ->
+      let _ = atpanic l old_panic in
+      LUA_ERRMEM
+  | e -> 
+      let _ = atpanic l old_panic in
+      raise e
 
 external createtable : state -> int -> int -> unit = "lua_createtable__stub"
 
@@ -226,16 +257,9 @@ external next : state -> int -> int = "lua_next__stub"
 
 external objlen : state -> int -> int = "lua_objlen__stub"
 
-external lua_pcall__wrapper : state -> int -> int -> int -> int = "lua_pcall__stub"
-
-let pcall l nargs nresults errfunc =
-  lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
-
 external pop : state -> int -> unit = "lua_pop__stub"
 
 external pushboolean : state -> bool -> unit = "lua_pushboolean__stub"
-
-external pushcfunction : state -> oCamlFunction -> unit = "lua_pushcfunction__stub"
 
 let pushocamlfunction = pushcfunction
 
@@ -244,8 +268,6 @@ let pushfstring (state : state) =
     Printf.kprintf k
 
 external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
-
-external pushlightuserdata : state -> 'a -> unit = "lua_pushlightuserdata__stub"
 
 external pushliteral : state -> string -> unit = "lua_pushlstring__stub"
 
