@@ -1,10 +1,12 @@
 # OASIS_START
-# DO NOT EDIT (digest: af0359b02199a17e736919c6c2c0b974)
+# DO NOT EDIT (digest: 20242ffe006305edfdec756bdbdfab9a)
 version = "0.1.0"
 description = "Lua bindings"
 requires = "unix"
 archive(byte) = "lua.cma"
+archive(byte, plugin) = "lua.cma"
 archive(native) = "lua.cmxa"
+archive(native, plugin) = "lua.cmxs"
 exists_if = "lua.cma"
 # OASIS_STOP
 

@@ -1,23 +1,41 @@
 # OASIS_START
-# DO NOT EDIT (digest: f701cabc3078e2d417a0098c3a5be8a0)
+# DO NOT EDIT (digest: 440c5149ad45e86e79e908e5867afd19)
+# Ignore VCS directories, you can use the same kind of rule outside 
+# OASIS_START/STOP if you want to exclude directories that contains 
+# useless stuff for the build process
+<**/.svn>: -traverse
+<**/.svn>: not_hygienic
+".bzr": -traverse
+".bzr": not_hygienic
+".hg": -traverse
+".hg": not_hygienic
+".git": -traverse
+".git": not_hygienic
+"_darcs": -traverse
+"_darcs": not_hygienic
 # Library lua
-"src": include
+"src/lua.cmxs": use_lua
 <src/*.ml{,i}>: oasis_library_lua_ccopt
 "src/stub.c": oasis_library_lua_ccopt
 <src/lua.{cma,cmxa}>: oasis_library_lua_cclib
-"src/liblua.lib": oasis_library_lua_cclib
-"src/dlllua.dll": oasis_library_lua_cclib
-"src/liblua.a": oasis_library_lua_cclib
-"src/dlllua.so": oasis_library_lua_cclib
-<src/lua.{cma,cmxa}>: use_liblua
+"src/liblua_stubs.lib": oasis_library_lua_cclib
+"src/dlllua_stubs.dll": oasis_library_lua_cclib
+"src/liblua_stubs.a": oasis_library_lua_cclib
+"src/dlllua_stubs.so": oasis_library_lua_cclib
+<src/lua.{cma,cmxa}>: use_liblua_stubs
 <src/*.ml{,i}>: pkg_unix
 "src/stub.c": pkg_unix
 # Executable bench_exec
 "tests/main.native": use_lua
-"tests/main.native": pkg_unix
 "tests/main.native": pkg_batteries
+"tests/main.native": pkg_unix
 <tests/*.ml{,i}>: use_lua
-<tests/*.ml{,i}>: pkg_unix
 <tests/*.ml{,i}>: pkg_batteries
+<tests/*.ml{,i}>: pkg_unix
 "tests/main.native": custom
+# Executable ci
+"examples/ci/ci.byte": use_lua
+"examples/ci/ci.byte": pkg_unix
+<examples/ci/*.ml{,i}>: use_lua
+<examples/ci/*.ml{,i}>: pkg_unix
 # OASIS_STOP

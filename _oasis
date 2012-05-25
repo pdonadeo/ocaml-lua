@@ -1,4 +1,4 @@
-OASISFormat:  0.1
+OASISFormat:  0.3
 OCamlVersion: >= 3.11.1
 Name:         ocaml-lua
 Version:      0.1.0
@@ -7,9 +7,9 @@ Authors:      Paolo Donadeo,
               Sylvain Le Gall
 License:      LGPL-2.1 with OCaml linking exception
 BuildTools:   ocamlbuild
-Plugins:      META (0.2),
-              StdFiles (0.2),
-              DevFiles (0.2)
+Plugins:      META (0.3),
+              StdFiles (0.3),
+              DevFiles (0.3)
 Homepage:     http://ocaml-lua.forge.ocamlcore.org
 
 Description:
@@ -76,3 +76,21 @@ Test bench
   Command:   $bench_exec
   TestTools: bench_exec
  
+#
+# Examples
+#
+
+Flag examples
+  Description: Compile examples
+  Default: false
+
+Executable ci
+  Path: examples/ci
+  Build$: flag(examples)
+  Install: false
+  MainIs: ci.ml
+  BuildDepends: lua
+  
+Test ci
+  Run$: flag(ci)
+  Command: $ci examples/ci/script.lua
