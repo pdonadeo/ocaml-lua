@@ -21,12 +21,6 @@ type thread_status =
 (** See {{:http://www.lua.org/manual/5.1/manual.html#pdf-LUA_YIELD}lua_status}
     documentation. *)
 
-type alloc
-(** This type corresponds to
-    {{:http://www.lua.org/manual/5.1/manual.html#lua_Alloc}lua_Alloc} and is here
-    only as a placeholder, but it's not used in this binding because it makes
-    very little sense to write a low level allocator in Objective Caml. *)
-
 type gc_command =
   | GCSTOP
   | GCRESTART

@@ -15,8 +15,6 @@ type thread_status =
   | LUA_ERRMEM
   | LUA_ERRERR
 
-type alloc (* TODO placeholder, not used, to be removed? *)
-
 type gc_command =
   | GCSTOP
   | GCRESTART
