@@ -1,15 +1,16 @@
-OASISFormat:  0.1
-OCamlVersion: >= 3.11.1
+OASISFormat:  0.3
+OCamlVersion: >= 3.12.1
 Name:         ocaml-lua
 Version:      0.1.0
 Synopsis:     Lua bindings
 Authors:      Paolo Donadeo, 
               Sylvain Le Gall
 License:      LGPL-2.1 with OCaml linking exception
+LicenseFile:  COPYING.txt
 BuildTools:   ocamlbuild
-Plugins:      META (0.2),
-              StdFiles (0.2),
-              DevFiles (0.2)
+Plugins:      META (0.3),
+              StdFiles (0.3),
+              DevFiles (0.3)
 Homepage:     http://ocaml-lua.forge.ocamlcore.org
 
 Description:
@@ -18,7 +19,7 @@ Description:
   replace DSL that don't really need to be specific.
   .
   This library provides bindings to Lua API which allows the application to
-  exchange data with Lua programs and also to extend Lua with C functions.
+  exchange data with Lua programs and also to extend Lua with OCaml functions.
   .
   [Lua homepage](http://www.lua.org)
 
@@ -27,52 +28,86 @@ Flag lua51
                the first case, disable this flag.
   Default: true
 
-# 
-# Lua bindings and their documentation
-#
-
+# Libraries
 Library lua
-  Path:     src
-  Modules:  Lua_api, 
-            Lua_api_lib, 
-            Lua_aux_lib
-  CSources: stub.c, stub.h, aux_stub.c
+  Path:         src
+  Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
+  CSources:     stub.c, stub.h, aux_stub.c
   BuildDepends: unix
-  CCopt: -O3 -Wall -ggdb -Isrc/
+  CCopt:        -O3 -Wall -ggdb -Isrc/
   if flag(lua51)
     CCopt+: -I/usr/include/lua5.1
-    CClib: -llua5.1
+    CClib:  -llua5.1
   else
-    CClib: -llua -lm
+    CClib:  -llua -lm
+  XMETADescription: OCaml binding to Lua API library
 
 
+# Documentation
 Document "api-lua"
-  Title:                API reference for Lua
-  Type:                 ocamlbuild (0.2)
+  Title:                Reference for Lua API library
+  Type:                 ocamlbuild (0.3)
   InstallDir:           $htmldir/lua
+  Install:              true
   XOCamlbuildPath:      src/
   XOCamlbuildLibraries: lua
-  BuildTools+:          ocamldoc
+  BuildTools:           ocamldoc
 
 #
-# Benchmarks
+# Memory test executables
 #
 
-Flag bench
-  Description: Create and run benchmark tests
-  Default:     false
+Flag all
+  Description:  Build all
+  Default:      false
 
-Executable bench_exec
-  Path:         tests
-  Build$:       flag(bench)
-  Install:      false
-  MainIs:       main.ml
-  Custom:       true
-  BuildDepends: lua, batteries
+Flag memory_test
+  Description:  Create and run programs to reveal memory leaks
+  Default$:     flag(all)
+
+Executable atpanic
+  Path:           tests
+  Build$:         flag(memory_test) || flag(all)
+  Install:        false
+  MainIs:         atpanic.ml
+  Custom:         true
+  BuildDepends:   lua
   CompiledObject: native
   
-Test bench
-  Run$:      flag(bench)
-  Command:   $bench_exec
-  TestTools: bench_exec
- 
+Executable cpcall
+  Path:           tests
+  Build$:         flag(memory_test) || flag(all)
+  Install:        false
+  MainIs:         cpcall.ml
+  Custom:         true
+  BuildDepends:   lua
+  CompiledObject: native
+  
+# VCS
+SourceRepository head
+  Type:     git
+  Location: http://forge.ocamlcore.org/anonscm/git/ocaml-lua/ocaml-lua.git
+  Browser:  http://forge.ocamlcore.org/scm/browser.php?group_id=167
+  Branch:   master
+
+#
+# Examples
+#
+
+Flag examples
+  Description: Compile examples
+  Default: false
+
+Executable ci
+  Path:             examples/ci
+  Build$:           flag(examples) || flag(all)
+  Install:          false
+  MainIs:           ci.ml
+  Custom:           true
+  BuildDepends:     lua
+  CompiledObject:   native
+  
+Test ci
+  Run$:     flag(examples) || flag(all)
+  Command:  $ci examples/ci/script.lua
+
