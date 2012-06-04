@@ -1,5 +1,47 @@
 open Lua_api_lib
 
+type buffer =
+  { l : state;
+    buffer : Buffer.t; }
+
+let addchar b c =
+  Buffer.add_char b.buffer c
+;;
+
+let addlstring b s =
+  Buffer.add_string b.buffer s
+;;
+
+let addstring = addlstring;;
+
+let addvalue b =
+  Buffer.add_string b.buffer (tolstring b.l (-1))
+;;
+
+external argcheck : state -> bool -> int -> string -> unit = "luaL_argcheck__stub"
+
+external argerror : state -> int -> string -> unit = "luaL_argerror__stub"
+
+let buffinit l =
+  { l = l;
+    buffer = Buffer.create 8192; }
+;;
+
+external callmeta : state -> int -> string -> bool = "luaL_callmeta__stub"
+
+external checkany : state -> int -> unit = "luaL_checkany__stub"
+
+external checkint : state -> int -> int = "luaL_checkint__stub"
+
+let checkinteger = checkint;;
+
+external checklong : state -> int -> int = "luaL_checklong__stub"
+
+(******************************************************************************)
+(******************************************************************************)
+(*****                          TO BE COMPLETED                           *****)
+(******************************************************************************)
+(******************************************************************************)
 let (|>) x f = f x
 
 external newstate : unit -> state = "luaL_newstate__stub"

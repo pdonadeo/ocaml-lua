@@ -204,6 +204,48 @@ static int default_panic(lua_State *L)
 /******************************************************************************/
 
 CAMLprim
+value luaL_argcheck__stub (value L, value cond, value narg, value extramsg)
+{
+    CAMLparam4(L, cond, narg, extramsg);
+    luaL_argcheck(  lua_State_val(L),
+                    Bool_val(cond),
+                    Int_val(narg),
+                    String_val(extramsg)  );
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim
+value luaL_argerror__stub (value L, value narg, value extramsg)
+{
+    CAMLparam3(L, narg, extramsg);
+    luaL_argerror(lua_State_val(L), Int_val(narg), String_val(extramsg));
+    CAMLreturn(Val_unit);
+}
+
+CAMLprim
+value luaL_callmeta__stub (value L, value obj, value e)
+{
+    CAMLparam3(L, obj, e);
+    int retval = luaL_callmeta(lua_State_val(L), Int_val(obj), String_val(e));
+    if (retval == 0)
+        CAMLreturn(Val_false);
+    else
+        CAMLreturn(Val_true);
+}
+
+STUB_STATE_INT_VOID(luaL_checkany, narg)
+
+STUB_STATE_INT_INT(luaL_checkint, narg)
+
+CAMLprim
+value luaL_checklong__stub(value L, value narg)
+{
+    CAMLparam2(L, narg);
+    long int retval = luaL_checklong(lua_State_val(L), Long_val(narg));
+    CAMLreturn(Val_long(retval));
+}
+
+CAMLprim
 value luaL_newstate__stub (value unit)
 {
     CAMLparam1(unit);
