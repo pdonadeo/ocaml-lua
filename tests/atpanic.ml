@@ -4,6 +4,11 @@ let (|>) x f = f x;;
 
 Random.self_init ();;
 
+let opt_get o =
+  match o with
+  | Some v -> v
+  | None -> raise Not_found
+
 exception Test_exception
 let counter = ref 0;;
 
@@ -116,7 +121,7 @@ let test_loop () =
   with
   | Lua.Error err ->
     begin
-      Printf.printf "%s\n%!" (Lua.tostring l1 (-1));
+      Printf.printf "%s\n%!" ((Lua.tostring l1 (-1)) |> opt_get);
       Lua.pop l1 1;
       failwith "FATAL ERROR"
     end;

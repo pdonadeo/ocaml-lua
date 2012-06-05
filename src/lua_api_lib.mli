@@ -587,10 +587,12 @@ val tointeger : state -> int -> int
     {{:http://www.lua.org/manual/5.1/manual.html#lua_tointeger}lua_tointeger}
     documentation. *)
 
-val tolstring : state -> int -> string
+val tolstring : state -> int -> string option
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_tolstring}lua_tolstring}
-    documentation. The original [len] argument is missing because, unlike in C,
+    documentation.
+    
+    {b NOTE}: The original [len] argument is missing because, unlike in C,
     there is no impedance mismatch between OCaml and Lua strings *)
 
 val tonumber : state -> int -> float
@@ -602,7 +604,7 @@ val tonumber : state -> int -> float
     {{:http://www.lua.org/manual/5.1/manual.html#lua_topointer}lua_topointer}
     is not available *)
 
-val tostring : state -> int -> string
+val tostring : state -> int -> string option
 (** Alias of {!Lua_api_lib.tolstring} *)
 
 val tothread : state -> int -> state option

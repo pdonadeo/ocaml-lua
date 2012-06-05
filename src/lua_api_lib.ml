@@ -120,8 +120,12 @@ let _ = Callback.register_exception "Not_a_block_value" Not_a_block_value
 (*************)
 (* FUNCTIONS *)
 (*************)
-external tolstring : state -> int -> string = "lua_tolstring__stub"
+external tolstring__wrapper : state -> int -> string = "lua_tolstring__stub"
   (** Raises [Type_error] *)
+
+let tolstring l index =
+  try Some (tolstring__wrapper l index)
+  with Type_error _ -> None
 
 let tostring = tolstring
 
@@ -132,7 +136,11 @@ let pushstring = pushlstring
 (* This is the "porting" of the standard panic function from Lua source:
    lua-5.1.4/src/lauxlib.c line 639 *)
 let default_panic (l : state) =
-  Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" (tostring l (-1));
+  let msg = tostring l (-1) in
+  let () =
+    match msg with
+    | Some msg -> Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" msg;
+    | None -> failwith "default_panic: impossible pattern: this error shoud never be raised" in
   0
 
 let _ = Callback.register "default_panic" default_panic
