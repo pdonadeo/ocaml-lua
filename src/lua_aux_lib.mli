@@ -73,6 +73,21 @@ external checklong : state -> int -> int = "luaL_checklong__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_checklong}luaL_checklong}
     documentation. *)
 
+val checklstring : state -> int -> string
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checklstring}luaL_checklstring}
+    documentation.
+
+    {b NOTE}:The original [len] argument is missing because, unlike in C, there
+    is no impedance mismatch between OCaml and Lua strings.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_addvalue,
+    it's rather an OCaml function with the same semantics. *)
+
+external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
+    documentation. *)
+
 (**/**)
 
 (******************************************************************************)
@@ -96,7 +111,7 @@ val checkudata : state -> int -> string -> [> `Userdata of 'a | `Light_userdata 
 
 external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 
-external checkstring : state -> int -> string = "luaL_checkstring__stub"
+external checkstring : state -> int -> string = "luaL_checkstring__stub" (* TODO RENDERE ALIAS DI checklstring *)
 
 val error : state -> ('a, unit, string, 'b) format4 -> 'a                                                             
 

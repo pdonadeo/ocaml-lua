@@ -15,7 +15,9 @@ let addlstring b s =
 let addstring = addlstring;;
 
 let addvalue b =
-  Buffer.add_string b.buffer (tolstring b.l (-1))
+  match tolstring b.l (-1) with
+  | Some s -> Buffer.add_string b.buffer s
+  | None -> ()
 ;;
 
 external argcheck : state -> bool -> int -> string -> unit = "luaL_argcheck__stub"
@@ -36,6 +38,18 @@ external checkint : state -> int -> int = "luaL_checkint__stub"
 let checkinteger = checkint;;
 
 external checklong : state -> int -> int = "luaL_checklong__stub"
+
+external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
+
+let tag_error l narg tag =
+  typerror l narg (typename l tag)
+;;
+
+let checklstring l narg =
+  match tolstring l narg with
+  | Some s -> s
+  | None -> tag_error l narg LUA_TSTRING
+;;
 
 (******************************************************************************)
 (******************************************************************************)
@@ -65,7 +79,6 @@ external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
 
 external getmetatable : state -> string -> unit = "luaL_getmetatable__stub"
 
-external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 
 (* checkudata is not a binding of luaL_checkudata (see:
  * http://www.lua.org/manual/5.1/manual.html#luaL_checkudata), it's actually a porting of the
