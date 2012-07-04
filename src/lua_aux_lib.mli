@@ -81,12 +81,20 @@ val checklstring : state -> int -> string
     {b NOTE}:The original [len] argument is missing because, unlike in C, there
     is no impedance mismatch between OCaml and Lua strings.
 
-    {b NOTE}: this function is {b not} a binding of the original luaL_addvalue,
+    {b NOTE}: this function is {b not} a binding of the original luaL_checklstring,
     it's rather an OCaml function with the same semantics. *)
 
 external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
     documentation. *)
+
+val checknumber : state -> int -> float
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checknumber}luaL_checknumber}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_checknumber,
+    it's rather an OCaml function with the same semantics. *)
 
 (**/**)
 

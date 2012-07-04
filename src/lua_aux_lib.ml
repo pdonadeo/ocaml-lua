@@ -51,6 +51,13 @@ let checklstring l narg =
   | None -> tag_error l narg LUA_TSTRING
 ;;
 
+let checknumber l narg =
+  let d = tonumber l narg in
+  if d = 0.0 && not (isnumber l narg)
+  then tag_error l narg LUA_TNUMBER
+  else d
+;;
+
 (******************************************************************************)
 (******************************************************************************)
 (*****                          TO BE COMPLETED                           *****)
