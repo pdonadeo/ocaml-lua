@@ -43,7 +43,7 @@ external argcheck : state -> bool -> int -> string -> unit = "luaL_argcheck__stu
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_argcheck}luaL_argcheck}
     documentation. *)
 
-external argerror : state -> int -> string -> unit = "luaL_argerror__stub"
+external argerror : state -> int -> string -> 'a = "luaL_argerror__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_argerror}luaL_argerror}
     documentation. *)
 
@@ -84,6 +84,12 @@ val checklstring : state -> int -> string
     {b NOTE}: this function is {b not} a binding of the original luaL_checklstring,
     it's rather an OCaml function with the same semantics. *)
 
+val checkstring : state -> int -> string
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_checkstring}luaL_checkstring}
+    documentation.
+
+    {b NOTE}: this function is an alias of {!Lua_aux_lib.checklstring} *)
+
 external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
     documentation. *)
@@ -94,6 +100,14 @@ val checknumber : state -> int -> float
     documentation.
 
     {b NOTE}: this function is {b not} a binding of the original luaL_checknumber,
+    it's rather an OCaml function with the same semantics. *)
+
+val checkoption : state -> int -> string option -> string list -> int
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checkoption}luaL_checkoption}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_checkoption,
     it's rather an OCaml function with the same semantics. *)
 
 (**/**)
@@ -119,7 +133,18 @@ val checkudata : state -> int -> string -> [> `Userdata of 'a | `Light_userdata 
 
 external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 
-external checkstring : state -> int -> string = "luaL_checkstring__stub" (* TODO RENDERE ALIAS DI checklstring *)
-
 val error : state -> ('a, unit, string, 'b) format4 -> 'a                                                             
 
+val optlstring : state -> int -> string -> string
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_optlstring}luaL_optlstring}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_optlstring,
+    it's rather an OCaml function with the same semantics. *)
+
+val optstring : buffer -> string -> unit
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_optstring}luaL_optstring}
+    documentation.
+
+    {b NOTE}: this function is an alias of {!Lua_aux_lib.optlstring} *)

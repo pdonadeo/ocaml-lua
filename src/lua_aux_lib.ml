@@ -22,7 +22,7 @@ let addvalue b =
 
 external argcheck : state -> bool -> int -> string -> unit = "luaL_argcheck__stub"
 
-external argerror : state -> int -> string -> unit = "luaL_argerror__stub"
+external argerror : state -> int -> string -> 'a = "luaL_argerror__stub"
 
 let buffinit l =
   { l = l;
@@ -57,6 +57,30 @@ let checknumber l narg =
   then tag_error l narg LUA_TNUMBER
   else d
 ;;
+
+let optlstring l narg d =
+  if isnoneornil l narg then d
+  else checklstring l narg
+;;
+
+let optstring = optlstring;;
+
+let checkstring = checklstring;;
+
+let checkoption l narg def lst =
+  let name =
+    match def with
+    | Some s -> optstring l narg s
+    | None -> checkstring l narg in
+
+  let rec find ?(i=0) p xs =
+    match xs with
+    | [] -> argerror l narg (pushfstring l "invalid option '%s'" name)
+    | hd::tl -> if p hd then i else find ~i:(i+1) p tl in
+
+  find (fun s -> s = name) lst
+;;
+
 
 (******************************************************************************)
 (******************************************************************************)
@@ -106,8 +130,6 @@ let checkudata l ud tname =
     end
   | None -> Lazy.force te
 ;;
-
-external checkstring : state -> int -> string = "luaL_checkstring__stub"
 
 external error__wrapper : state -> string -> 'a = "luaL_error__stub"
 
