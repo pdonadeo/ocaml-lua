@@ -110,30 +110,107 @@ val checkoption : state -> int -> string option -> string list -> int
     {b NOTE}: this function is {b not} a binding of the original luaL_checkoption,
     it's rather an OCaml function with the same semantics. *)
 
-(**/**)
+val checkstack : state -> int -> string -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checkstack}luaL_checkstack}
+    documentation.
 
-(******************************************************************************)
-(******************************************************************************)
-(*****                          TO BE COMPLETED                           *****)
-(******************************************************************************)
-(******************************************************************************)
-external newstate : unit -> state = "luaL_newstate__stub"
+    {b NOTE}: this function is {b not} a binding of the original luaL_checkstack,
+    it's rather an OCaml function with the same semantics. *)
 
-external openlibs : Lua_api_lib.state -> unit = "luaL_openlibs__stub"
+val checktype : state -> int -> lua_type -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checktype}luaL_checktype}
+    documentation.
 
-val loadbuffer : Lua_api_lib.state -> string -> string -> Lua_api_lib.thread_status
-
-val loadfile : Lua_api_lib.state -> string -> Lua_api_lib.thread_status
-
-external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
-
-external getmetatable : state -> string -> unit = "luaL_getmetatable__stub"
+    {b NOTE}: this function is {b not} a binding of the original luaL_checktype,
+    it's rather an OCaml function with the same semantics. *)
 
 val checkudata : state -> int -> string -> [> `Userdata of 'a | `Light_userdata of 'a ] option
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_checkudata}luaL_checkudata}
+    documentation.
 
-external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
+    {b NOTE}: this function is {b not} a binding of the original luaL_checkudata,
+    it's rather an OCaml function with the same semantics. *)
 
-val error : state -> ('a, unit, string, 'b) format4 -> 'a                                                             
+val dofile : state -> string -> bool
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_dofile}luaL_dofile}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_dofile,
+    it's rather an OCaml function with the same semantics. *)
+
+val dostring : state -> string -> bool
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_dostring}luaL_dostring}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_dostring,
+    it's rather an OCaml function with the same semantics. *)
+
+val error : state -> ('a, unit, string, 'b) format4 -> 'a
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_error,
+    it's rather an OCaml function with the same semantics. *)
+
+external getmetafield : state -> int -> string -> bool = "luaL_getmetafield__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_getmetafield}luaL_getmetafield}
+    documentation. *)
+
+external getmetatable : state -> string -> unit = "luaL_getmetatable__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_getmetatable}luaL_getmetatable}
+    documentation. *)
+
+external gsub : state -> string -> string -> string -> string = "luaL_gsub__stub"
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_gsub}luaL_gsub}
+    documentation. *)
+
+val loadbuffer : Lua_api_lib.state -> string -> string -> thread_status
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_loadbuffer}luaL_loadbuffer}
+    documentation. *)
+
+val loadfile : state -> string -> thread_status
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_loadfile}luaL_loadfile}
+    documentation. *)
+
+val loadstring : state -> string -> thread_status
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_loadstring}luaL_loadstring}
+    documentation. *)
+
+external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newmetatable}luaL_newmetatable}
+    documentation. *)
+
+external newstate : unit -> state = "luaL_newstate__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newstate}luaL_newstate}
+    documentation. *)
+
+external openlibs : Lua_api_lib.state -> unit = "luaL_openlibs__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_openlibs}luaL_openlibs}
+    documentation. *)
+
+val optint : state -> int -> int -> int
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_optint}luaL_optint}
+    documentation.
+
+    {b NOTE}: this function is an alias of {!Lua_aux_lib.optinteger} *)
+
+external optinteger : state -> int -> int -> int = "luaL_optinteger__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_optinteger}luaL_optinteger}
+    documentation. *)
+
+external optlong : state -> int -> int -> int = "luaL_optlong__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_optlong}luaL_optlong}
+    documentation. *)
 
 val optlstring : state -> int -> string -> string
 (** See
@@ -143,8 +220,38 @@ val optlstring : state -> int -> string -> string
     {b NOTE}: this function is {b not} a binding of the original luaL_optlstring,
     it's rather an OCaml function with the same semantics. *)
 
-val optstring : buffer -> string -> unit
+val optnumber : state -> int -> float -> float
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_optnumber}luaL_optnumber}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_optnumber,
+    it's rather an OCaml function with the same semantics. *)
+
+val optstring : state -> int -> string -> string
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_optstring}luaL_optstring}
     documentation.
 
     {b NOTE}: this function is an alias of {!Lua_aux_lib.optlstring} *)
+
+(**/**)
+
+(******************************************************************************)
+(******************************************************************************)
+(*****                          TO BE COMPLETED                           *****)
+(******************************************************************************)
+(******************************************************************************)
+val loadfile : Lua_api_lib.state -> string -> Lua_api_lib.thread_status
+
+external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
+
+val error : state -> ('a, unit, string, string) format4 -> 'a
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
+    documentation.
+
+    Warning: this function has a different behavior with respect to the original
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
+    because the conversion specifiers are not restricted as specified in the Lua
+    documentation, but you can use all the conversions of the
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}Printf module}. *)

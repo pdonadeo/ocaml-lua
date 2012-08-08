@@ -1,5 +1,7 @@
 open Lua_api_lib
 
+let (|>) x f = f x
+
 type buffer =
   { l : state;
     buffer : Buffer.t; }
@@ -81,41 +83,25 @@ let checkoption l narg def lst =
   find (fun s -> s = name) lst
 ;;
 
+external error_aux : state -> string -> 'a = "luaL_error__stub"
 
-(******************************************************************************)
-(******************************************************************************)
-(*****                          TO BE COMPLETED                           *****)
-(******************************************************************************)
-(******************************************************************************)
-let (|>) x f = f x
-
-external newstate : unit -> state = "luaL_newstate__stub"
-
-external openlibs : state -> unit = "luaL_openlibs__stub"
-
-external luaL_loadbuffer__wrapper :
-  state -> string -> int -> string -> int = "luaL_loadbuffer__stub"
-
-let loadbuffer l buff name =
-  luaL_loadbuffer__wrapper l buff (String.length buff) name |> thread_status_of_int
+let error state =
+  let k s = error_aux state s in
+    Printf.kprintf k
 ;;
 
-external luaL_loadfile__wrapper : state -> string -> int = "luaL_loadfile__stub"
-
-let loadfile l filename =
-  luaL_loadfile__wrapper l filename |> thread_status_of_int
+let checkstack l space mes =
+  if not (Lua_api_lib.checkstack l space)
+  then error l "stack overflow (%s)" mes
+  else ()
 ;;
 
-external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
+let checktype l narg t =
+  if (Lua_api_lib.type_ l narg <> t)
+  then tag_error l narg t
+  else ()
+;;
 
-external getmetatable : state -> string -> unit = "luaL_getmetatable__stub"
-
-
-(* checkudata is not a binding of luaL_checkudata (see:
- * http://www.lua.org/manual/5.1/manual.html#luaL_checkudata), it's actually a porting of the
- * function implementd in the Lua auxiliary library, in lauxlib.c, line 124, of the official
- * distrubution of Lua.
- *)
 let checkudata l ud tname =
   let te = lazy (typerror l ud tname) in
   let p = touserdata l ud in
@@ -131,10 +117,63 @@ let checkudata l ud tname =
   | None -> Lazy.force te
 ;;
 
-external error__wrapper : state -> string -> 'a = "luaL_error__stub"
+external luaL_loadfile__wrapper : state -> string -> int = "luaL_loadfile__stub"
 
-let error (state : state) =
-  let k s = error__wrapper state s in
-  Printf.kprintf k
+let loadfile l filename =
+  luaL_loadfile__wrapper l filename |> thread_status_of_int
 ;;
 
+let dofile l filename =
+  match loadfile l filename with
+  | LUA_OK -> begin
+      match pcall l 0 multret 0 with
+      | LUA_OK -> true
+      | _ -> false
+    end
+  | _ -> false
+;;
+
+external luaL_loadbuffer__wrapper :
+  state -> string -> int -> string -> int = "luaL_loadbuffer__stub"
+
+let loadbuffer l buff name =
+  luaL_loadbuffer__wrapper l buff (String.length buff) name |> thread_status_of_int
+;;
+
+let loadstring l s =
+  loadbuffer l s s
+;;
+
+let dostring l str =
+  match loadstring l str with
+  | LUA_OK -> begin
+      match pcall l 0 multret 0 with
+      | LUA_OK -> true
+      | _ -> false
+    end
+  | _ -> false
+;;
+
+external getmetafield : state -> int -> string -> bool = "luaL_getmetafield__stub"
+
+external getmetatable : state -> string -> unit = "luaL_getmetatable__stub"
+
+external gsub : state -> string -> string -> string -> string = "luaL_gsub__stub"
+
+external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
+
+external newstate : unit -> state = "luaL_newstate__stub"
+
+external openlibs : state -> unit = "luaL_openlibs__stub"
+
+external optinteger : state -> int -> int -> int = "luaL_optinteger__stub"
+
+let optint = optinteger
+
+external optlong : state -> int -> int -> int = "luaL_optlong__stub"
+
+let optnumber l narg d =
+  if Lua_api_lib.isnoneornil l narg
+  then d
+  else checknumber l narg
+;;

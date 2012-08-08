@@ -339,6 +339,24 @@ value luaL_getmetatable__stub(value L, value tname)
 }
 
 CAMLprim
+value luaL_gsub__stub(value L, value s, value p, value r)
+{
+  size_t len = 0;
+  const char *value_from_lua;
+  CAMLparam4(L, s, p, r);
+  CAMLlocal1(ret_val);
+
+  value_from_lua = luaL_gsub(lua_State_val(L), String_val(s), String_val(p), String_val(r));
+  len = strlen(value_from_lua);
+
+  ret_val = caml_alloc_string(len);
+  char *retval_str = String_val(ret_val);
+  memcpy(retval_str, value_from_lua, len);
+
+  CAMLreturn(ret_val);
+}
+
+CAMLprim
 value luaL_typerror__stub(value L, value narg, value tname)
 {
   CAMLparam3(L, narg, tname);
@@ -375,3 +393,26 @@ value luaL_error__stub(value L, value message)
   CAMLreturn(Val_unit);
 }
 
+CAMLprim
+value luaL_getmetafield__stub(value L, value obj, value e)
+{
+  CAMLparam3(L, obj, e);
+  CAMLlocal1(retval);
+
+  retval = Val_int(luaL_getmetafield(lua_State_val(L), Int_val(obj), String_val(e)));
+
+  if (retval == 0)
+    CAMLreturn(Val_false);
+  else
+    CAMLreturn(Val_true);
+}
+
+STUB_STATE_INT_INT_INT(luaL_optinteger, narg, d)
+
+CAMLprim
+value luaL_optlong__stub(value L, value narg, value d)
+{
+    CAMLparam3(L, narg, d);
+    long int retval = luaL_optlong(lua_State_val(L), Long_val(narg), Long_val(d));
+    CAMLreturn(Val_long(retval));
+}
