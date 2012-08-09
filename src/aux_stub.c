@@ -416,3 +416,33 @@ value luaL_optlong__stub(value L, value narg, value d)
     long int retval = luaL_optlong(lua_State_val(L), Long_val(narg), Long_val(d));
     CAMLreturn(Val_long(retval));
 }
+
+STUB_STATE_INT_INT(luaL_ref, t)
+
+CAMLprim
+value luaL_findtable__stub(value L, value idx, value fname, value szhint)
+{
+    size_t len = 0;
+    const char *value_from_lua;
+
+    CAMLparam4(L, idx, fname, szhint);
+    CAMLlocal2(ret_string, ret_option);
+
+    value_from_lua = luaL_findtable(lua_State_val(L), Int_val(idx), String_val(fname), Int_val(szhint));
+    if (value_from_lua == NULL)
+    {
+        return Val_int(0);
+    }
+    else
+    {
+        len = strlen(value_from_lua);
+        ret_string = caml_alloc_string(len);
+        char *retval_str = String_val(ret_string);
+        memcpy(retval_str, value_from_lua, len);
+
+        ret_option = caml_alloc(1, 0);
+        Store_field(ret_option, 0, ret_string);
+
+        CAMLreturn(ret_option);
+    }
+}

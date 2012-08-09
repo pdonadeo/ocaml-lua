@@ -8,6 +8,31 @@ type buffer
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_Buffer}luaL_Buffer}
     documentation. *)
 
+type reg = string * oCamlFunction
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_reg}luaL_reg}
+    documentation. *)
+
+
+(************************)
+(** {2 Constant values} *)
+(************************)
+
+val refnil : int
+(** Value returned by `luaL_ref` and `luaL_unref`.
+    See {{:http://www.lua.org/manual/5.1/manual.html#luaL_ref}luaL_ref}
+    and {{:http://www.lua.org/manual/5.1/manual.html#luaL_unref}luaL_unref}
+    documentation. *)
+
+val noref : int
+(** Value returned by `luaL_ref` and `luaL_unref`.
+    See {{:http://www.lua.org/manual/5.1/manual.html#luaL_ref}luaL_ref}
+    and {{:http://www.lua.org/manual/5.1/manual.html#luaL_unref}luaL_unref}
+    documentation. *)
+
+(****************************************)
+(** {2 The Auxiliary Library functions} *)
+(****************************************)
+
 val addchar : buffer -> char -> unit
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_addchar}luaL_addchar}
     documentation.
@@ -23,7 +48,8 @@ val addlstring : buffer -> string -> unit
     it's rather an OCaml function with the same semantics. *)
 
 (* TODO: decide if luaL_addsize should be included in this binding
-         void luaL_addsize (luaL_Buffer *B, size_t n);
+    http://www.lua.org/manual/5.1/manual.html#luaL_addsize
+    void luaL_addsize (luaL_Buffer *B, size_t n);
  *)
 
 val addstring : buffer -> string -> unit
@@ -233,6 +259,31 @@ val optstring : state -> int -> string -> string
     documentation.
 
     {b NOTE}: this function is an alias of {!Lua_aux_lib.optlstring} *)
+
+(* TODO: decide if luaL_prepbuffer should be included in this binding
+    http://www.lua.org/manual/5.1/manual.html#luaL_prepbuffer
+    char *luaL_prepbuffer (luaL_Buffer *B);
+ *)
+
+val pushresult : buffer -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_pushresult}luaL_pushresult}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_pushresult,
+    it's rather an OCaml function with the same semantics. *)
+
+external ref_ : state -> int -> int = "luaL_ref__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_ref}luaL_ref}
+    documentation. *)
+
+val register : state -> string option -> reg list -> unit
+(** See
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_register}luaL_register}
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_register,
+    it's rather an OCaml function with the same semantics. *)
 
 (**/**)
 

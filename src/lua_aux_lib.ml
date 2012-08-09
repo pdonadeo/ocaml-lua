@@ -6,6 +6,12 @@ type buffer =
   { l : state;
     buffer : Buffer.t; }
 
+type reg = string * oCamlFunction
+
+let refnil = -1;;
+
+let noref = -2;;
+
 let addchar b c =
   Buffer.add_char b.buffer c
 ;;
@@ -176,4 +182,73 @@ let optnumber l narg d =
   if Lua_api_lib.isnoneornil l narg
   then d
   else checknumber l narg
+;;
+
+let pushresult b =
+  let data = Buffer.contents b.buffer in
+  Lua_api_lib.pushlstring b.l data;
+  Buffer.clear b.buffer;
+;;
+
+external ref_ : state -> int -> int = "luaL_ref__stub"
+
+(* 
+LUALIB_API void luaI_openlib (lua_State *L, const char *libname, const luaL_Reg *l) {
+  if (libname) {
+    int size = libsize(l);
+    /* check whether lib already exists */
+    luaL_findtable(L, LUA_REGISTRYINDEX, "_LOADED", 1);
+    lua_getfield(L, -1, libname);  /* get _LOADED[libname] */
+    if (!lua_istable(L, -1)) {  /* not found? */
+      lua_pop(L, 1);  /* remove previous result */
+      /* try global variable (and create one if it does not exist) */
+      if (luaL_findtable(L, LUA_GLOBALSINDEX, libname, size) != NULL)
+        luaL_error(L, "name conflict for module " LUA_QS, libname);
+      lua_pushvalue(L, -1);
+      lua_setfield(L, -3, libname);  /* _LOADED[libname] = new table */
+    }
+    lua_remove(L, -2);  /* remove _LOADED table */
+    lua_insert(L, -1);  /* move library table to below upvalues */
+  }
+  for (; l->name; l++) {
+    int i;
+    for (i=0; i<0; i++)  /* copy upvalues to the top */
+      lua_pushvalue(L, 0);
+    lua_pushcclosure(L, l->func, 0);
+    lua_setfield(L, -2, l->name);
+  }
+  lua_pop(L, 0);  /* remove upvalues */
+}
+ *)
+
+external findtable : state -> int -> string -> int -> string option = "luaL_findtable__stub"
+
+let register l libname func_list =
+  let () =
+    match libname with
+    | Some libname -> begin
+      let size = List.length func_list in
+      (* check whether lib already exists *)
+      let _ = findtable l registryindex "_LOADED" 1 in
+      getfield l (-1) libname; (* get _LOADED[libname] *)
+      if not (istable l (-1)) then begin  (* not found? *)
+        pop l 1;  (* remove previous result *)
+        (* try global variable (and create one if it does not exist) *)
+        let () =
+          match findtable l globalsindex libname size with
+          | Some _ -> error l "name conflict for module '%s'" libname
+          | None -> () in
+        pushvalue l (-1);
+        setfield l (-3) libname;  (* _LOADED[libname] = new table *)
+      end;
+      remove l (-2);  (* remove _LOADED table *)
+      insert l (-1);  (* move library table to below upvalues *)
+    end
+    | None -> () in
+
+  List.iter
+    (fun reg ->
+      pushcfunction l (snd reg);
+      setfield l (-2) (fst reg))
+    func_list;
 ;;
