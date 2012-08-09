@@ -295,7 +295,7 @@ val load : state -> 'a lua_Reader -> 'a -> string -> thread_status
     written in OCaml. To create a new Lua state, use the function
     {!Lua_aux_lib.newstate}. *)
 
-external newtable: state -> int -> int -> bool = "lua_newtable__stub"
+external newtable: state -> unit = "lua_newtable__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newtable}lua_newtable}
     documentation. *)

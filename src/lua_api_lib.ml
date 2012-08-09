@@ -244,7 +244,7 @@ external lua_load__wrapper : state -> 'a lua_Reader -> 'a -> string -> int = "lu
 let load l reader data chunkname =
   lua_load__wrapper l reader data chunkname |> thread_status_of_int
 
-external newtable: state -> int -> int -> bool = "lua_newtable__stub"
+external newtable: state -> unit = "lua_newtable__stub"
 
 external newthread : state -> state = "lua_newthread__stub"
 
