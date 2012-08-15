@@ -192,35 +192,6 @@ let pushresult b =
 
 external ref_ : state -> int -> int = "luaL_ref__stub"
 
-(* 
-LUALIB_API void luaI_openlib (lua_State *L, const char *libname, const luaL_Reg *l) {
-  if (libname) {
-    int size = libsize(l);
-    /* check whether lib already exists */
-    luaL_findtable(L, LUA_REGISTRYINDEX, "_LOADED", 1);
-    lua_getfield(L, -1, libname);  /* get _LOADED[libname] */
-    if (!lua_istable(L, -1)) {  /* not found? */
-      lua_pop(L, 1);  /* remove previous result */
-      /* try global variable (and create one if it does not exist) */
-      if (luaL_findtable(L, LUA_GLOBALSINDEX, libname, size) != NULL)
-        luaL_error(L, "name conflict for module " LUA_QS, libname);
-      lua_pushvalue(L, -1);
-      lua_setfield(L, -3, libname);  /* _LOADED[libname] = new table */
-    }
-    lua_remove(L, -2);  /* remove _LOADED table */
-    lua_insert(L, -1);  /* move library table to below upvalues */
-  }
-  for (; l->name; l++) {
-    int i;
-    for (i=0; i<0; i++)  /* copy upvalues to the top */
-      lua_pushvalue(L, 0);
-    lua_pushcclosure(L, l->func, 0);
-    lua_setfield(L, -2, l->name);
-  }
-  lua_pop(L, 0);  /* remove upvalues */
-}
- *)
-
 external findtable : state -> int -> string -> int -> string option = "luaL_findtable__stub"
 
 let register l libname func_list =
@@ -252,3 +223,11 @@ let register l libname func_list =
       setfield l (-2) (fst reg))
     func_list;
 ;;
+
+let typename l index =
+  Lua_api_lib.typename l (Lua_api_lib.type_ l index)
+;;
+
+external unref : state -> int -> int = "luaL_ref__stub"
+
+external where : state -> int -> unit = "luaL_where__stub"

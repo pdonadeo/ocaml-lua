@@ -116,10 +116,6 @@ val checkstring : state -> int -> string
 
     {b NOTE}: this function is an alias of {!Lua_aux_lib.checklstring} *)
 
-external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
-(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
-    documentation. *)
-
 val checknumber : state -> int -> float
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#luaL_checknumber}luaL_checknumber}
@@ -182,7 +178,13 @@ val error : state -> ('a, unit, string, 'b) format4 -> 'a
     documentation.
 
     {b NOTE}: this function is {b not} a binding of the original luaL_error,
-    it's rather an OCaml function with the same semantics. *)
+    it's rather an OCaml function with the same semantics.
+
+    Warning: this function has a different behavior with respect to the original
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
+    because the conversion specifiers are not restricted as specified in the Lua
+    documentation, but you can use all the conversions of the
+    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}Printf module}. *)
 
 external getmetafield : state -> int -> string -> bool = "luaL_getmetafield__stub"
 (** See
@@ -285,24 +287,22 @@ val register : state -> string option -> reg list -> unit
     {b NOTE}: this function is {b not} a binding of the original luaL_register,
     it's rather an OCaml function with the same semantics. *)
 
-(**/**)
-
-(******************************************************************************)
-(******************************************************************************)
-(*****                          TO BE COMPLETED                           *****)
-(******************************************************************************)
-(******************************************************************************)
-val loadfile : Lua_api_lib.state -> string -> Lua_api_lib.thread_status
-
-external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
-
-val error : state -> ('a, unit, string, string) format4 -> 'a
+val typename : state -> int -> string
 (** See
-    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_typename}luaL_typename}
     documentation.
 
-    Warning: this function has a different behavior with respect to the original
-    {{:http://www.lua.org/manual/5.1/manual.html#luaL_error}luaL_error}
-    because the conversion specifiers are not restricted as specified in the Lua
-    documentation, but you can use all the conversions of the
-    {{:http://caml.inria.fr/pub/docs/manual-ocaml/libref/Printf.html}Printf module}. *)
+    {b NOTE}: this function is {b not} a binding of the original luaL_typename,
+    it's rather an OCaml function with the same semantics. *)
+
+external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
+    documentation. *)
+
+external unref : state -> int -> int = "luaL_ref__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_unref}luaL_unref}
+    documentation. *)
+
+external where : state -> int -> unit = "luaL_where__stub"
+(** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_where}luaL_where}
+    documentation. *)
