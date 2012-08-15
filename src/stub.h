@@ -97,7 +97,9 @@ CAMLprim \
 value lua_function##__stub(value L, value int_name) \
 { \
     CAMLparam2(L, int_name); \
+    debug(3, #lua_function "__stub(%p, %d)\n", (void*)(lua_State_val(L)), Int_val(int_name)); \
     lua_function(lua_State_val(L), Int_val(int_name)); \
+    debug(4, #lua_function "__stub" ": RETURNS\n"); \
     CAMLreturn(Val_unit); \
 }
 

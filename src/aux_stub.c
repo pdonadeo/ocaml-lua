@@ -257,8 +257,10 @@ value luaL_newstate__stub (value unit)
 
     /* create a fresh new Lua state */
     lua_State *L = lua_newstate(custom_alloc, NULL);
-    debug(5, "luaL_newstate__stub: calling lua_newstate -> %p\n", (void*)L);
+    debug(5, "luaL_newstate__stub: lua_newstate returned %p\n", (void*)L);
+    debug(6, "    luaL_newstate__stub: calling lua_atpanic...");
     lua_atpanic(L, &default_panic);
+    debug(6, " done!\n");
 
     /* alloc space for the register entry */
     ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
@@ -446,3 +448,7 @@ value luaL_findtable__stub(value L, value idx, value fname, value szhint)
         CAMLreturn(ret_option);
     }
 }
+
+STUB_STATE_INT_INT_VOID(luaL_unref, t, ref)
+
+STUB_STATE_INT_VOID(luaL_where, lvl)
