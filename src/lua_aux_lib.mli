@@ -1,4 +1,19 @@
+(**************************************************)
+(** {1 The Lua Auxiliary Library (OCaml binding)} *)
+(**************************************************)
+
 open Lua_api_lib
+
+(***********************************************************)
+(** {2 Difference with the original Lua Auxiliary Library} *)
+(***********************************************************)
+
+(** Here is a list of functions of which you should read documentation:
+- {b Missing functions}: [luaL_addsize], [luaL_prepbuffer]
+- {b Notably different functions}: {!error}
+- {b Special remarks}: {!checklstring}
+
+*)
 
 (**************************)
 (** {2 Types definitions} *)
@@ -47,10 +62,10 @@ val addlstring : buffer -> string -> unit
     {b NOTE}: this function is {b not} a binding of the original luaL_addlstring,
     it's rather an OCaml function with the same semantics. *)
 
-(* TODO: decide if luaL_addsize should be included in this binding
-    http://www.lua.org/manual/5.1/manual.html#luaL_addsize
-    void luaL_addsize (luaL_Buffer *B, size_t n);
- *)
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_addsize}luaL_addsize} is not
+    present because the type {!Lua_aux_lib.buffer} and related functions have been
+    reimplemented in OCaml, and luaL_addsize is not needed. *)
 
 val addstring : buffer -> string -> unit
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_addstring}luaL_addstring}
@@ -262,10 +277,10 @@ val optstring : state -> int -> string -> string
 
     {b NOTE}: this function is an alias of {!Lua_aux_lib.optlstring} *)
 
-(* TODO: decide if luaL_prepbuffer should be included in this binding
-    http://www.lua.org/manual/5.1/manual.html#luaL_prepbuffer
-    char *luaL_prepbuffer (luaL_Buffer *B);
- *)
+(** The function
+    {{:http://www.lua.org/manual/5.1/manual.html#luaL_prepbuffer}luaL_prepbuffer} is not
+    present because the type {!Lua_aux_lib.buffer} and related functions have been
+    reimplemented in OCaml, and luaL_prepbuffer is not needed. *)
 
 val pushresult : buffer -> unit
 (** See

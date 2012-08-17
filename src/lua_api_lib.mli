@@ -1,3 +1,21 @@
+(**************************************************************)
+(** {1 The Lua Application Program Interface (OCaml binding)} *)
+(**************************************************************)
+
+(*********************************************)
+(** {2 Difference with the original Lua API} *)
+(*********************************************)
+
+(** Here is a list of functions of which you should read documentation:
+- {b Missing functions}: [lua_close], [lua_getallocf], [lua_newstate]
+(see below {{:#VALload}here}), [lua_pushcclosure] (see below {{:#VALpushboolean}here}),
+[lua_setallocf], [lua_topointer].
+- {b Notably different functions}: {!newuserdata}, {!pushfstring}, {!pushlightuserdata},
+{!touserdata}
+- {b Special remarks}: {!cpcall}, {!newthread}, {!default_gc}, {!make_gc_function}.
+{!tolstring}
+*)
+
 (**************************)
 (** {2 Types definitions} *)
 (**************************)
@@ -341,17 +359,46 @@ Gc.compact ();; (* This will collect [state] inside [f] *)
     to an {e undefined behaviour} if you are unlucky. *)
 
 external default_gc : state -> int = "default_gc__stub"
-(** TODO WRITE A DECENT COMMENT *)
+(** This is the default "__gc" function attached to any new userdatum created
+    with [newuserdata]. See documentation of {! newuserdata} below. *)
 
 val make_gc_function : oCamlFunction -> oCamlFunction
-(** TODO WRITE A DECENT COMMENT *)
+(** This function takes an {! oCamlFunction} you have created to be executed
+    as "__gc" metamethod and "decorates" it with some default actions needed
+    to deallocate all the memory.
+
+    If you want to create a "__gc" method for your userdata, you {b must} register
+    the value from [make_gc_function]. *)
 
 external newuserdata : state -> 'a -> unit = "lua_newuserdata__stub"
 (** [newuserdata] is the binding of
     {{:http://www.lua.org/manual/5.1/manual.html#lua_newuserdata}lua_newuserdata}
     but it works in a different way if compared to the original function, and the
     signature is slightly different.
-  * TODO WRITE A DECENT COMMENT *)
+
+    In C [lua_newuserdata] allocates an area for you, returns a [void*] and you
+    cast it as needed. Moreover, it pushes the new userdata on the stack.
+
+    In OCaml, however, you never allocates a value and so the resulting signature
+    provides you a way to push an already created value on the top of the Lua stack.
+
+    {b Very important remark, read carefully.} The original Lua [lua_newuserdata]
+    doesn't associate to the new userdatum any metatable, it's up to you to define
+    a metatable with metamethods, if you need it. On the other hand, this binding
+    {b silently} creates a metatable with only one metamethod ("__gc") and associates
+    the function {! default_gc } defined above. This function takes care of managing
+    the memory between the two garbage collectors when needed. This is transparent
+    to you, unless you want to attach to the userdatum a metatable of your, which is
+    very likely to happen.
+
+    In case you want to attach a metatable to your userdatum you {b must} include
+    the "__gc" metamethod, and you {b must} create the function using
+    {! make_gc_function } described above.
+
+    {b WARNING}: using this function could be harmful because it actually breaks
+    the type system. It has the same semantics of [Obj.magic], allowing the
+    programmer to push an OCaml value into the Lua state, and then retrieve it
+    with a different type. Be very careful! *)
 
 external next : state -> int -> int = "lua_next__stub"
 (** See
