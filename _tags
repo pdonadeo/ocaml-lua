@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: fbb82fe886941c91099c910db82b4882)
+# DO NOT EDIT (digest: 7ffe0d51e93a8bfc1b2423b029b5fa5e)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -43,4 +43,10 @@
 <examples/ci/*.ml{,i}>: use_lua
 <examples/ci/*.ml{,i}>: pkg_unix
 "examples/ci/ci.native": custom
+# Executable dir
+"examples/lua_book/dir.native": use_lua
+"examples/lua_book/dir.native": pkg_unix
+<examples/lua_book/*.ml{,i}>: use_lua
+<examples/lua_book/*.ml{,i}>: pkg_unix
+"examples/lua_book/dir.native": custom
 # OASIS_STOP

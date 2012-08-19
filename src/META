@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: c453bf594fe92ae9a530aedc3a488db9)
-version = "0.1.0"
+# DO NOT EDIT (digest: 67da0ac4a1f002bd8fefeb5555987b44)
+version = "1.0"
 description = "OCaml binding to Lua API library"
 requires = "unix"
 archive(byte) = "lua.cma"
