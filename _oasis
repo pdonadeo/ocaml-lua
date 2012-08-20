@@ -5,7 +5,7 @@ Version:      1.0
 Synopsis:     Lua bindings
 Authors:      Paolo Donadeo,
               Sylvain Le Gall
-License:      LGPL-2.1 with OCaml linking exception
+License:      MIT
 LicenseFile:  COPYING.txt
 BuildTools:   ocamlbuild
 Plugins:      META (0.3),
