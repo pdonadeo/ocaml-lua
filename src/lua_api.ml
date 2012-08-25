@@ -21,7 +21,7 @@
   {{:http://www.lua.org/manual/5.1/manual.html#4}auxiliary library}, described
   in the original documentation as follow:
 
-  {R The auxiliary library provides several convenient functions to interface
+  {i The auxiliary library provides several convenient functions to interface
   C with Lua. While the basic API provides the primitive functions for all
   interactions between C and Lua, the auxiliary library provides higher-level
   functions for some common tasks. ... All functions in the auxiliary
@@ -45,9 +45,9 @@
 open Lua_api;;
 
 let push_hello () =
-  let l = LuaL.newstate () in
-  Lua.pushstring l "hello";
-  l
+  let ls = LuaL.newstate () in
+  Lua.pushstring ls "hello";
+  ls
 ;;
     ]}
   which is very close to what you would do in C:

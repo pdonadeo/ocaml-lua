@@ -3,7 +3,7 @@ open Lua_api_lib
 let (|>) x f = f x
 
 type buffer =
-  { l : state;
+  { ls : state;
     buffer : Buffer.t; }
 
 type reg = string * oCamlFunction
@@ -23,7 +23,7 @@ let addlstring b s =
 let addstring = addlstring;;
 
 let addvalue b =
-  match tolstring b.l (-1) with
+  match tolstring b.ls (-1) with
   | Some s -> Buffer.add_string b.buffer s
   | None -> ()
 ;;
@@ -32,8 +32,8 @@ external argcheck : state -> bool -> int -> string -> unit = "luaL_argcheck__stu
 
 external argerror : state -> int -> string -> 'a = "luaL_argerror__stub"
 
-let buffinit l =
-  { l = l;
+let buffinit ls =
+  { ls = ls;
     buffer = Buffer.create 8192; }
 ;;
 
@@ -49,41 +49,41 @@ external checklong : state -> int -> int = "luaL_checklong__stub"
 
 external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 
-let tag_error l narg tag =
-  typerror l narg (typename l tag)
+let tag_error ls narg tag =
+  typerror ls narg (typename ls tag)
 ;;
 
-let checklstring l narg =
-  match tolstring l narg with
+let checklstring ls narg =
+  match tolstring ls narg with
   | Some s -> s
-  | None -> tag_error l narg LUA_TSTRING
+  | None -> tag_error ls narg LUA_TSTRING
 ;;
 
-let checknumber l narg =
-  let d = tonumber l narg in
-  if d = 0.0 && not (isnumber l narg)
-  then tag_error l narg LUA_TNUMBER
+let checknumber ls narg =
+  let d = tonumber ls narg in
+  if d = 0.0 && not (isnumber ls narg)
+  then tag_error ls narg LUA_TNUMBER
   else d
 ;;
 
-let optlstring l narg d =
-  if isnoneornil l narg then d
-  else checklstring l narg
+let optlstring ls narg d =
+  if isnoneornil ls narg then d
+  else checklstring ls narg
 ;;
 
 let optstring = optlstring;;
 
 let checkstring = checklstring;;
 
-let checkoption l narg def lst =
+let checkoption ls narg def lst =
   let name =
     match def with
-    | Some s -> optstring l narg s
-    | None -> checkstring l narg in
+    | Some s -> optstring ls narg s
+    | None -> checkstring ls narg in
 
   let rec find ?(i=0) p xs =
     match xs with
-    | [] -> argerror l narg (pushfstring l "invalid option '%s'" name)
+    | [] -> argerror ls narg (pushfstring ls "invalid option '%s'" name)
     | hd::tl -> if p hd then i else find ~i:(i+1) p tl in
 
   find (fun s -> s = name) lst
@@ -96,27 +96,27 @@ let error state =
     Printf.kprintf k
 ;;
 
-let checkstack l space mes =
-  if not (Lua_api_lib.checkstack l space)
-  then error l "stack overflow (%s)" mes
+let checkstack ls space mes =
+  if not (Lua_api_lib.checkstack ls space)
+  then error ls "stack overflow (%s)" mes
   else ()
 ;;
 
-let checktype l narg t =
-  if (Lua_api_lib.type_ l narg <> t)
-  then tag_error l narg t
+let checktype ls narg t =
+  if (Lua_api_lib.type_ ls narg <> t)
+  then tag_error ls narg t
   else ()
 ;;
 
-let checkudata l ud tname =
-  let te = lazy (typerror l ud tname) in
-  let p = touserdata l ud in
+let checkudata ls ud tname =
+  let te = lazy (typerror ls ud tname) in
+  let p = touserdata ls ud in
   match p with
   | Some data -> begin
-      if (Lua_api_lib.getmetatable l ud) then begin
-        getfield l registryindex tname;
-        if (rawequal l (-1) (-2))
-        then (pop l 2; p)
+      if (Lua_api_lib.getmetatable ls ud) then begin
+        getfield ls registryindex tname;
+        if (rawequal ls (-1) (-2))
+        then (pop ls 2; p)
         else Lazy.force te
       end else Lazy.force te
     end
@@ -125,14 +125,14 @@ let checkudata l ud tname =
 
 external luaL_loadfile__wrapper : state -> string -> int = "luaL_loadfile__stub"
 
-let loadfile l filename =
-  luaL_loadfile__wrapper l filename |> thread_status_of_int
+let loadfile ls filename =
+  luaL_loadfile__wrapper ls filename |> thread_status_of_int
 ;;
 
-let dofile l filename =
-  match loadfile l filename with
+let dofile ls filename =
+  match loadfile ls filename with
   | LUA_OK -> begin
-      match pcall l 0 multret 0 with
+      match pcall ls 0 multret 0 with
       | LUA_OK -> true
       | _ -> false
     end
@@ -142,18 +142,18 @@ let dofile l filename =
 external luaL_loadbuffer__wrapper :
   state -> string -> int -> string -> int = "luaL_loadbuffer__stub"
 
-let loadbuffer l buff name =
-  luaL_loadbuffer__wrapper l buff (String.length buff) name |> thread_status_of_int
+let loadbuffer ls buff name =
+  luaL_loadbuffer__wrapper ls buff (String.length buff) name |> thread_status_of_int
 ;;
 
-let loadstring l s =
-  loadbuffer l s s
+let loadstring ls s =
+  loadbuffer ls s s
 ;;
 
-let dostring l str =
-  match loadstring l str with
+let dostring ls str =
+  match loadstring ls str with
   | LUA_OK -> begin
-      match pcall l 0 multret 0 with
+      match pcall ls 0 multret 0 with
       | LUA_OK -> true
       | _ -> false
     end
@@ -178,15 +178,15 @@ let optint = optinteger
 
 external optlong : state -> int -> int -> int = "luaL_optlong__stub"
 
-let optnumber l narg d =
-  if Lua_api_lib.isnoneornil l narg
+let optnumber ls narg d =
+  if Lua_api_lib.isnoneornil ls narg
   then d
-  else checknumber l narg
+  else checknumber ls narg
 ;;
 
 let pushresult b =
   let data = Buffer.contents b.buffer in
-  Lua_api_lib.pushlstring b.l data;
+  Lua_api_lib.pushlstring b.ls data;
   Buffer.clear b.buffer;
 ;;
 
@@ -194,38 +194,38 @@ external ref_ : state -> int -> int = "luaL_ref__stub"
 
 external findtable : state -> int -> string -> int -> string option = "luaL_findtable__stub"
 
-let register l libname func_list =
+let register ls libname func_list =
   let () =
     match libname with
     | Some libname -> begin
       let size = List.length func_list in
       (* check whether lib already exists *)
-      let _ = findtable l registryindex "_LOADED" 1 in
-      getfield l (-1) libname; (* get _LOADED[libname] *)
-      if not (istable l (-1)) then begin  (* not found? *)
-        pop l 1;  (* remove previous result *)
+      let _ = findtable ls registryindex "_LOADED" 1 in
+      getfield ls (-1) libname; (* get _LOADED[libname] *)
+      if not (istable ls (-1)) then begin  (* not found? *)
+        pop ls 1;  (* remove previous result *)
         (* try global variable (and create one if it does not exist) *)
         let () =
-          match findtable l globalsindex libname size with
-          | Some _ -> error l "name conflict for module '%s'" libname
+          match findtable ls globalsindex libname size with
+          | Some _ -> error ls "name conflict for module '%s'" libname
           | None -> () in
-        pushvalue l (-1);
-        setfield l (-3) libname;  (* _LOADED[libname] = new table *)
+        pushvalue ls (-1);
+        setfield ls (-3) libname;  (* _LOADED[libname] = new table *)
       end;
-      remove l (-2);  (* remove _LOADED table *)
-      insert l (-1);  (* move library table to below upvalues *)
+      remove ls (-2);  (* remove _LOADED table *)
+      insert ls (-1);  (* move library table to below upvalues *)
     end
     | None -> () in
 
   List.iter
     (fun reg ->
-      pushcfunction l (snd reg);
-      setfield l (-2) (fst reg))
+      pushcfunction ls (snd reg);
+      setfield ls (-2) (fst reg))
     func_list;
 ;;
 
-let typename l index =
-  Lua_api_lib.typename l (Lua_api_lib.type_ l index)
+let typename ls index =
+  Lua_api_lib.typename ls (Lua_api_lib.type_ ls index)
 ;;
 
 external unref : state -> int -> int = "luaL_ref__stub"

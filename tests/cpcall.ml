@@ -26,11 +26,11 @@ let p_finaliser v =
 ;;
 
 let test_loop () =
-  let l = LuaL.newstate () in
+  let ls = LuaL.newstate () in
   let test_value = ref empty in
-  let func l =
+  let func ls =
     let p : point =
-      match Lua.touserdata l 1 with
+      match Lua.touserdata ls 1 with
       | Some `Light_userdata ud -> ud
       | _ -> failwith "A light userdata expected" in
     test_value := p;
@@ -44,7 +44,7 @@ let test_loop () =
   Gc.finalise p_finaliser p;
 
   let () = 
-    match Lua.cpcall l func p with
+    match Lua.cpcall ls func p with
     | Lua.LUA_OK        -> ()
     | Lua.LUA_YIELD
     | Lua.LUA_ERRRUN

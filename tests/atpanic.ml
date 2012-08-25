@@ -12,26 +12,26 @@ let opt_get o =
 exception Test_exception
 let counter = ref 0;;
 
-let panicf1 l =
+let panicf1 ls =
   Printf.printf "panicf1: %d\n%!" !counter;
   raise Test_exception
 ;;
 
-let push_get_call_c_function l f =
-  Lua.pushocamlfunction l f;
-  let f' = Lua.tocfunction l (-1) in
-  Lua.pop l 1;
+let push_get_call_c_function ls f =
+  Lua.pushocamlfunction ls f;
+  let f' = Lua.tocfunction ls (-1) in
+  Lua.pop ls 1;
   match f' with
   | None -> failwith "This should be a function, something went wrong!"
   | Some f ->
       begin
         Printf.printf "Calling an OCaml function obtained from Lua: %!";
-        f l |> ignore;
+        f ls |> ignore;
       end
 ;;
 
 let test_loop () =
-  let simple_ocaml_function l =
+  let simple_ocaml_function ls =
     let () = Test_common.allocate ~random:false 479 99733 |> ignore in
       Printf.printf "OCaml function called from Lua!!!:-)\n%!";
       0 in
@@ -41,10 +41,10 @@ let test_loop () =
 
   try
     let str_list = Test_common.allocate ~random:false 479 99733 in
-    let panicf2 l =
+    let panicf2 ls =
       ignore str_list;
 
-      push_get_call_c_function l simple_ocaml_function;
+      push_get_call_c_function ls simple_ocaml_function;
 
       Printf.printf "panicf2: %d\n%!" !counter;
       raise Test_exception in

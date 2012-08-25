@@ -123,8 +123,8 @@ let _ = Callback.register_exception "Not_a_block_value" Not_a_block_value
 external tolstring__wrapper : state -> int -> string = "lua_tolstring__stub"
   (** Raises [Type_error] *)
 
-let tolstring l index =
-  try Some (tolstring__wrapper l index)
+let tolstring ls index =
+  try Some (tolstring__wrapper ls index)
   with Type_error _ -> None
 
 let tostring = tolstring
@@ -135,8 +135,8 @@ let pushstring = pushlstring
 
 (* This is the "porting" of the standard panic function from Lua source:
    lua-5.1.4/src/lauxlib.c line 639 *)
-let default_panic (l : state) =
-  let msg = tostring l (-1) in
+let default_panic (ls : state) =
+  let msg = tostring ls (-1) in
   let () =
     match msg with
     | Some msg -> Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" msg;
@@ -159,31 +159,31 @@ external pushlightuserdata : state -> 'a -> unit = "lua_pushlightuserdata__stub"
 
 external lua_pcall__wrapper : state -> int -> int -> int -> int = "lua_pcall__stub"
 
-let pcall l nargs nresults errfunc =
-  lua_pcall__wrapper l nargs nresults errfunc |> thread_status_of_int
+let pcall ls nargs nresults errfunc =
+  lua_pcall__wrapper ls nargs nresults errfunc |> thread_status_of_int
 
 exception Memory_allocation_error
 
-let cpcall l func ud =
-  let cpcall_panic l = raise Memory_allocation_error in
-  let old_panic = atpanic l cpcall_panic in
+let cpcall ls func ud =
+  let cpcall_panic ls = raise Memory_allocation_error in
+  let old_panic = atpanic ls cpcall_panic in
   try
-    match checkstack l 2 with (* ALLOCATES MEMORY, COULD FAIL! *)
+    match checkstack ls 2 with (* ALLOCATES MEMORY, COULD FAIL! *)
     | true -> begin
-        pushcfunction l func;
-        pushlightuserdata l ud; (* ALLOCATES MEMORY, COULD FAIL! *)
-        let _ = atpanic l old_panic in
-        pcall l 1 0 0
+        pushcfunction ls func;
+        pushlightuserdata ls ud; (* ALLOCATES MEMORY, COULD FAIL! *)
+        let _ = atpanic ls old_panic in
+        pcall ls 1 0 0
       end
     | false ->
-        let _ = atpanic l old_panic in
+        let _ = atpanic ls old_panic in
         LUA_ERRMEM
   with
   | Memory_allocation_error ->
-      let _ = atpanic l old_panic in
+      let _ = atpanic ls old_panic in
       LUA_ERRMEM
   | e -> 
-      let _ = atpanic l old_panic in
+      let _ = atpanic ls old_panic in
       raise e
 
 external createtable : state -> int -> int -> unit = "lua_createtable__stub"
@@ -195,15 +195,15 @@ external equal : state -> int -> int -> bool = "lua_equal__stub"
 external error : state -> 'a = "lua_error__stub"
 
 external gc_wrapper : state -> int -> int -> int = "lua_gc__stub"
-let gc l what data =
+let gc ls what data =
   let what = int_of_gc_command what in
-    gc_wrapper l what data
+    gc_wrapper ls what data
 
 external getfenv : state -> int -> unit = "lua_getfenv__stub"
 
 external getfield : state -> int -> string -> unit = "lua_getfield__stub"
 
-let getglobal l name = getfield l globalsindex name
+let getglobal ls name = getfield ls globalsindex name
 
 external getmetatable : state -> int -> bool = "lua_getmetatable__stub"
 
@@ -241,8 +241,8 @@ external lessthan : state -> int -> int -> bool = "lua_lessthan__stub"
 
 external lua_load__wrapper : state -> 'a lua_Reader -> 'a -> string -> int = "lua_load__stub"
 
-let load l reader data chunkname =
-  lua_load__wrapper l reader data chunkname |> thread_status_of_int
+let load ls reader data chunkname =
+  lua_load__wrapper ls reader data chunkname |> thread_status_of_int
 
 external newtable: state -> unit = "lua_newtable__stub"
 
@@ -251,9 +251,9 @@ external newthread : state -> state = "lua_newthread__stub"
 external default_gc : state -> int = "default_gc__stub"
 
 let make_gc_function user_gc_function =
-  let new_gc l =
-    let res = user_gc_function l in
-    let _ = default_gc l in
+  let new_gc ls =
+    let res = user_gc_function ls in
+    let _ = default_gc ls in
     res in
   new_gc
 
@@ -299,9 +299,9 @@ external rawseti : state -> int -> int -> unit = "lua_rawseti__stub"
 
 external setglobal : state -> string -> unit = "lua_setglobal__stub"
 
-let register l name f =
-  pushcfunction l f;
-  setglobal l name
+let register ls name f =
+  pushcfunction ls f;
+  setglobal ls name
 
 external remove : state -> int -> unit = "lua_remove__stub"
 
@@ -309,8 +309,8 @@ external replace : state -> int -> unit = "lua_replace__stub"
 
 external lua_resume__wrapper : state -> int -> int = "lua_resume__stub"
 
-let resume l narg =
-  lua_resume__wrapper l narg |> thread_status_of_int
+let resume ls narg =
+  lua_resume__wrapper ls narg |> thread_status_of_int
 
 external setfenv : state -> int -> bool = "lua_setfenv__stub"
 
@@ -324,14 +324,14 @@ external settop : state -> int -> unit = "lua_settop__stub"
 
 external status_aux : state -> int = "lua_status__stub"
 
-let status l = l |> status_aux |> thread_status_of_int
+let status ls = ls |> status_aux |> thread_status_of_int
 
 external toboolean : state -> int -> bool = "lua_toboolean__stub"
 
 external tocfunction_aux : state -> int -> oCamlFunction = "lua_tocfunction__stub"
 
-let tocfunction l index =
-  try Some (tocfunction_aux l index)
+let tocfunction ls index =
+  try Some (tocfunction_aux ls index)
   with Not_a_C_function -> None
 
 let toocamlfunction = tocfunction
@@ -342,15 +342,15 @@ external tonumber : state -> int -> float = "lua_tonumber__stub"
 
 external tothread_aux : state -> int -> state = "lua_tothread__stub"
 
-let tothread l index =
-  try Some (tothread_aux l index)
+let tothread ls index =
+  try Some (tothread_aux ls index)
   with Not_a_Lua_thread -> None
 
 external touserdata_aux : state -> int -> 'a = "lua_touserdata__stub"
 
-let touserdata l index =
-  if      islightuserdata l index then (Some (`Light_userdata (touserdata_aux l index)))
-  else if isuserdata      l index then (Some (`Userdata (touserdata_aux l index)))
+let touserdata ls index =
+  if      islightuserdata ls index then (Some (`Light_userdata (touserdata_aux ls index)))
+  else if isuserdata      ls index then (Some (`Userdata (touserdata_aux ls index)))
   else None
 
 external lua_type_wrapper : state -> int -> int = "lua_type__stub"

@@ -16,18 +16,18 @@ let allocate_many_small () = allocate 99991 499
 
 module LuaBookDir =
 struct
-  let readdir l =
+  let readdir ls =
     let handle : Unix.dir_handle =
-      let w = Lua.touserdata l 1 in
+      let w = Lua.touserdata ls 1 in
       match w with
       | Some `Userdata h -> h
       | _ -> failwith "Dir handle expected!" in
-    try Lua.pushstring l (Unix.readdir handle); 1
+    try Lua.pushstring ls (Unix.readdir handle); 1
     with End_of_file -> 0
 
-  let dir_gc l =
+  let dir_gc ls =
     let handle : Unix.dir_handle =
-      let w = Lua.touserdata l 1 in
+      let w = Lua.touserdata ls 1 in
       match w with
       | Some `Userdata h -> h
       | _ -> failwith "Dir handle expected!" in
@@ -37,49 +37,49 @@ struct
   let ocaml_handle_gc h =
     Unix.closedir h
 
-  let opendir l =
-    let path = LuaL.checkstring l 1 in
+  let opendir ls =
+    let path = LuaL.checkstring ls 1 in
     let handle =
       try Unix.opendir path
       with Unix.Unix_error (err, _, _) ->
-        LuaL.error l "cannot open %s: %s" path (Unix.error_message err) in
-    Lua.newuserdata l handle;
-    LuaL.getmetatable l "LuaBook.dir";
-    Lua.setmetatable l (-2) |> ignore;
+        LuaL.error ls "cannot open %s: %s" path (Unix.error_message err) in
+    Lua.newuserdata ls handle;
+    LuaL.getmetatable ls "LuaBook.dir";
+    Lua.setmetatable ls (-2) |> ignore;
     1
 
-  let allocate_ocaml_data l =
+  let allocate_ocaml_data ls =
     let data1 = allocate_many_small () in
     let data2 = allocate_a_lot () in
-    Lua.newuserdata l data1;
-    Lua.newuserdata l data2;
+    Lua.newuserdata ls data1;
+    Lua.newuserdata ls data2;
     1
 
-  let gc_compact l =
+  let gc_compact ls =
     Printf.printf "Calling Gc.compact 2 times from Lua... %!";
     Gc.compact ();
     Gc.compact ();
     Printf.printf "done!\n%!";
     0
 
-  let luaopen_dir l =
+  let luaopen_dir ls =
     (* metatable for "dir" *)
-    LuaL.newmetatable l "LuaBook.dir" |> ignore;
-    Lua.pushstring l "__gc";
-    Lua.pushocamlfunction l (Lua.make_gc_function dir_gc);
-    Lua.settable l (-3) |> ignore;
+    LuaL.newmetatable ls "LuaBook.dir" |> ignore;
+    Lua.pushstring ls "__gc";
+    Lua.pushocamlfunction ls (Lua.make_gc_function dir_gc);
+    Lua.settable ls (-3) |> ignore;
     
-    Lua.pushocamlfunction l opendir;
-    Lua.setglobal l "opendir";
+    Lua.pushocamlfunction ls opendir;
+    Lua.setglobal ls "opendir";
 
-    Lua.pushocamlfunction l readdir;
-    Lua.setglobal l "readdir";
+    Lua.pushocamlfunction ls readdir;
+    Lua.setglobal ls "readdir";
 
-    Lua.pushocamlfunction l gc_compact;
-    Lua.setglobal l "gc_compact";
+    Lua.pushocamlfunction ls gc_compact;
+    Lua.setglobal ls "gc_compact";
 
-    Lua.pushocamlfunction l allocate_ocaml_data;
-    Lua.setglobal l "allocate_ocaml_data";
+    Lua.pushocamlfunction ls allocate_ocaml_data;
+    Lua.setglobal ls "allocate_ocaml_data";
 end;;
 
 let closure () =
