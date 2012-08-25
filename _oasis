@@ -47,8 +47,9 @@ Library lua
 Document "api-lua"
   Title:                Reference for Lua API library
   Type:                 ocamlbuild (0.3)
-  InstallDir:           $htmldir/lua
+  InstallDir:           $htmldir/html
   Install:              true
+  DataFiles:            docs/style.css
   XOCamlbuildPath:      src/
   XOCamlbuildLibraries: lua
   BuildTools:           ocamldoc
