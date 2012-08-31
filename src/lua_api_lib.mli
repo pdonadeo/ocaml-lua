@@ -393,7 +393,10 @@ external newuserdata : state -> 'a -> unit = "lua_newuserdata__stub"
 
     In case you want to attach a metatable to your userdatum you {b must} include
     the "__gc" metamethod, and you {b must} create the function using
-    {! make_gc_function } described above.
+    {! make_gc_function } described above.If you want a metatable for your
+    userdatum but you don't need a "__gc", use in any case the {! default_gc }.
+    {b Don't create a userdatum with a metatable and without "__gc" or your
+    program will leak memory!}
 
     {b WARNING}: using this function could be harmful because it actually breaks
     the type system. It has the same semantics of [Obj.magic], allowing the
@@ -481,7 +484,7 @@ let push_something state =
 ;;
     ]}
     when the [push_something] function returns the Lua state, the [ocaml_value]
-    is {e not} collected and can be retrieved in a second moment from [state].
+    is {e not} collected and can be retrieved at a later time from [state].
 
     This behaviour has a major drawback: while ensuring the lifetime of objects,
     it wastes memory. All the OCaml values pushed as light userdata will in fact

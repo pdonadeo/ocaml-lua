@@ -1,6 +1,8 @@
-(* OASIS_START *)
-(* DO NOT EDIT (digest: d6f5c4668b4345b814c55019567e5976) *)
-Authors of ocaml-lua
+Authors of ocaml-lua:
+
+Martin DeMello
 Paolo Donadeo
 Sylvain Le Gall
-(* OASIS_STOP *)
+Florent Monnier
+
+Special thank to Sylvain for giving us OCaml Forge and OASIS.
