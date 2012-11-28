@@ -165,14 +165,12 @@ static void finalize_thread(value L)
 
     lua_pushnil(thread);  /* first key */
 
-    int index = 0;
     lua_State *el = NULL;
     int found = 0;
 
     /* Find the thread element to be removed */
     while (lua_next(thread, table_pos) != 0)
     {
-        index = lua_tointeger(thread, -2);
         el = lua_tothread(thread, -1);
         if (el == thread)
         {
