@@ -27,20 +27,33 @@ Flag lua51
                the first case, disable this flag.
   Default: true
 
+Flag luajit
+  Description:  Enable support for linking with LuaJIT
+  Default:      false
+
+Flag stub_debug
+  Description:  Turn ocaml debug flag on
+  Default:      true
+
 # Libraries
 Library lua
   Path:         src
   Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
   CSources:     stub.c, stub.h, aux_stub.c
   BuildDepends: unix
-  CCopt:        -O3 -Wall -ggdb -Isrc/
-  if flag(lua51)
-    CCopt+: -I/usr/include/lua5.1
-    CClib:  -llua5.1
+  CCopt:        -O3 -Wall -Isrc/
+  if flag (luajit)
+    CClib:  -lluajit-5.1 -lm
+    CCopt+: -I/usr/include/luajit-2.0 -DENABLE_LUAJIT
   else
-    CClib:  -llua -lm
+    if flag(lua51)
+      CCopt+: -I/usr/include/lua5.1
+      CClib:  -llua5.1
+    else
+      CClib:  -llua -lm
+  if flag (stub_debug)
+    CCopt+: -ggdb
   XMETADescription: OCaml binding to Lua API library
-
 
 # Documentation
 Document "api-lua"
@@ -119,4 +132,3 @@ Executable dir
 Test ci
   Run$:     flag(examples) || flag(all)
   Command:  $ci examples/ci/script.lua
-
