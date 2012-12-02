@@ -112,10 +112,6 @@ exception Not_a_C_function
 exception Not_a_Lua_thread
 exception Not_a_block_value
 
-let _ = Callback.register_exception "Lua_type_error" (Type_error "")
-let _ = Callback.register_exception "Not_a_C_function" Not_a_C_function
-let _ = Callback.register_exception "Not_a_Lua_thread" Not_a_Lua_thread
-let _ = Callback.register_exception "Not_a_block_value" Not_a_block_value
 
 (*************)
 (* FUNCTIONS *)
@@ -142,8 +138,7 @@ let default_panic (ls : state) =
     | Some msg -> Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" msg;
     | None -> failwith "default_panic: impossible pattern: this error shoud never be raised" in
   0
-
-let _ = Callback.register "default_panic" default_panic
+;;
 
 external atpanic : state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
 
@@ -374,3 +369,12 @@ external xmove : state -> state -> int -> unit = "lua_xmove__stub"
 
 external yield : state -> int -> int = "lua_yield__stub"
 
+let init =
+  lazy (
+    Callback.register_exception "Lua_type_error" (Type_error "");
+    Callback.register_exception "Not_a_C_function" Not_a_C_function;
+    Callback.register_exception "Not_a_Lua_thread" Not_a_Lua_thread;
+    Callback.register_exception "Not_a_block_value" Not_a_block_value;
+    Callback.register "default_panic" default_panic;
+  )
+;;

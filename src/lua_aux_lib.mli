@@ -233,7 +233,7 @@ external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newmetatable}luaL_newmetatable}
     documentation. *)
 
-external newstate : unit -> state = "luaL_newstate__stub"
+val newstate : unit -> state
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newstate}luaL_newstate}
     documentation. *)
 

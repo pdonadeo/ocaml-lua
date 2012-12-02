@@ -168,7 +168,12 @@ external gsub : state -> string -> string -> string -> string = "luaL_gsub__stub
 
 external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
 
-external newstate : unit -> state = "luaL_newstate__stub"
+external newstate__wrapper : unit -> state = "luaL_newstate__stub"
+
+let newstate () =
+  let () = Lazy.force (Lua_api_lib.init) in
+  newstate__wrapper ()
+;;
 
 external openlibs : state -> unit = "luaL_openlibs__stub"
 
