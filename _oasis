@@ -31,9 +31,9 @@ Flag luajit
   Description:  Enable support for linking with LuaJIT
   Default:      false
 
-Flag stub_debug
+Flag stubdebug
   Description:  Turn ocaml debug flag on
-  Default:      true
+  Default:      false
 
 # Libraries
 Library lua
@@ -51,7 +51,7 @@ Library lua
       CClib:  -llua5.1
     else
       CClib:  -llua -lm
-  if flag (stub_debug)
+  if flag (stubdebug)
     CCopt+: -ggdb
   XMETADescription: OCaml binding to Lua API library
 

@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 6fcd181547b29a4b4bcc53a4201800cf) *)
+(* DO NOT EDIT (digest: 294b35401b32e7bb606ee9c44e7d7d7e) *)
 module OASISGettext = struct
 (* # 21 "/opt/godi/build/apps/apps-oasis/work/oasis-0.3.0/src/oasis/OASISGettext.ml" *)
 
@@ -493,7 +493,7 @@ let package_default =
                       A "-ccopt";
                       A "-Isrc/"
                    ]);
-               (OASISExpr.EFlag "stub_debug",
+               (OASISExpr.EFlag "stubdebug",
                  S
                    [
                       A "-ccopt";
@@ -523,7 +523,7 @@ let package_default =
                   (OASISExpr.EAnd
                      (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
                        OASISExpr.EFlag "lua51"),
-                    OASISExpr.EFlag "stub_debug"),
+                    OASISExpr.EFlag "stubdebug"),
                  S
                    [
                       A "-ccopt";
@@ -552,7 +552,7 @@ let package_default =
                       A "-DENABLE_LUAJIT"
                    ]);
                (OASISExpr.EAnd
-                  (OASISExpr.EFlag "luajit", OASISExpr.EFlag "stub_debug"),
+                  (OASISExpr.EFlag "luajit", OASISExpr.EFlag "stubdebug"),
                  S
                    [
                       A "-ccopt";
@@ -594,7 +594,7 @@ let package_default =
                        OASISExpr.EAnd
                          (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
                            OASISExpr.EFlag "lua51")),
-                    OASISExpr.EFlag "stub_debug"),
+                    OASISExpr.EFlag "stubdebug"),
                  S
                    [
                       A "-ccopt";
