@@ -88,7 +88,6 @@ static void *custom_alloc ( void *ud,
     }
 }
 #else   /* ENABLE_LUAJIT */
-#warning KEEP IN MIND: ENABLING SUPPORT FOR LUAJIT, THREAD SAFETY IS LOST
 #endif  /* ENABLE_LUAJIT */
 
 
@@ -266,17 +265,16 @@ value luaL_newstate__stub (value unit)
 #ifndef ENABLE_LUAJIT
     lua_State *L = lua_newstate(custom_alloc, NULL);
     debug(5, "luaL_newstate__stub: lua_newstate returned %p\n", (void*)L);
-    debug(6, "    luaL_newstate__stub: calling lua_atpanic...");
-    lua_atpanic(L, &default_panic);
-    debug(6, " done!\n");
 #else
-    #warning KEEP IN MIND: ENABLING SUPPORT FOR LUAJIT, THREAD SAFETY IS LOST
+    value *check_thread_v = caml_named_value("check_thread");
+    debug(5, "luaL_newstate__stub: calling check_thread OCaml function\n");
+    caml_callback(*check_thread_v, Val_unit);
     lua_State *L = luaL_newstate();
     debug(5, "luaL_newstate__stub: luaL_newstate returned %p\n", (void*)L);
+#endif  /* ENABLE_LUAJIT */
     debug(6, "    luaL_newstate__stub: calling lua_atpanic...");
     lua_atpanic(L, &default_panic);
     debug(6, " done!\n");
-#endif  /* ENABLE_LUAJIT */
 
     /* alloc space for the register entry */
     ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));

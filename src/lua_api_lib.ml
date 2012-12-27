@@ -373,4 +373,3 @@ let typename _ = function
 external xmove : state -> state -> int -> unit = "lua_xmove__stub"
 
 external yield : state -> int -> int = "lua_yield__stub"
-

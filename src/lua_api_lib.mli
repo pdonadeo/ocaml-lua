@@ -692,4 +692,3 @@ val yield : state -> int -> int
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_yield}lua_yield}
     documentation. *)
-

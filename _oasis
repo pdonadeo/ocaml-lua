@@ -40,11 +40,11 @@ Library lua
   Path:         src
   Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
   CSources:     stub.c, stub.h, aux_stub.c
-  BuildDepends: unix
+  BuildDepends: unix, threads
   CCopt:        -O3 -Wall -Isrc/
   if flag (luajit)
-    CClib:  -lluajit-5.1 -lm
-    CCopt+: -I/usr/include/luajit-2.0 -DENABLE_LUAJIT
+    CClib:          -lluajit-5.1 -lm
+    CCopt+:         -I/usr/include/luajit-2.0 -DENABLE_LUAJIT
   else
     if flag(lua51)
       CCopt+: -I/usr/include/lua5.1
@@ -94,6 +94,15 @@ Executable cpcall
   MainIs:         cpcall.ml
   Custom:         true
   BuildDepends:   lua
+  CompiledObject: native
+
+Executable fasta_threads
+  Path:           tests
+  Build$:         flag(memory_test) || flag(all)
+  Install:        false
+  MainIs:         fasta_threads.ml
+  Custom:         true
+  BuildDepends:   threads, lua
   CompiledObject: native
 
 # VCS
