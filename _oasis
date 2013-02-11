@@ -27,20 +27,33 @@ Flag lua51
                the first case, disable this flag.
   Default: true
 
+Flag luajit
+  Description:  Enable support for linking with LuaJIT
+  Default:      false
+
+Flag stubdebug
+  Description:  Turn ocaml debug flag on
+  Default:      false
+
 # Libraries
 Library lua
   Path:         src
   Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
   CSources:     stub.c, stub.h, aux_stub.c
-  BuildDepends: unix
-  CCopt:        -O3 -Wall -ggdb -Isrc/
-  if flag(lua51)
-    CCopt+: -I/usr/include/lua5.1
-    CClib:  -llua5.1
+  BuildDepends: unix, threads
+  CCopt:        -O3 -Wall -Isrc/
+  if flag (luajit)
+    CClib:          -lluajit-5.1 -lm
+    CCopt+:         -I/usr/include/luajit-2.0 -DENABLE_LUAJIT
   else
-    CClib:  -llua -lm
+    if flag(lua51)
+      CCopt+: -I/usr/include/lua5.1
+      CClib:  -llua5.1
+    else
+      CClib:  -llua -lm
+  if flag (stubdebug)
+    CCopt+: -ggdb
   XMETADescription: OCaml binding to Lua API library
-
 
 # Documentation
 Document "api-lua"
@@ -83,6 +96,15 @@ Executable cpcall
   BuildDepends:   lua
   CompiledObject: native
 
+Executable fasta_threads
+  Path:           tests
+  Build$:         flag(memory_test) || flag(all)
+  Install:        false
+  MainIs:         fasta_threads.ml
+  Custom:         true
+  BuildDepends:   threads, lua
+  CompiledObject: native
+
 # VCS
 SourceRepository head
   Type:     git
@@ -119,4 +141,3 @@ Executable dir
 Test ci
   Run$:     flag(examples) || flag(all)
   Command:  $ci examples/ci/script.lua
-

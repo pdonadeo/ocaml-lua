@@ -138,7 +138,6 @@ let default_panic (ls : state) =
     | Some msg -> Printf.fprintf stderr "PANIC: unprotected error in call to Lua API (%s)\n%!" msg;
     | None -> failwith "default_panic: impossible pattern: this error shoud never be raised" in
   0
-;;
 
 external atpanic : state -> oCamlFunction -> oCamlFunction = "lua_atpanic__stub"
 

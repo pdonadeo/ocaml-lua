@@ -44,13 +44,17 @@ static struct custom_operations default_lua_State_ops =
 /******************************************************************************/
 /*****                           GLOBAL LOCKS                             *****/
 /******************************************************************************/
+#ifndef ENABLE_LUAJIT
 static pthread_mutex_t alloc_lock = PTHREAD_MUTEX_INITIALIZER;
-
+#else
+#warning KEEP IN MIND: ENABLING SUPPORT FOR LUAJIT, THREAD SAFETY IS LOST
+#endif  /* ENABLE_LUAJIT */
 
 
 /******************************************************************************/
 /*****                         UTILITY FUNCTIONS                          *****/
 /******************************************************************************/
+#ifndef ENABLE_LUAJIT
 static void *custom_alloc ( void *ud,
                             void *ptr,
                             size_t osize,
@@ -83,6 +87,8 @@ static void *custom_alloc ( void *ud,
         return realloc_result;
     }
 }
+#else   /* ENABLE_LUAJIT */
+#endif  /* ENABLE_LUAJIT */
 
 
 /* While "closure_data_gc" and "default_gc" are the same function (see the
@@ -256,8 +262,16 @@ value luaL_newstate__stub (value unit)
     value *default_panic_v = caml_named_value("default_panic");
 
     /* create a fresh new Lua state */
+#ifndef ENABLE_LUAJIT
     lua_State *L = lua_newstate(custom_alloc, NULL);
     debug(5, "luaL_newstate__stub: lua_newstate returned %p\n", (void*)L);
+#else
+    value *check_thread_v = caml_named_value("check_thread");
+    debug(5, "luaL_newstate__stub: calling check_thread OCaml function\n");
+    caml_callback(*check_thread_v, Val_unit);
+    lua_State *L = luaL_newstate();
+    debug(5, "luaL_newstate__stub: luaL_newstate returned %p\n", (void*)L);
+#endif  /* ENABLE_LUAJIT */
     debug(6, "    luaL_newstate__stub: calling lua_atpanic...");
     lua_atpanic(L, &default_panic);
     debug(6, " done!\n");
