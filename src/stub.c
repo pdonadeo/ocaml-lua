@@ -20,19 +20,13 @@
 /******************************************************************************/
 /*****                           DEBUG FUNCTION                           *****/
 /******************************************************************************/
-#ifndef NO_DEBUG
+#ifdef ENABLE_DEBUG
 static int msglevel = 10; /* the higher, the more messages... */
 #endif
 
-#if defined(NO_DEBUG) && defined(__GNUC__)
-/* Nothing */
-#else
+#if defined(ENABLE_DEBUG)
 void debug(int level, char* format, ...)
 {
-#ifdef NO_DEBUG
-    /* Empty body, so a good compiler will optimise calls
-       to debug away */
-#else
     va_list args;
 
     if (level > msglevel)
@@ -42,9 +36,15 @@ void debug(int level, char* format, ...)
     vfprintf(stderr, format, args);
     fflush(stderr);
     va_end(args);
-#endif /* NO_DEBUG */
+#ifdef ENABLE_DEBUG
+#else
+    /* Empty body, so a good compiler will optimise calls
+       to debug away */
+#endif /* ENABLE_DEBUG */
 }
-#endif /* NO_DEBUG && __GNUC__ */
+#else
+/* Nothing */
+#endif /* ENABLE_DEBUG */
 
 
 /******************************************************************************/

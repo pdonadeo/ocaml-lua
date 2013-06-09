@@ -11,6 +11,7 @@ BuildTools:   ocamlbuild
 Plugins:      META (0.3),
               DevFiles (0.3)
 Homepage:     http://ocaml-lua.forge.ocamlcore.org
+PostConfCommand:    ./post_conf.ml
 
 Description:
   Lua is a powerful, light-weight programming language designed for extending
@@ -22,17 +23,12 @@ Description:
   .
   [Lua homepage](http://www.lua.org)
 
-Flag lua51
-  Description: The pkg-config name of lua can be lua5.1 or lua. If you are in
-               the first case, disable this flag.
-  Default: true
-
 Flag luajit
   Description:  Enable support for linking with LuaJIT
   Default:      false
 
 Flag stubdebug
-  Description:  Turn ocaml debug flag on
+  Description:  Compile C stubs with -ggdb and with massively verbose debug messages in console
   Default:      false
 
 # Libraries
@@ -41,18 +37,10 @@ Library lua
   Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
   CSources:     stub.c, stub.h, aux_stub.c
   BuildDepends: unix, threads
-  CCopt:        -O3 -Wall -Isrc/
-  if flag (luajit)
-    CClib:          -lluajit-5.1 -lm
-    CCopt+:         -I/usr/include/luajit-2.0 -DENABLE_LUAJIT
-  else
-    if flag(lua51)
-      CCopt+: -I/usr/include/lua5.1
-      CClib:  -llua5.1
-    else
-      CClib:  -llua -lm
+  CCopt:  $(my_ccopt)
+  CClib:  $(my_cclib)
   if flag (stubdebug)
-    CCopt+: -ggdb
+    CCopt+: -ggdb -DENABLE_DEBUG
   XMETADescription: OCaml binding to Lua API library
 
 # Documentation
@@ -81,6 +69,7 @@ Flag memory_test
 Executable atpanic
   Path:           tests
   Build$:         flag(memory_test) || flag(all)
+  CClib:          $(osx_cclib)
   Install:        false
   MainIs:         atpanic.ml
   Custom:         true
@@ -90,6 +79,7 @@ Executable atpanic
 Executable cpcall
   Path:           tests
   Build$:         flag(memory_test) || flag(all)
+  CClib:          $(osx_cclib)
   Install:        false
   MainIs:         cpcall.ml
   Custom:         true
@@ -99,6 +89,7 @@ Executable cpcall
 Executable fasta_threads
   Path:           tests
   Build$:         flag(memory_test) || flag(all)
+  CClib:          $(osx_cclib)
   Install:        false
   MainIs:         fasta_threads.ml
   Custom:         true
@@ -123,6 +114,7 @@ Flag examples
 Executable ci
   Path:             examples/ci
   Build$:           flag(examples) || flag(all)
+  CClib:          $(osx_cclib)
   Install:          false
   MainIs:           ci.ml
   Custom:           true
@@ -132,6 +124,7 @@ Executable ci
 Executable dir
   Path:             examples/lua_book
   Build$:           flag(examples) || flag(all)
+  CClib:            $(osx_cclib)
   Install:          false
   MainIs:           dir.ml
   Custom:           true

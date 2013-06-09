@@ -1,0 +1,63 @@
+--- myocamlbuild.ml	2013-01-28 07:33:27.203836729 +0000
++++ myocamlbuild.ml.new	2013-01-28 07:32:18.627740773 +0000
+@@ -184,26 +184,26 @@
+              filename)
+       end
+ 
+-  let var_get name env =
+-    let rec var_expand str =
+-      let buff =
+-        Buffer.create ((String.length str) * 2)
+-      in
+-        Buffer.add_substitute
+-          buff
+-          (fun var ->
+-             try
+-               var_expand (MapString.find var env)
+-             with Not_found ->
+-               failwith
+-                 (Printf.sprintf
+-                    "No variable %s defined when trying to expand %S."
+-                    var
+-                    str))
+-          str;
+-        Buffer.contents buff
++  let rec var_expand str env =
++    let buff =
++      Buffer.create ((String.length str) * 2)
+     in
+-      var_expand (MapString.find name env)
++      Buffer.add_substitute
++        buff
++        (fun var ->
++           try
++             var_expand (MapString.find var env) env
++           with Not_found ->
++             failwith
++               (Printf.sprintf
++                  "No variable %s defined when trying to expand %S."
++                  var
++                  str))
++        str;
++      Buffer.contents buff
++
++  let var_get name env =
++    var_expand (MapString.find name env) env
+ 
+   let var_choose lst env =
+     OASISExpr.choose
+@@ -460,7 +460,13 @@
+                  let spec = 
+                    BaseEnvLight.var_choose cond_specs env
+                  in
+-                   flag tags & spec)
++                 let rec eval_specs = 
++                   function 
++                     | S lst -> S (List.map eval_specs lst)
++                     | A str -> A (BaseEnvLight.var_expand str env)
++                     | spec -> spec
++                 in
++                   flag tags & (eval_specs spec))
+               t.flags
+         | _ -> 
+             ()

@@ -4,13 +4,13 @@
 /******************************************************************************/
 /*****                           DEBUG FUNCTION                           *****/
 /******************************************************************************/
-/* Comment out the following line to enable debug */
-#define NO_DEBUG
+/* Uncomment the following line to enable debug                               */
+/* #define ENABLE_DEBUG */
 
-#if defined(NO_DEBUG) && defined(__GNUC__)
-#define debug(level, format, args...) ((void)0)
-#else
+#if defined(ENABLE_DEBUG)
 void debug(int level, char *format, ...);
+#else
+#define debug(level, format, args...) ((void)0)
 #endif
 
 

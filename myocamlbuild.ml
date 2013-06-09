@@ -1,7 +1,7 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 42bdcccdfec7a944800fd257baee1f53) *)
+(* DO NOT EDIT (digest: 6f98617a1caf2bbe10b98dca4833a6d0) *)
 module OASISGettext = struct
-(* # 21 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/oasis/OASISGettext.ml" *)
+(* # 21 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/oasis/OASISGettext.ml" *)
 
   let ns_ str =
     str
@@ -24,7 +24,7 @@ module OASISGettext = struct
 end
 
 module OASISExpr = struct
-(* # 21 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/oasis/OASISExpr.ml" *)
+(* # 21 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/oasis/OASISExpr.ml" *)
 
 
 
@@ -116,7 +116,7 @@ end
 
 # 117 "myocamlbuild.ml"
 module BaseEnvLight = struct
-(* # 21 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/base/BaseEnvLight.ml" *)
+(* # 21 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/base/BaseEnvLight.ml" *)
 
   module MapString = Map.Make(String)
 
@@ -184,26 +184,26 @@ module BaseEnvLight = struct
              filename)
       end
 
-  let var_get name env =
-    let rec var_expand str =
-      let buff =
-        Buffer.create ((String.length str) * 2)
-      in
-        Buffer.add_substitute
-          buff
-          (fun var ->
-             try
-               var_expand (MapString.find var env)
-             with Not_found ->
-               failwith
-                 (Printf.sprintf
-                    "No variable %s defined when trying to expand %S."
-                    var
-                    str))
-          str;
-        Buffer.contents buff
+  let rec var_expand str env =
+    let buff =
+      Buffer.create ((String.length str) * 2)
     in
-      var_expand (MapString.find name env)
+      Buffer.add_substitute
+        buff
+        (fun var ->
+           try
+             var_expand (MapString.find var env) env
+           with Not_found ->
+             failwith
+               (Printf.sprintf
+                  "No variable %s defined when trying to expand %S."
+                  var
+                  str))
+        str;
+      Buffer.contents buff
+
+  let var_get name env =
+    var_expand (MapString.find name env) env
 
   let var_choose lst env =
     OASISExpr.choose
@@ -214,7 +214,7 @@ end
 
 # 215 "myocamlbuild.ml"
 module MyOCamlbuildFindlib = struct
-(* # 21 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
+(* # 21 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
 
   (** OCamlbuild extension, copied from 
     * http://brion.inria.fr/gallium/index.php/Using_ocamlfind_with_ocamlbuild
@@ -323,7 +323,7 @@ module MyOCamlbuildFindlib = struct
 end
 
 module MyOCamlbuildBase = struct
-(* # 21 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+(* # 21 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
 
   (** Base functions for writing myocamlbuild.ml
       @author Sylvain Le Gall
@@ -339,7 +339,7 @@ module MyOCamlbuildBase = struct
   type name = string 
   type tag = string 
 
-(* # 56 "/home/paolo/.opam/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
+(* # 56 "/home/paolo/.opam__LUA/4.00.1/build/oasis.0.3.0/src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
 
   type t =
       {
@@ -458,7 +458,13 @@ module MyOCamlbuildBase = struct
                  let spec = 
                    BaseEnvLight.var_choose cond_specs env
                  in
-                   flag tags & spec)
+                 let rec eval_specs = 
+                   function 
+                     | S lst -> S (List.map eval_specs lst)
+                     | A str -> A (BaseEnvLight.var_expand str env)
+                     | spec -> spec
+                 in
+                   flag tags & (eval_specs spec))
               t.flags
         | _ -> 
             ()
@@ -483,163 +489,42 @@ let package_default =
        [
           (["oasis_library_lua_ccopt"; "compile"],
             [
-               (OASISExpr.EBool true,
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/"
-                   ]);
+               (OASISExpr.EBool true, S [A "-ccopt"; A "${my_ccopt}"]);
                (OASISExpr.EFlag "stubdebug",
                  S
                    [
                       A "-ccopt";
-                      A "-O3";
+                      A "${my_ccopt}";
                       A "-ccopt";
-                      A "-Wall";
+                      A "-ggdb";
                       A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-ggdb"
-                   ]);
-               (OASISExpr.EAnd
-                  (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                    OASISExpr.EFlag "lua51"),
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/lua5.1"
-                   ]);
-               (OASISExpr.EAnd
-                  (OASISExpr.EAnd
-                     (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                       OASISExpr.EFlag "lua51"),
-                    OASISExpr.EFlag "stubdebug"),
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/lua5.1";
-                      A "-ccopt";
-                      A "-ggdb"
-                   ]);
-               (OASISExpr.EFlag "luajit",
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/luajit-2.0";
-                      A "-ccopt";
-                      A "-DENABLE_LUAJIT"
-                   ]);
-               (OASISExpr.EAnd
-                  (OASISExpr.EFlag "luajit", OASISExpr.EFlag "stubdebug"),
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/luajit-2.0";
-                      A "-ccopt";
-                      A "-DENABLE_LUAJIT";
-                      A "-ccopt";
-                      A "-ggdb"
-                   ]);
-               (OASISExpr.EAnd
-                  (OASISExpr.EFlag "luajit",
-                    OASISExpr.EAnd
-                      (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                        OASISExpr.EFlag "lua51")),
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/luajit-2.0";
-                      A "-ccopt";
-                      A "-DENABLE_LUAJIT";
-                      A "-ccopt";
-                      A "-I/usr/include/lua5.1"
-                   ]);
-               (OASISExpr.EAnd
-                  (OASISExpr.EAnd
-                     (OASISExpr.EFlag "luajit",
-                       OASISExpr.EAnd
-                         (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                           OASISExpr.EFlag "lua51")),
-                    OASISExpr.EFlag "stubdebug"),
-                 S
-                   [
-                      A "-ccopt";
-                      A "-O3";
-                      A "-ccopt";
-                      A "-Wall";
-                      A "-ccopt";
-                      A "-Isrc/";
-                      A "-ccopt";
-                      A "-I/usr/include/luajit-2.0";
-                      A "-ccopt";
-                      A "-DENABLE_LUAJIT";
-                      A "-ccopt";
-                      A "-I/usr/include/lua5.1";
-                      A "-ccopt";
-                      A "-ggdb"
+                      A "-DENABLE_DEBUG"
                    ])
             ]);
           (["oasis_library_lua_cclib"; "link"],
-            [
-               (OASISExpr.EBool true, S []);
-               (OASISExpr.EFlag "luajit",
-                 S [A "-cclib"; A "-lluajit-5.1"; A "-cclib"; A "-lm"]);
-               (OASISExpr.EAnd
-                  (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                    OASISExpr.EFlag "lua51"),
-                 S [A "-cclib"; A "-llua5.1"]);
-               (OASISExpr.EAnd
-                  (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                    OASISExpr.ENot (OASISExpr.EFlag "lua51")),
-                 S [A "-cclib"; A "-llua"; A "-cclib"; A "-lm"])
-            ]);
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${my_cclib}"])]);
           (["oasis_library_lua_cclib"; "ocamlmklib"; "c"],
-            [
-               (OASISExpr.EBool true, S []);
-               (OASISExpr.EFlag "luajit", S [A "-lluajit-5.1"; A "-lm"]);
-               (OASISExpr.EAnd
-                  (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                    OASISExpr.EFlag "lua51"),
-                 S [A "-llua5.1"]);
-               (OASISExpr.EAnd
-                  (OASISExpr.ENot (OASISExpr.EFlag "luajit"),
-                    OASISExpr.ENot (OASISExpr.EFlag "lua51")),
-                 S [A "-llua"; A "-lm"])
-            ])
+            [(OASISExpr.EBool true, S [A "${my_cclib}"])]);
+          (["oasis_executable_atpanic_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${osx_cclib}"])]);
+          (["oasis_executable_atpanic_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "${osx_cclib}"])]);
+          (["oasis_executable_cpcall_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${osx_cclib}"])]);
+          (["oasis_executable_cpcall_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "${osx_cclib}"])]);
+          (["oasis_executable_fasta_threads_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${osx_cclib}"])]);
+          (["oasis_executable_fasta_threads_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "${osx_cclib}"])]);
+          (["oasis_executable_ci_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${osx_cclib}"])]);
+          (["oasis_executable_ci_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "${osx_cclib}"])]);
+          (["oasis_executable_dir_cclib"; "link"],
+            [(OASISExpr.EBool true, S [A "-cclib"; A "${osx_cclib}"])]);
+          (["oasis_executable_dir_cclib"; "ocamlmklib"; "c"],
+            [(OASISExpr.EBool true, S [A "${osx_cclib}"])])
        ];
      includes =
        [
@@ -652,6 +537,6 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 656 "myocamlbuild.ml"
+# 535 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;
