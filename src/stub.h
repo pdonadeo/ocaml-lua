@@ -32,10 +32,17 @@ void debug(int level, char *format, ...);
 /******************************************************************************/
 /*****                          DATA STRUCTURES                           *****/
 /******************************************************************************/
+typedef struct allocator_data
+{
+    int max_memory;
+    int used_memory;
+} allocator_data;
+
 typedef struct ocaml_data
 {
     value state_value;
     value panic_callback;
+    allocator_data ad;
 } ocaml_data;
 
 

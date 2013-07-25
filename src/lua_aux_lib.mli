@@ -10,7 +10,7 @@ open Lua_api_lib
 
 (** Here is a list of functions of which you should read documentation:
 - {b Missing functions}: [luaL_addsize], [luaL_prepbuffer]
-- {b Notably different functions}: {!error}
+- {b Notably different functions}: {!error}, {!newstate}
 - {b Special remarks}: {!checklstring}
 
 *)
@@ -233,9 +233,19 @@ external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newmetatable}luaL_newmetatable}
     documentation. *)
 
-val newstate : unit -> state
+val newstate : ?max_memory_size:int -> unit -> state
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_newstate}luaL_newstate}
-    documentation. *)
+    documentation.
+
+    {b NOTE}: this function is {b not} a binding of the original luaL_newstate,
+    it's rather an OCaml function with the same semantics.
+
+    An optional parameter, not available in the original luaL_newstate, provide
+    the user the chance to specify the maximum memory (in byte) that Lua is allowed to
+    allocate for this state.
+
+    {b Warning}: when the library is built with LuaJIT [max_memory_size] is
+    ignored! *)
 
 external openlibs : Lua_api_lib.state -> unit = "luaL_openlibs__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_openlibs}luaL_openlibs}

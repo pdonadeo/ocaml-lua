@@ -193,11 +193,12 @@ external gsub : state -> string -> string -> string -> string = "luaL_gsub__stub
 
 external newmetatable : state -> string -> bool = "luaL_newmetatable__stub"
 
-external newstate__wrapper : unit -> state = "luaL_newstate__stub"
+external newstate__wrapper : int -> unit -> state = "luaL_newstate__stub"
 
-let newstate () =
+let newstate ?(max_memory_size) () =
   let () = Lazy.force (Lua_api_lib.init) in
-  newstate__wrapper ()
+  let m = match max_memory_size with | Some i -> i | None -> 0 in
+  newstate__wrapper m ()
 ;;
 
 external openlibs : state -> unit = "luaL_openlibs__stub"

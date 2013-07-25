@@ -60,9 +60,11 @@ static void *custom_alloc ( void *ud,
                             size_t osize,
                             size_t nsize )
 {
-    (void)ud;
-    (void)osize;  /* not used */
     void *realloc_result = NULL;
+
+    allocator_data *ad = (allocator_data *)ud;
+    debug(6, "custom_alloc: max_memory = %d\n", ad->max_memory);
+    debug(6, "custom_alloc: used_memory = %d\n", ad->used_memory);
 
     pthread_mutex_lock(&alloc_lock);
 
@@ -72,6 +74,9 @@ static void *custom_alloc ( void *ud,
     {
         debug(6, "custom_alloc: calling free(%p)\n", ptr);
         free(ptr);
+        debug(7, "custom_alloc: OLD value of used_memory = %d\n", ad->used_memory);
+        ad->used_memory -= osize;    /* substract old size from used memory */
+        debug(7, "custom_alloc: NEW value of used_memory = %d\n", ad->used_memory);
         debug(6, "custom_alloc: returning NULL\n");
 
         pthread_mutex_unlock(&alloc_lock);
@@ -79,8 +84,23 @@ static void *custom_alloc ( void *ud,
     }
     else
     {
+        if (ad->max_memory > 0 &&
+            ad->used_memory + (nsize - osize) > ad->max_memory)
+        {
+            /* too much memory in use */
+            debug(6, "custom_alloc: TOO MUCH MEMORY ALLOCATED, returning NULL\n");
+            pthread_mutex_unlock(&alloc_lock);
+            return NULL;
+        }
         debug(6, "custom_alloc: calling caml_stat_resize(%p, %d)\n", ptr, nsize);
         realloc_result = caml_stat_resize(ptr, nsize);
+        if (realloc_result)
+        {
+            /* reallocation successful? */
+            debug(7, "custom_alloc: OLD value of used_memory = %d\n", ad->used_memory);
+            ad->used_memory += (nsize - osize);
+            debug(7, "custom_alloc: NEW value of used_memory = %d\n", ad->used_memory);
+        }
         debug(6, "custom_alloc: returning %p\n", realloc_result);
 
         pthread_mutex_unlock(&alloc_lock);
@@ -252,18 +272,31 @@ value luaL_checklong__stub(value L, value narg)
 }
 
 CAMLprim
-value luaL_newstate__stub (value unit)
+value luaL_newstate__stub (value max_memory_size, value unit)
 {
-    CAMLparam1(unit);
+    CAMLparam2(max_memory_size, unit);
     CAMLlocal2(v_L, v_L_mirror);
 
     debug(3, "luaL_newstate__stub: BEGIN\n");
 
     value *default_panic_v = caml_named_value("default_panic");
 
+    /* alloc space for the register entry */
+    ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
+
+    /* protect the panic_callback portion and assign with the default value */
+    caml_register_global_root(&(data->panic_callback));
+    data->panic_callback = *default_panic_v;
+
     /* create a fresh new Lua state */
 #ifndef ENABLE_LUAJIT
-    lua_State *L = lua_newstate(custom_alloc, NULL);
+    int max_memory = Int_val(max_memory_size);
+
+    /* init the allocator data */
+    data->ad.max_memory = max_memory;
+    data->ad.used_memory = 0;
+
+    lua_State *L = lua_newstate(custom_alloc, (void*)&(data->ad));
     debug(5, "luaL_newstate__stub: lua_newstate returned %p\n", (void*)L);
 #else
     value *check_thread_v = caml_named_value("check_thread");
@@ -275,11 +308,6 @@ value luaL_newstate__stub (value unit)
     debug(6, "    luaL_newstate__stub: calling lua_atpanic...");
     lua_atpanic(L, &default_panic);
     debug(6, " done!\n");
-
-    /* alloc space for the register entry */
-    ocaml_data *data = (ocaml_data*)caml_stat_alloc(sizeof(ocaml_data));
-    caml_register_global_root(&(data->panic_callback));
-    data->panic_callback = *default_panic_v;
 
     /* wrap the lua_State* in a custom object */
     v_L = caml_alloc_custom(&lua_State_ops, sizeof(lua_State *), 1, 10);
