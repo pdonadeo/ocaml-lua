@@ -19,6 +19,8 @@ documentation](http://www.lua.org/manual/5.1/manual.html#3).
 In this moment only the version 5.1.x is supported, while 5.2.x is on my TODO
 list. In general my plan is to support newest versions, but not the oldest ones.
 
+[LuaJIT](http://luajit.org/luajit.html) 2.0.0 for Lua 5.1 is also supported.
+
 
 Intended audience
 -----------------
@@ -68,8 +70,13 @@ Building and installing the library
 To build the library the following requirements are mandatory:
 
 * lua 5.1.x
-* ocaml (>= 3.12.1) (but OCaml 4.0.x was not tested!)
+* ocaml (>= 3.12.1)
 * findlib
+
+The library can optionally be compiled and linked with LuaJIT. In this case an
+additional requirement is:
+
+* LuaJIT 2.0.0 for Lua 5.1
 
 To compile use the usual spell:
 

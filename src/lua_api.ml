@@ -15,6 +15,15 @@
 
   My plan is to support newest versions, but not the oldest ones.
 
+  This library can also be linked to LuaJIT, the just-in-time compiler by Mike
+  Pall, available {{:http://luajit.org/luajit.html}here}. Compiling with LuaJIT
+  produce a much faster Lua virtual machine, but the user loses:{ol
+    {- multi threading: see chapter below;}
+    {- max memory limit for a virtual machine: see {!Lua_aux_lib.newstate}.}
+  }
+
+  The tested version of LuaJIT is 2.0.0 for Lua 5.1.
+
   The Lua API library is composed by two parts: the
   {{:http://www.lua.org/manual/5.1/manual.html#3}low level API}, providing all
   the functions you need to interact with the Lua runtime, and the
