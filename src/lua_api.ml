@@ -82,7 +82,7 @@ lua_State* push_hello () {
     a Lua state [Lua_api_lib.state] between threads, because Lua itself doesn't
     allow this.
 
-    {b Warning:}: if you built this binding with LuaJIT instead of the regular
+    {b Warning}: if you built this binding with LuaJIT instead of the regular
     Lua, you {i lose} the thread safety at all. You still can use threads in
     your program but you can call functions from this library in only one
     thread. If you accidentally call functions from several threads, the second
