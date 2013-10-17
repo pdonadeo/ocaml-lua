@@ -312,7 +312,7 @@ external setfield : state -> int -> string -> unit = "lua_setfield__stub"
 
 external setmetatable : state -> int -> int = "lua_setmetatable__stub"
 
-external settable : state -> int -> int = "lua_settable__stub"
+external settable : state -> int -> unit = "lua_settable__stub"
 
 external settop : state -> int -> unit = "lua_settop__stub"
 

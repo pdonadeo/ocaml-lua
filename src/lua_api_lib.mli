@@ -604,7 +604,7 @@ external setmetatable : state -> int -> int = "lua_setmetatable__stub"
     {{:http://www.lua.org/manual/5.1/manual.html#lua_setmetatable}lua_setmetatable}
     documentation. *)
 
-external settable : state -> int -> int = "lua_settable__stub"
+external settable : state -> int -> unit = "lua_settable__stub"
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_settable}lua_settable}
     documentation. *)
