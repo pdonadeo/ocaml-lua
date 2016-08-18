@@ -1,4 +1,4 @@
-OASISFormat:  0.3
+OASISFormat:  0.4
 OCamlVersion: >= 3.12.1
 Name:         ocaml-lua
 Version:      1.2

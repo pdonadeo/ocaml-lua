@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: ded5b5adad7e367a7babc678fa3054c7)
-# Ignore VCS directories, you can use the same kind of rule outside 
-# OASIS_START/STOP if you want to exclude directories that contains 
+# DO NOT EDIT (digest: c7560c1c332321c5f86fbfca11ba0369)
+# Ignore VCS directories, you can use the same kind of rule outside
+# OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
+true: annot, bin_annot
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
 ".bzr": -traverse
@@ -15,7 +16,7 @@
 "_darcs": not_hygienic
 # Library lua
 "src/lua.cmxs": use_lua
-<src/*.ml{,i}>: oasis_library_lua_ccopt
+<src/*.ml{,i,y}>: oasis_library_lua_ccopt
 "src/stub.c": oasis_library_lua_ccopt
 "src/aux_stub.c": oasis_library_lua_ccopt
 <src/lua.{cma,cmxa}>: oasis_library_lua_cclib
@@ -24,49 +25,49 @@
 "src/liblua_stubs.a": oasis_library_lua_cclib
 "src/dlllua_stubs.so": oasis_library_lua_cclib
 <src/lua.{cma,cmxa}>: use_liblua_stubs
-<src/*.ml{,i}>: pkg_threads
-<src/*.ml{,i}>: pkg_unix
-"src/stub.c": pkg_threads
-"src/stub.c": pkg_unix
-"src/aux_stub.c": pkg_threads
-"src/aux_stub.c": pkg_unix
+<src/*.ml{,i,y}>: package(threads)
+<src/*.ml{,i,y}>: package(unix)
+"src/stub.c": package(threads)
+"src/stub.c": package(unix)
+"src/aux_stub.c": package(threads)
+"src/aux_stub.c": package(unix)
 # Executable atpanic
 "tests/atpanic.native": oasis_executable_atpanic_cclib
+"tests/atpanic.native": package(threads)
+"tests/atpanic.native": package(unix)
 "tests/atpanic.native": use_lua
-"tests/atpanic.native": pkg_threads
-"tests/atpanic.native": pkg_unix
 "tests/atpanic.native": custom
 # Executable cpcall
 "tests/cpcall.native": oasis_executable_cpcall_cclib
+"tests/cpcall.native": package(threads)
+"tests/cpcall.native": package(unix)
 "tests/cpcall.native": use_lua
-"tests/cpcall.native": pkg_threads
-"tests/cpcall.native": pkg_unix
 "tests/cpcall.native": custom
 # Executable fasta_threads
 "tests/fasta_threads.native": oasis_executable_fasta_threads_cclib
+"tests/fasta_threads.native": package(threads)
+"tests/fasta_threads.native": package(unix)
 "tests/fasta_threads.native": use_lua
-"tests/fasta_threads.native": pkg_threads
-"tests/fasta_threads.native": pkg_unix
-<tests/*.ml{,i}>: use_lua
-<tests/*.ml{,i}>: pkg_threads
-<tests/*.ml{,i}>: pkg_unix
+<tests/*.ml{,i,y}>: package(threads)
+<tests/*.ml{,i,y}>: package(unix)
+<tests/*.ml{,i,y}>: use_lua
 "tests/fasta_threads.native": custom
 # Executable ci
 "examples/ci/ci.native": oasis_executable_ci_cclib
+"examples/ci/ci.native": package(threads)
+"examples/ci/ci.native": package(unix)
 "examples/ci/ci.native": use_lua
-"examples/ci/ci.native": pkg_threads
-"examples/ci/ci.native": pkg_unix
-<examples/ci/*.ml{,i}>: use_lua
-<examples/ci/*.ml{,i}>: pkg_threads
-<examples/ci/*.ml{,i}>: pkg_unix
+<examples/ci/*.ml{,i,y}>: package(threads)
+<examples/ci/*.ml{,i,y}>: package(unix)
+<examples/ci/*.ml{,i,y}>: use_lua
 "examples/ci/ci.native": custom
 # Executable dir
 "examples/lua_book/dir.native": oasis_executable_dir_cclib
+"examples/lua_book/dir.native": package(threads)
+"examples/lua_book/dir.native": package(unix)
 "examples/lua_book/dir.native": use_lua
-"examples/lua_book/dir.native": pkg_threads
-"examples/lua_book/dir.native": pkg_unix
-<examples/lua_book/*.ml{,i}>: use_lua
-<examples/lua_book/*.ml{,i}>: pkg_threads
-<examples/lua_book/*.ml{,i}>: pkg_unix
+<examples/lua_book/*.ml{,i,y}>: package(threads)
+<examples/lua_book/*.ml{,i,y}>: package(unix)
+<examples/lua_book/*.ml{,i,y}>: use_lua
 "examples/lua_book/dir.native": custom
 # OASIS_STOP

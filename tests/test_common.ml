@@ -88,11 +88,11 @@ let allocate ?(random=true) how_many str_len =
   let l = ref [] in
   for i = 1 to how_many
   do
-    let s = String.create str_len in
+    let s = Bytes.create str_len in
     for j = 0 to (str_len - 1) do
       if random
-      then s.[j] <- Char.chr (Random.int 256)
-      else s.[j] <- 'x'
+      then Bytes.set s j (Char.chr (Random.int 256))
+      else Bytes.set s j 'x'
     done;
     l := s::(!l);
   done;

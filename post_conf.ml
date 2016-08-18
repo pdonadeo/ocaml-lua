@@ -15,7 +15,7 @@ module SMap = Map.Make(String);;
 let slurp_channel channel =
   let buffer_size = 4096 in
   let buffer = Buffer.create buffer_size in
-  let string = String.create buffer_size in
+  let string = Bytes.create buffer_size in
   let chars_read = ref 1 in
   while !chars_read <> 0 do
     chars_read := input channel string 0 buffer_size;
@@ -33,7 +33,7 @@ let slurp_file filename =
   result
 ;;
 
-let length = String.length;;
+let length = Bytes.length;;
 
 exception Stop of int;;
 
@@ -169,7 +169,7 @@ let input_all fd =
   let rec loop acc total buf ofs =
     let n = Unix.read fd buf ofs (buf_len - ofs) in
     if n = 0 then
-      let res = String.create total in
+      let res = Bytes.create total in
       let pos = total - ofs in
       let _ = String.blit buf 0 res pos ofs in
       let coll pos buf =
@@ -182,10 +182,10 @@ let input_all fd =
       let new_ofs = ofs + n in
       let new_total = total + n in
       if new_ofs = buf_len then
-        loop (buf :: acc) new_total (String.create buf_len) 0
+        loop (buf :: acc) new_total (Bytes.create buf_len) 0
       else
         loop acc new_total buf new_ofs in
-  loop [] 0 (String.create buf_len) 0
+  loop [] 0 (Bytes.create buf_len) 0
 ;;
 
 let spawn args =
@@ -347,10 +347,12 @@ let search_options_for_lua cc base_options prefix setup_data_map =
       (* Linux *)
       let ccopt_to_try = [|
           [| "-O3"; "-Wall"; "-Isrc/"; "-I/usr/include/lua5.1" |];
+          [| "-O3"; "-Wall"; "-Isrc/"; "-I/usr/include/lua-5.1" |];
           [| "-O3"; "-Wall"; "-Isrc/" |]
         |] in
       let cclib_to_try = [|
           [| "-llua5.1" |];
+          [| "-llua-5.1" |];
           [| "-llua"; "-lm"|]
         |] in
         ccopt_to_try, cclib_to_try

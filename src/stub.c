@@ -233,7 +233,7 @@ STUB_STATE_INT_INT_VOID(lua_createtable, narr, nrec)
 
 static int writer_function(lua_State *L, const void *p, size_t sz, void* ud)
 {
-    CAMLlocal2(writer_status_value, buffer);
+    value writer_status_value, buffer;
 
     debug(3, "writer_function(%p, %p, %d, %p)\n", L, p, sz, ud);
 
@@ -495,7 +495,7 @@ value lua_pushcfunction__stub(value L, value f)
     value *ocaml_closure = (value*)lua_newuserdata(LL, sizeof(value));
     debug(5, "lua_pushcfunction__stub: calling lua_newuserdata(%p, %d) -> %p\n",
              (void*)LL, sizeof(value), (void*)ocaml_closure);
-    
+
     caml_register_global_root(ocaml_closure);
     *ocaml_closure = f;
 
