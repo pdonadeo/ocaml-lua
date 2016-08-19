@@ -336,11 +336,13 @@ let search_options_for_lua cc base_options prefix setup_data_map =
           let include_dir = homebrew_prefix ^ "/" ^ "include" in
           let lib_dir = homebrew_prefix ^ "/" ^ "lib" in
           let ccopt_to_try = [|
-              [| "-O3"; "-Wall"; "-Isrc/"; "-I" ^ include_dir |];
-            |] in
+            [| "-O3"; "-Wall"; "-Isrc/"; "-I" ^ include_dir |];
+            [| "-O3"; "-Wall"; "-Isrc/"; "-I" ^ include_dir ^ "/lua-5.1" |];
+          |] in
           let cclib_to_try = [|
-              [| "-L" ^ lib_dir; "-llua"; "-lm"|]
-            |] in
+            [| "-L" ^ lib_dir; "-llua"; "-lm"|];
+            [| "-L" ^ lib_dir; "-llua5.1"; "-lm"|];
+          |] in
           ccopt_to_try, cclib_to_try
         end
     end else begin
