@@ -7,18 +7,8 @@ authors: [
   "Paolo Donadeo"
   "Sylvain Le Gall"
 ]
-license: "MIT"
 build: [
-  [
-    "./configure"
-    "--enable-docs"
-    "--prefix"
-    prefix
-    "--docdir"
-    "%{doc}%/ocaml-lua"
-    "--libdir"
-    "%{lib}%/ocaml-lua"
-  ]
+  ["./configure" "--docdir" doc]
   [make]
   [make "doc"]
 ]

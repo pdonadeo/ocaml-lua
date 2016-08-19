@@ -1,7 +1,7 @@
 OASISFormat:  0.4
 OCamlVersion: >= 4.02.1
 Name:         ocaml-lua
-Version:      1.3
+Version:      1.4
 Synopsis:     Lua bindings
 Authors:      Paolo Donadeo, Sylvain Le Gall
 Maintainers:  Paolo Donadeo <p.donadeo@gmail.com>

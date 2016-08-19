@@ -35,6 +35,7 @@ depexts: [
   [["ubuntu"] ["liblua5.1-0-dev"]]
   [["fedora"] ["compat-lua-devel"]]
   [["centos"] ["lua-devel"]]
+  [["osx" "homebrew"] ["lua51"]]
 ]
-available: [ os = "linux" & ocaml-version >= "4.02.1" & ocaml-version < "4.03" ]
+available: [ ocaml-version >= "4.02.1" & ocaml-version < "4.03" ]
 install: [make "install"]
