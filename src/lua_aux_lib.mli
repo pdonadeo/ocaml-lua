@@ -324,7 +324,7 @@ external typerror : state -> int -> string -> 'a = "luaL_typerror__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_typerror}luaL_typerror}
     documentation. *)
 
-external unref : state -> int -> int -> unit = "luaL_ref__stub"
+external unref : state -> int -> int -> unit = "luaL_unref__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_unref}luaL_unref}
     documentation. *)
 

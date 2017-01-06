@@ -259,6 +259,6 @@ let typename ls index =
   Lua_api_lib.typename ls (Lua_api_lib.type_ ls index)
 ;;
 
-external unref : state -> int -> int -> unit = "luaL_ref__stub"
+external unref : state -> int -> int -> unit = "luaL_unref__stub"
 
 external where : state -> int -> unit = "luaL_where__stub"
