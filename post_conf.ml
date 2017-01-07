@@ -248,9 +248,14 @@ let compiler ?(cc_name = "gcc") ?(temp_dir = "/tmp") ?(prefix = "test") ?(option
 
 let test_program = "\
 #include <stdio.h>
+#include <string.h>
 #include \"lua.h\"
 #include \"lauxlib.h\"
 #include \"lualib.h\"
+
+#if (LUA_VERSION_NUM != 501)
+    #error Lua 5.1 is required
+#endif
 
 int main (void) {
   char buff[256];
