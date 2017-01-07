@@ -38,6 +38,7 @@ type thread_status =
   | LUA_ERRSYNTAX
   | LUA_ERRMEM
   | LUA_ERRERR
+  | LUA_ERRFILE
 
 (** This type is not present in the official API and is used by the function
     [gc] *)

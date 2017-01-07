@@ -50,7 +50,8 @@ let test_loop () =
     | Lua.LUA_ERRRUN
     | Lua.LUA_ERRSYNTAX
     | Lua.LUA_ERRMEM
-    | Lua.LUA_ERRERR as e -> raise (Lua.Error e) in
+    | Lua.LUA_ERRERR
+    | Lua.LUA_ERRFILE as e -> raise (Lua.Error e) in
 
   if not (equal p !test_value)
   then failwith "The lightuserdata inside cpcall is not the expected one!"

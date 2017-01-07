@@ -14,6 +14,7 @@ type thread_status =
   | LUA_ERRSYNTAX
   | LUA_ERRMEM
   | LUA_ERRERR
+  | LUA_ERRFILE
 
 type gc_command =
   | GCSTOP
@@ -52,6 +53,7 @@ let thread_status_of_int = function
   | 3 -> LUA_ERRSYNTAX
   | 4 -> LUA_ERRMEM
   | 5 -> LUA_ERRERR
+  | 6 -> LUA_ERRFILE
   | _ -> failwith "thread_status_of_int: unknown status value"
 
 let int_of_thread_status = function
@@ -61,6 +63,7 @@ let int_of_thread_status = function
   | LUA_ERRSYNTAX -> 3
   | LUA_ERRMEM -> 4
   | LUA_ERRERR -> 5
+  | LUA_ERRFILE -> 6
 
 let int_of_gc_command = function
   | GCSTOP -> 0
