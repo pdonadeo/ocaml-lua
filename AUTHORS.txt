@@ -1,6 +1,0 @@
-Authors of ocaml-lua:
-
-Paolo Donadeo
-Sylvain Le Gall
-
-Special thank to Sylvain for giving us OCaml Forge and OASIS.

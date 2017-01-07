@@ -1,7 +1,0 @@
-true : dtypes
-true : debug
-
-# Findlib deps
-<**/*.{ml,mli}> : use_unix
-<main.{d.byte,native,p.native}> : use_unix
-
