@@ -47,11 +47,13 @@ See the file COPYING.txt for copying conditions. See the file AUTHORS.txt for cr
 ## Building and installing the library
 
 To build the library the following requirements are mandatory:
+
 * lua 5.1.x
 * ocaml (>= 3.12.1)
 * findlib
 
 The library can optionally be compiled and linked with LuaJIT. In this case an additional requirement is:
+
 * LuaJIT 2.0.0 for Lua 5.1
 
 To compile use the usual spell:
