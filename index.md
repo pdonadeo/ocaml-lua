@@ -38,8 +38,6 @@ The homepage of the project is hosted on [GitHub](https://pdonadeo.github.io/oca
 
 The complete library reference (ocamldoc generated) is [here](https://pdonadeo.github.io/ocaml-lua/ocamldoc/).
 
-Source tarball are on the download page on OCaml Forge. TODO
-
 The official GIT repository is [here](https://github.com/pdonadeo/ocaml-lua).
 
 Bug reports and feature requests are on my page on [GitHub](https://github.com/pdonadeo/ocaml-lua/issues).
