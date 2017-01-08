@@ -1,0 +1,82 @@
+<html><head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Lua_api" rel="Chapter" href="Lua_api.html">
+<link title="Lua_api_lib" rel="Chapter" href="Lua_api_lib.html">
+<link title="Lua_aux_lib" rel="Chapter" href="Lua_aux_lib.html"><title>Lua_aux_lib</title>
+</head>
+<body>
+<code class="code"><span class="keyword">sig</span><br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;buffer<br>
+&nbsp;&nbsp;<span class="keyword">type</span>&nbsp;reg&nbsp;=&nbsp;string&nbsp;*&nbsp;<span class="constructor">Lua_api_lib</span>.oCamlFunction<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;refnil&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;noref&nbsp;:&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;addchar&nbsp;:&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;char&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;addlstring&nbsp;:&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;addstring&nbsp;:&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;addvalue&nbsp;:&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;argcheck&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_argcheck__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;argerror&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_argerror__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;buffinit&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;callmeta&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_callmeta__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;checkany&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_checkany__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;checkint&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"luaL_checkint__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checkinteger&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;checklong&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_checklong__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checklstring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checkstring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checknumber&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checkoption&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checkstack&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checktype&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_api_lib</span>.lua_type&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;checkudata&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;[&gt;&nbsp;<span class="keywordsign">`</span><span class="constructor">Light_userdata</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="keywordsign">`</span><span class="constructor">Userdata</span>&nbsp;<span class="keyword">of</span>&nbsp;<span class="keywordsign">'</span>a&nbsp;]&nbsp;option<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;dofile&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;dostring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;error&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;(<span class="keywordsign">'</span>a,&nbsp;unit,&nbsp;string,&nbsp;<span class="keywordsign">'</span>b)&nbsp;<span class="constructor">Pervasives</span>.format4&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;getmetafield&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_getmetafield__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;getmetatable&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_getmetatable__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;gsub&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_gsub__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;loadbuffer&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_api_lib</span>.thread_status<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;loadfile&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_api_lib</span>.thread_status<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;loadstring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_api_lib</span>.thread_status<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;newmetatable&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_newmetatable__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;newstate&nbsp;:&nbsp;?max_memory_size:int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_api_lib</span>.state<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;openlibs&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit&nbsp;=&nbsp;<span class="string">"luaL_openlibs__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;optint&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;optinteger&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_optinteger__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;optlong&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_optlong__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;optlstring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;optnumber&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;float<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;optstring&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;pushresult&nbsp;:&nbsp;<span class="constructor">Lua_aux_lib</span>.buffer&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;ref_&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;=&nbsp;<span class="string">"luaL_ref__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;register&nbsp;:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;option&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Lua_aux_lib</span>.reg&nbsp;list&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;<span class="keyword">val</span>&nbsp;typename&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string<br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;typerror&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;string&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="keywordsign">'</span>a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_typerror__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;unref&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit<br>
+&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;<span class="string">"luaL_unref__stub"</span><br>
+&nbsp;&nbsp;<span class="keyword">external</span>&nbsp;where&nbsp;:&nbsp;<span class="constructor">Lua_api_lib</span>.state&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;int&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;unit&nbsp;=&nbsp;<span class="string">"luaL_where__stub"</span><br>
+<span class="keyword">end</span></code></body></html>
