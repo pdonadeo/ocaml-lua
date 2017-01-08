@@ -46,6 +46,12 @@ See the file COPYING.txt for copying conditions. See the file AUTHORS.txt for cr
 
 ## Building and installing the library
 
+### Installing with OPAM
+
+Installing the library with OPAM should be as sismple as: `opam install ocaml-lua`
+
+### Compiling and installing from source
+
 To build the library the following requirements are mandatory:
 
 + lua 5.1.x
