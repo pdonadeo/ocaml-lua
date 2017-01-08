@@ -36,7 +36,7 @@ My advice is to read the book ["Programming in Lua"](http://www.lua.org/pil/), w
 
 The homepage of the project is hosted on [GitHub](https://pdonadeo.github.io/ocaml-lua/).
 
-The complete library reference (ocamldoc generated) is here. TODO
+The complete library reference (ocamldoc generated) is [here](https://pdonadeo.github.io/ocaml-lua/ocamldoc/).
 
 Source tarball are on the download page on OCaml Forge. TODO
 
