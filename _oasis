@@ -1,16 +1,16 @@
-OASISFormat:  0.4
-OCamlVersion: >= 4.02.1
-Name:         ocaml-lua
-Version:      1.4
-Synopsis:     Lua bindings
-Authors:      Paolo Donadeo, Sylvain Le Gall
-Maintainers:  Paolo Donadeo <p.donadeo@gmail.com>
-License:      MIT
-LicenseFile:  COPYING.txt
-BuildTools:   ocamlbuild
-Plugins:      META (0.3),
-              DevFiles (0.3)
-Homepage:     http://ocaml-lua.forge.ocamlcore.org
+OASISFormat:        0.4
+OCamlVersion:       >= 4.02.1
+Name:               ocaml-lua
+Version:            1.5
+Synopsis:           Lua bindings
+Authors:            Paolo Donadeo
+Maintainers:        Paolo Donadeo <p.donadeo@gmail.com>
+License:            MIT
+LicenseFile:        COPYING.txt
+BuildTools:         ocamlbuild
+Plugins:            META (0.4),
+                    DevFiles (0.4)
+Homepage:           https://pdonadeo.github.io/ocaml-lua/
 PostConfCommand:    ./post_conf.ml
 
 Description:
@@ -21,7 +21,7 @@ Description:
   This library provides bindings to Lua API which allows the application to
   exchange data with Lua programs and also to extend Lua with OCaml functions.
   .
-  [Lua homepage](http://www.lua.org)
+  [Lua homepage](http://www.lua.org/)
 
 Flag luajit
   Description:  Enable support for linking with LuaJIT
@@ -33,14 +33,14 @@ Flag stubdebug
 
 # Libraries
 Library lua
-  Path:         src
-  Modules:      Lua_api, Lua_api_lib, Lua_aux_lib
-  CSources:     stub.c, stub.h, aux_stub.c
-  BuildDepends: unix, threads
-  CCopt:  $(my_ccopt)
-  CClib:  $(my_cclib)
+  Path:             src
+  Modules:          Lua_api, Lua_api_lib, Lua_aux_lib
+  CSources:         stub.c, stub.h, aux_stub.c
+  BuildDepends:     unix, threads
+  CCopt:            $(my_ccopt)
+  CClib:            $(my_cclib)
   if flag (stubdebug)
-    CCopt+: -ggdb -DENABLE_DEBUG
+    CCopt+:         -ggdb -DENABLE_DEBUG
   XMETADescription: OCaml binding to Lua API library
 
 # Documentation
@@ -99,8 +99,8 @@ Executable fasta_threads
 # VCS
 SourceRepository head
   Type:     git
-  Location: http://forge.ocamlcore.org/anonscm/git/ocaml-lua/ocaml-lua.git
-  Browser:  http://forge.ocamlcore.org/scm/browser.php?group_id=167
+  Location: https://github.com/pdonadeo/ocaml-lua.git
+  Browser:  https://github.com/pdonadeo/ocaml-lua
   Branch:   master
 
 #
@@ -114,7 +114,7 @@ Flag examples
 Executable ci
   Path:             examples/ci
   Build$:           flag(examples) || flag(all)
-  CClib:          $(osx_cclib)
+  CClib:            $(osx_cclib)
   Install:          false
   MainIs:           ci.ml
   Custom:           true

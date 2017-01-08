@@ -133,7 +133,7 @@ external pushlstring : state -> string -> unit = "lua_pushlstring__stub"
 let pushstring = pushlstring
 
 (* This is the "porting" of the standard panic function from Lua source:
-   lua-5.1.4/src/lauxlib.c line 639 *)
+   lua-5.1.5/src/lauxlib.c line 639 *)
 let default_panic (ls : state) =
   let msg = tostring ls (-1) in
   let () =
@@ -179,7 +179,7 @@ let cpcall ls func ud =
   | Memory_allocation_error ->
       let _ = atpanic ls old_panic in
       LUA_ERRMEM
-  | e -> 
+  | e ->
       let _ = atpanic ls old_panic in
       raise e
 

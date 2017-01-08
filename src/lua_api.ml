@@ -71,7 +71,7 @@ lua_State* push_hello () {
     return L;
 }
     ]}
-    
+
     Many functions, expecially in the [LuaL] module, are not real bindings,
     because sometimes it was faster to rewrite the function in OCaml than
     creating the binding. Every time this happens, it's clearly stated in the

@@ -53,7 +53,7 @@ type gc_command =
   | GCSETSTEPMUL
 
 (** This type is a collection of the possible types of a Lua value, as defined
-    by the macros in lua.h. As a reference, see the documentation of the 
+    by the macros in lua.h. As a reference, see the documentation of the
     {{:http://www.lua.org/manual/5.1/manual.html#lua_type}lua_type function},
     and the corresponding OCaml {!Lua_api_lib.type_}. *)
 type lua_type =
@@ -327,7 +327,7 @@ val newthread : state -> state
     When you create a new thread, this binding guaranties that the Lua object
     will remain "living" (protected from both the Lua and the OCaml garbage
     collectors) until a valid copy exists in at least one of the two contexts.
-    
+
     Remember that all the threads obtained by [newthread] and
     {!Lua_api_lib.tothread} are shared copies, for example:
     {[
@@ -339,7 +339,7 @@ Lua.settop state 0;;
     Now the stack of [state] is empty and you have two threads, [th] and [th'],
     but they are actually the {e very same data structure} and operations performed
     on the first will be visible on the second!
-    
+
     Another important issue regarding the scope of a state object representing a
     thread (coroutine): this binding don't prevent you from accessing invalid
     memory in case of misuse of the library. Please, carefully consider this
@@ -642,7 +642,7 @@ val tolstring : state -> int -> string option
 (** See
     {{:http://www.lua.org/manual/5.1/manual.html#lua_tolstring}lua_tolstring}
     documentation.
-    
+
     {b NOTE}: The original [len] argument is missing because, unlike in C,
     there is no impedance mismatch between OCaml and Lua strings *)
 
