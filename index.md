@@ -6,7 +6,9 @@ This project provides the bindings required to embed Lua.
 
 [More information about Lua](http://www.lua.org/)
 
-<div style="text-align: center;">![Lua logo](https://pdonadeo.github.io/ocaml-lua/img/lua-logo.gif)</div>
+<p align="center">
+  <img alt="Lua logo" title="Lua logo" src="https://pdonadeo.github.io/ocaml-lua/img/lua-logo.gif">
+</p>
 
 ## Introduction
 
