@@ -170,7 +170,7 @@ let main thread_num n =
 ;;
 
 try main Sys.argv.(1) Sys.argv.(2)
-with Invalid_argument("index out of bounds") -> begin
+with Invalid_argument _ -> begin
   Printf.eprintf "Usage: %s <thread_num> <fasta_argument>\n%!" (Sys.argv.(0));
   exit 1;
 end
