@@ -15,11 +15,11 @@ module SMap = Map.Make(String);;
 let slurp_channel channel =
   let buffer_size = 4096 in
   let buffer = Buffer.create buffer_size in
-  let string = Bytes.create buffer_size in
+  let bytes = Bytes.create buffer_size in
   let chars_read = ref 1 in
   while !chars_read <> 0 do
-    chars_read := input channel string 0 buffer_size;
-    Buffer.add_substring buffer string 0 !chars_read
+    chars_read := input channel bytes 0 buffer_size;
+    Buffer.add_subbytes buffer bytes 0 !chars_read
   done;
   Buffer.contents buffer
 ;;
@@ -33,7 +33,7 @@ let slurp_file filename =
   result
 ;;
 
-let length = Bytes.length;;
+let length = String.length;;
 
 exception Stop of int;;
 
@@ -63,8 +63,8 @@ let split str ~by:sep =
   String.sub str 0 p, String.sub str (p + len) (slen - p - len)
 ;;
 
-let rfind_from str suf sub = 
-  let sublen = length sub 
+let rfind_from str suf sub =
+  let sublen = length sub
   and len    = length str in
     if sublen = 0 then len
     else
@@ -88,7 +88,7 @@ let nsplit str ~by:sep =
   else if sep = "" then invalid_arg "nsplit: empty sep not allowed"
   else
     (* str is non empty *)
-    let seplen = String.length sep in
+    let seplen = length sep in
     let rec aux acc ofs =
       if ofs >= 0 then (
         match
@@ -139,14 +139,14 @@ let trim s =
 let read_setup_data filename =
   let content = slurp_file filename in
   let lines = nsplit content "\n" |>
-                List.map trim |> 
+                List.map trim |>
                   List.filter ((<>) "") in
   List.fold_left
     (fun map l ->
       let key, value = split l ~by:"=" in
       let key = trim key in
       let value = trim value in
-      let value = String.sub value 1 ((String.length value) - 2) in
+      let value = String.sub value 1 ((length value) - 2) in
       let value = trim value in
       SMap.add key value map)
     SMap.empty
@@ -171,10 +171,10 @@ let input_all fd =
     if n = 0 then
       let res = Bytes.create total in
       let pos = total - ofs in
-      let _ = String.blit buf 0 res pos ofs in
+      let _ = Bytes.blit buf 0 res pos ofs in
       let coll pos buf =
         let new_pos = pos - buf_len in
-        String.blit buf 0 res new_pos buf_len;
+        Bytes.blit buf 0 res new_pos buf_len;
         new_pos in
       let _ = List.fold_left coll pos acc in
       res
@@ -185,7 +185,7 @@ let input_all fd =
         loop (buf :: acc) new_total (Bytes.create buf_len) 0
       else
         loop acc new_total buf new_ofs in
-  loop [] 0 (Bytes.create buf_len) 0
+  loop [] 0 (Bytes.create buf_len) 0 |> Bytes.to_string
 ;;
 
 let spawn args =
