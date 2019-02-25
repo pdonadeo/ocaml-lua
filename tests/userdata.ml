@@ -4,9 +4,9 @@ let (|>) x f = f x;;
 
 let allocate how_many str_len =
   let l = ref [] in
-  for i = 1 to how_many
+  for _i = 1 to how_many
   do
-    let s = String.create str_len in
+    let s = Bytes.create str_len in
     l := s::(!l);
   done;
   !l
@@ -55,7 +55,7 @@ struct
     Lua.newuserdata ls data2;
     1
 
-  let gc_compact ls =
+  let gc_compact _ls =
     Printf.printf "Calling Gc.compact 2 times from Lua... %!";
     Gc.compact ();
     Gc.compact ();
@@ -68,7 +68,7 @@ struct
     Lua.pushstring ls "__gc";
     Lua.pushocamlfunction ls (Lua.make_gc_function dir_gc);
     Lua.settable ls (-3) |> ignore;
-    
+
     Lua.pushocamlfunction ls opendir;
     Lua.setglobal ls "opendir";
 
@@ -97,8 +97,8 @@ end
 " "test_program" |> ignore;
   match Lua.pcall l1 0 0 0 with
   | Lua.LUA_OK -> ()
-  | err -> begin
-      Printf.printf "%s\n%!" (Lua.tostring l1 (-1));
+  | _err -> begin
+      Printf.printf "%s\n%!" (Lua.tostring l1 (-1) |> Option.value ~default:"");
       Lua.pop l1 1;
       failwith "FATAL ERROR"
     end

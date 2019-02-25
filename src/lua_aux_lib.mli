@@ -12,7 +12,6 @@ open Lua_api_lib
 - {b Missing functions}: [luaL_addsize], [luaL_prepbuffer]
 - {b Notably different functions}: {!error}, {!newstate}
 - {b Special remarks}: {!checklstring}
-
 *)
 
 (**************************)
@@ -242,10 +241,7 @@ val newstate : ?max_memory_size:int -> unit -> state
 
     An optional parameter, not available in the original luaL_newstate, provide
     the user the chance to specify the maximum memory (in byte) that Lua is allowed to
-    allocate for this state.
-
-    {b Warning}: when the library is built with LuaJIT [max_memory_size] is
-    ignored! *)
+    allocate for this state. *)
 
 external openlibs : Lua_api_lib.state -> unit = "luaL_openlibs__stub"
 (** See {{:http://www.lua.org/manual/5.1/manual.html#luaL_openlibs}luaL_openlibs}

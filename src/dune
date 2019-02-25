@@ -1,0 +1,8 @@
+(library
+  (name lua)
+  (wrapped false)
+  (public_name ocaml-lua)
+  (modules lua_api lua_api_lib lua_aux_lib)
+  (c_names lua_api_lib_stubs lua_aux_lib_stubs)
+  (c_flags -O3 -Wall -Ilua_c/lua515/src)
+  (libraries unix threads lua_c))

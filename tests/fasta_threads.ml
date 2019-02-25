@@ -131,7 +131,7 @@ let thread thread_id n =
     | Lua.LUA_OK -> ()
     | err -> raise (Lua.Error err);
   with
-  | Lua.Error err ->
+  | Lua.Error _ ->
     begin
       Printf.printf "%s\n%!" ((Lua.tostring state (-1)) |> opt_get);
       Lua.pop state 1;
@@ -147,7 +147,7 @@ let rec mkdir ?(parents=true) ?(permissions = 0o755) directory =
   let dir_name = Filename.dirname directory in
   try mkdir' ~perm:permissions directory
   with
-  | Unix.Unix_error (Unix.EACCES, raising_fun, parameter) ->
+  | Unix.Unix_error (Unix.EACCES, _, parameter) ->
       raise (Unix.Unix_error (Unix.EACCES, "mkdir", parameter))
   | Unix.Unix_error (Unix.ENOENT, _, _) as e ->
       if parents then begin

@@ -6,7 +6,7 @@ type point =
   {
     x : float;
     y : float;
-    fluff : string list;
+    fluff : bytes list;
   }
 
 let empty = { x = 0.0; y = 0.0; fluff = [] };;
@@ -19,7 +19,7 @@ let equal p1 p2 =
 
 let p_alloc = ref 0;;
 
-let p_finaliser v =
+let p_finaliser _v =
   let open Test_common in
   log Debug_only "    deallocating...";
   decr p_alloc

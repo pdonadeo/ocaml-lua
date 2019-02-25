@@ -8,31 +8,6 @@ type buffer =
 
 type reg = string * oCamlFunction
 
-let check_thread_mutex = Mutex.create ();;
-let thread_id = ref None;;
-let no_thread_error_msg = "You cannot call Lua API functions (linked with LuaJIT) from different threads!"
-
-let check_thread () =
-  Mutex.lock check_thread_mutex;
-  match !thread_id with
-  | None -> begin
-      thread_id := Some (Thread.self () |> Thread.id);
-      Mutex.unlock check_thread_mutex;
-    end
-  | Some old_id -> begin
-      let current_thread_id = Thread.self () |> Thread.id in
-      if old_id <> current_thread_id
-      then begin
-        Printf.eprintf "%s\n%!" no_thread_error_msg;
-        Mutex.unlock check_thread_mutex;
-        failwith no_thread_error_msg;
-      end
-      else Mutex.unlock check_thread_mutex;
-    end
-;;
-
-let _ = Callback.register "check_thread" check_thread;;
-
 let refnil = -1;;
 
 let noref = -2;;
@@ -137,7 +112,7 @@ let checkudata ls ud tname =
   let te = lazy (typerror ls ud tname) in
   let p = touserdata ls ud in
   match p with
-  | Some data -> begin
+  | Some _data -> begin
       if (Lua_api_lib.getmetatable ls ud) then begin
         getfield ls registryindex tname;
         if (rawequal ls (-1) (-2))

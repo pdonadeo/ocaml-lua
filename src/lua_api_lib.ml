@@ -162,25 +162,25 @@ let pcall ls nargs nresults errfunc =
 exception Memory_allocation_error
 
 let cpcall ls func ud =
-  let cpcall_panic ls = raise Memory_allocation_error in
+  let cpcall_panic (_ls : state) : int = raise Memory_allocation_error in
   let old_panic = atpanic ls cpcall_panic in
   try
     match checkstack ls 2 with (* ALLOCATES MEMORY, COULD FAIL! *)
     | true -> begin
         pushcfunction ls func;
         pushlightuserdata ls ud; (* ALLOCATES MEMORY, COULD FAIL! *)
-        let _ = atpanic ls old_panic in
+        let _unused = atpanic ls old_panic in
         pcall ls 1 0 0
       end
     | false ->
-        let _ = atpanic ls old_panic in
+        let _unused = atpanic ls old_panic in
         LUA_ERRMEM
   with
   | Memory_allocation_error ->
-      let _ = atpanic ls old_panic in
+      let _unused = atpanic ls old_panic in
       LUA_ERRMEM
   | e ->
-      let _ = atpanic ls old_panic in
+      let _unused = atpanic ls old_panic in
       raise e
 
 external createtable : state -> int -> int -> unit = "lua_createtable__stub"

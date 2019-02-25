@@ -12,7 +12,7 @@ let opt_get o =
 exception Test_exception
 let counter = ref 0;;
 
-let panicf1 ls =
+let panicf1 _ =
   Printf.printf "panicf1: %d\n%!" !counter;
   raise Test_exception
 ;;
@@ -31,7 +31,7 @@ let push_get_call_c_function ls f =
 ;;
 
 let test_loop () =
-  let simple_ocaml_function ls =
+  let simple_ocaml_function _ =
     let () = Test_common.allocate ~random:false 479 99733 |> ignore in
       Printf.printf "OCaml function called from Lua!!!:-)\n%!";
       0 in
@@ -119,7 +119,7 @@ let test_loop () =
     | 1 -> Lua.error l2
     | _ -> failwith "IMPOSSIBILE"
   with
-  | Lua.Error err ->
+  | Lua.Error _ ->
     begin
       Printf.printf "%s\n%!" ((Lua.tostring l1 (-1)) |> opt_get);
       Lua.pop l1 1;

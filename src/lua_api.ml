@@ -13,17 +13,6 @@
   fix release, any version 5.1.x should be fine. On the other side, previous
   releases and the new Lua 5.2 is not supported.
 
-  My plan is to support newest versions, but not the oldest ones.
-
-  This library can also be linked to LuaJIT, the just-in-time compiler by Mike
-  Pall, available {{:http://luajit.org/luajit.html}here}. Compiling with LuaJIT
-  produce a much faster Lua virtual machine, but the user loses:{ol
-    {- multi threading: see chapter below;}
-    {- max memory limit for a virtual machine: see {!Lua_aux_lib.newstate}.}
-  }
-
-  The tested version of LuaJIT is 2.0.0 for Lua 5.1.
-
   The Lua API library is composed by two parts: the
   {{:http://www.lua.org/manual/5.1/manual.html#3}low level API}, providing all
   the functions you need to interact with the Lua runtime, and the
@@ -47,8 +36,9 @@
   between the two. This guideline lead to a very "imperative" OCaml library, but
   I think this is a minor issue.
 
-  Two "low level" modules are provided, {!Lua} and {! LuaL}. Ideally you should
-  start your program opening [Lua_api], and then call functions like this:
+  Two "low level" modules are provided, {!Lua_api_lib} and {!Lua_aux_lib}.
+  Ideally you should start your program opening [Lua_api], and then call
+  functions like this:
 
       {[
 open Lua_api;;
@@ -76,8 +66,9 @@ lua_State* push_hello () {
     because sometimes it was faster to rewrite the function in OCaml than
     creating the binding. Every time this happens, it's clearly stated in the
     documentation. Other functions have different signatures or special notes,
-    but all these differences are documented. At the top of the pages documenting
-    the {! Lua} and {! LuaL} modules there is a list of important differences.
+    but all these differences are documented. At the top of the pages
+    documenting the {! Lua_api_lib} and {! Lua_aux_lib} modules there is a list
+    of important differences.
 *)
 
 
@@ -89,16 +80,7 @@ lua_State* push_hello () {
     This binding is to be considered "thread safe". This means that you can use
     the library in a threaded setup, but keep in mind that you {b cannot} share
     a Lua state [Lua_api_lib.state] between threads, because Lua itself doesn't
-    allow this.
-
-    {b Warning}: if you built this binding with LuaJIT instead of the regular
-    Lua, you {i lose} the thread safety at all. You still can use threads in
-    your program but you can call functions from this library in only one
-    thread. If you accidentally call functions from several threads, the second
-    thread involved will rise an exception. This weird and quite rigid way to
-    handle concurrency has been implemented to avoid undefined behaviour in a
-    situation (LuaJIT) where I cannot use my custom allocator, which protect
-    mallocs. *)
+    allow this. *)
 
 
 (**************************)

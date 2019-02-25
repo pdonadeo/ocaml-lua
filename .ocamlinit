@@ -1,0 +1,12 @@
+#directory "+compiler-libs";;
+
+(* Added by OPAM. *)
+let () =
+  try Topdirs.dir_directory (Sys.getenv "OCAML_TOPLEVEL_PATH")
+  with Not_found -> ()
+;;
+
+let interactive = !Sys.interactive;;
+Sys.interactive := false;; (* Pretend to be in non-interactive mode *)
+#use "topfind";;
+Sys.interactive := interactive;; (* Return to regular interactive mode *)

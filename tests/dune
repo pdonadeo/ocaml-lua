@@ -1,0 +1,23 @@
+(library
+  (name test_common)
+  (modules test_common))
+
+(executable
+  (name userdata)
+  (modules userdata)
+  (libraries lua))
+
+(executable
+  (name cpcall)
+  (modules cpcall)
+  (libraries lua test_common))
+
+(executable
+  (name atpanic)
+  (modules atpanic)
+  (libraries lua test_common))
+
+(executable
+  (name fasta_threads)
+  (modules fasta_threads)
+  (libraries lua test_common))

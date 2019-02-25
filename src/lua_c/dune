@@ -1,0 +1,10 @@
+(library (name lua_c) (public_name ocaml-lua.c) (preprocess no_preprocessing)
+ (self_build_stubs_archive (lua_c)))
+
+(rule
+ (targets liblua_c_stubs.a dlllua_c_stubs.so)
+ (deps (source_tree lua515))
+ (action (progn
+            (chdir lua515 (run make linux))
+            (run cp lua515/src/liblua.a liblua_c_stubs.a)
+            (run cp lua515/src/liblua.so dlllua_c_stubs.so))))

@@ -79,14 +79,14 @@ let string_list_eq l1 l2 =
     (fun eq x1 x2 ->
       if eq = false
       then false
-      else if String.compare x1 x2 = 0
+      else if Bytes.compare x1 x2 = 0
            then true
            else false) true l1 l2
 ;;
 
 let allocate ?(random=true) how_many str_len =
   let l = ref [] in
-  for i = 1 to how_many
+  for _i = 1 to how_many
   do
     let s = Bytes.create str_len in
     for j = 0 to (str_len - 1) do
