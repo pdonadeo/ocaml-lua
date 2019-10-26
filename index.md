@@ -1,5 +1,7 @@
 ## What is ocaml-lua
 
+[![Build Status](https://travis-ci.org/pdonadeo/ocaml-lua.svg?branch=master)](https://travis-ci.org/pdonadeo/ocaml-lua)
+
 OCaml-lua provides bindings to the Lua programming language. Lua is a scripting
 language particularly useful when you need to embed a language in your
 application.
