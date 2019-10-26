@@ -74,6 +74,8 @@ To build the library you need dune and odoc (for documentation).
 
 To compile:
 
-1. dune build src/liblualibstock.a
-2. dune build @install src/lua.cmxa
-3. dune build @doc
+1. cd src/lua_c ; tar xf lua-5.1.5.tar.gz
+2. cd ; patch -p1 -i ../lua.patch
+3. cd .. ; mv lua-5.1.5 lua515
+4. cd ../.. ; dune build @install
+5. dune build @doc
