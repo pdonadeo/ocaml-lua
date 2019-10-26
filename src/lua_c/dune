@@ -5,6 +5,6 @@
  (targets liblua_c_stubs.a dlllua_c_stubs.so)
  (deps (source_tree lua515))
  (action (progn
-            (chdir lua515 (run make linux))
+            (chdir lua515 (run make %{system}))
             (run cp lua515/src/liblua.a liblua_c_stubs.a)
             (run cp lua515/src/liblua.so dlllua_c_stubs.so))))

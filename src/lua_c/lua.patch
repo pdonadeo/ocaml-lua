@@ -1,6 +1,6 @@
-diff -Naur lua-5.1.5/src/Makefile lua515/src/Makefile
---- lua-5.1.5/src/Makefile	2012-02-13 21:41:22.000000000 +0100
-+++ lua515/src/Makefile	2019-10-26 12:59:26.007250307 +0200
+diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
+--- lua-5.1.5__LUA_ORG/src/Makefile	2012-02-13 21:41:22.000000000 +0100
++++ lua-5.1.5/src/Makefile	2019-10-26 23:04:29.523750046 +0200
 @@ -8,7 +8,7 @@
  PLAT= none
  
@@ -18,7 +18,7 @@ diff -Naur lua-5.1.5/src/Makefile lua515/src/Makefile
  CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
  	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
  	lundump.o lvm.o lzio.o
-@@ -36,12 +37,12 @@
+@@ -36,12 +37,16 @@
  LUAC_O=	luac.o print.o
  
  ALL_O= $(CORE_O) $(LIB_O) $(LUA_O) $(LUAC_O)
@@ -30,10 +30,14 @@ diff -Naur lua-5.1.5/src/Makefile lua515/src/Makefile
  
 -all:	$(ALL_T)
 +all:	$(ALL_A) $(LUA_SO)
++
++all_macosx:	$(ALL_A)
++	$(CC) -dynamiclib -install_name $(LUA_SO) -compatibility_version 5.1 \
++		-current_version 5.1.5 -o $(LUA_SO) $(CORE_O) $(LIB_O)
  
  o:	$(ALL_O)
  
-@@ -51,6 +52,9 @@
+@@ -51,6 +56,9 @@
  	$(AR) $@ $(CORE_O) $(LIB_O)	# DLL needs all object files
  	$(RANLIB) $@
  
@@ -43,7 +47,7 @@ diff -Naur lua-5.1.5/src/Makefile lua515/src/Makefile
  $(LUA_T): $(LUA_O) $(LUA_A)
  	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
  
-@@ -96,10 +100,10 @@
+@@ -96,10 +104,10 @@
  	$(MAKE) all MYCFLAGS=
  
  linux:
@@ -52,7 +56,16 @@ diff -Naur lua-5.1.5/src/Makefile lua515/src/Makefile
  
  macosx:
 -	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-lreadline"
-+	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS=""
++	$(MAKE) all_macosx MYCFLAGS=-DLUA_USE_LINUX MYLIBS=""
  # use this on Mac OS X 10.3-
  #	$(MAKE) all MYCFLAGS=-DLUA_USE_MACOSX
+ 
+@@ -116,7 +124,7 @@
+ 	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
+ 
+ # list targets that do not create files (but not all makes understand .PHONY)
+-.PHONY: all $(PLATS) default o a clean depend echo none
++.PHONY: all all_macosx $(PLATS) default o a clean depend echo none
+ 
+ # DO NOT DELETE
  
