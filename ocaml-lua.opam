@@ -35,6 +35,6 @@ functions.
 [Lua homepage](http://www.lua.org)"""
 flags: light-uninstall
 url {
-  src: "https://github.com/pdonadeo/ocaml-lua/archive/v1.7.tar.gz"
-  checksum: "md5=7d6cd09c144e4ad48e591252c21974cc"
+  src: "https://github.com/pdonadeo/ocaml-lua/archive/v1.8.tar.gz"
+  checksum: "md5=f5fd56bd53f8e87818cb18137304e415"
 }
