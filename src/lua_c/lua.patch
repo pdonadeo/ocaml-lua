@@ -1,6 +1,18 @@
-diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
---- lua-5.1.5__LUA_ORG/src/Makefile	2012-02-13 21:41:22.000000000 +0100
-+++ lua-5.1.5/src/Makefile	2019-10-26 23:04:29.523750046 +0200
+diff -Naur lua-5.1.5/Makefile lua-5.1.5__PATCH/Makefile
+--- lua-5.1.5/Makefile	2012-02-10 10:50:23.000000000 +0100
++++ lua-5.1.5__PATCH/Makefile	2019-11-01 14:34:22.841165600 +0100
+@@ -38,7 +38,7 @@
+ # == END OF USER SETTINGS. NO NEED TO CHANGE ANYTHING BELOW THIS LINE =========
+ 
+ # Convenience platforms targets.
+-PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
++PLATS= aix ansi bsd freebsd generic linux macosx mingw64 posix solaris
+ 
+ # What to install.
+ TO_BIN= lua luac
+diff -Naur lua-5.1.5/src/Makefile lua-5.1.5__PATCH/src/Makefile
+--- lua-5.1.5/src/Makefile	2012-02-13 21:41:22.000000000 +0100
++++ lua-5.1.5__PATCH/src/Makefile	2019-11-01 14:36:20.399618400 +0100
 @@ -8,7 +8,7 @@
  PLAT= none
  
@@ -10,8 +22,12 @@ diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
  AR= ar rcu
  RANLIB= ranlib
  RM= rm -f
-@@ -23,6 +23,7 @@
- PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
+@@ -20,9 +20,10 @@
+ 
+ # == END OF USER SETTINGS. NO NEED TO CHANGE ANYTHING BELOW THIS LINE =========
+ 
+-PLATS= aix ansi bsd freebsd generic linux macosx mingw posix solaris
++PLATS= aix ansi bsd freebsd generic linux macosx mingw64 posix solaris
  
  LUA_A=	liblua.a
 +LUA_SO=	liblua.so
@@ -47,7 +63,7 @@ diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
  $(LUA_T): $(LUA_O) $(LUA_A)
  	$(CC) -o $@ $(MYLDFLAGS) $(LUA_O) $(LUA_A) $(LIBS)
  
-@@ -96,10 +104,10 @@
+@@ -96,18 +104,18 @@
  	$(MAKE) all MYCFLAGS=
  
  linux:
@@ -60,6 +76,19 @@ diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
  # use this on Mac OS X 10.3-
  #	$(MAKE) all MYCFLAGS=-DLUA_USE_MACOSX
  
+-mingw:
+-	$(MAKE) "LUA_A=lua51.dll" "LUA_T=lua.exe" \
+-	"AR=$(CC) -shared -o" "RANLIB=strip --strip-unneeded" \
+-	"MYCFLAGS=-DLUA_BUILD_AS_DLL" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
+-	$(MAKE) "LUAC_T=luac.exe" luac.exe
++mingw64:
++	$(MAKE) "CC=x86_64-w64-mingw32-gcc-7.4.0.exe" "LUA_A=lua51.dll" \
++	"LUA_T=lua.exe" "AR=x86_64-w64-mingw32-gcc-7.4.0.exe -shared -o" \
++	"RANLIB=strip --strip-unneeded" "MYCFLAGS=-DLUA_BUILD_AS_DLL" \
++	"MYLIBS=" "MYLDFLAGS=-s" lua.exe
+ 
+ posix:
+ 	$(MAKE) all MYCFLAGS=-DLUA_USE_POSIX
 @@ -116,7 +124,7 @@
  	$(MAKE) all MYCFLAGS="-DLUA_USE_POSIX -DLUA_USE_DLOPEN" MYLIBS="-ldl"
  
