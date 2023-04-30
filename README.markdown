@@ -1,7 +1,5 @@
 ## What is ocaml-lua
 
-[![Build Status](https://travis-ci.org/pdonadeo/ocaml-lua.svg?branch=master)](https://travis-ci.org/pdonadeo/ocaml-lua)
-
 OCaml-lua provides bindings to the Lua programming language. Lua is a scripting
 language particularly useful when you need to embed a language in your
 application.
@@ -77,7 +75,7 @@ To build the library you need dune and odoc (for documentation).
 To compile:
 
 1. cd src/lua_c ; tar xf lua-5.1.5.tar.gz
-2. cd ; patch -p1 -i ../lua.patch
+2. cd lua-5.1.5 ; patch -p1 -i ../lua.patch
 3. cd .. ; mv lua-5.1.5 lua515
 4. cd ../.. ; dune build @install
 5. dune build @doc

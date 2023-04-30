@@ -2,5 +2,6 @@ session.vim
 Session.vim
 
 _build
+_opam
 
-.merlin
+*.code-workspace

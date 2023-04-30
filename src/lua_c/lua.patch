@@ -6,7 +6,7 @@ diff -Naur lua-5.1.5__LUA_ORG/src/Makefile lua-5.1.5/src/Makefile
  
  CC= gcc
 -CFLAGS= -O2 -Wall $(MYCFLAGS)
-+CFLAGS= -O2 -Wall $(MYCFLAGS) -fPIC
++CFLAGS= -O2 -Wall $(MYCFLAGS) -fPIC -Wno-misleading-indentation
  AR= ar rcu
  RANLIB= ranlib
  RM= rm -f
