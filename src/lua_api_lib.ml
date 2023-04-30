@@ -268,7 +268,7 @@ let pushocamlfunction = pushcfunction
 
 let pushfstring (state : state) =
   let k s = pushstring state s; s in
-    Printf.kprintf k
+    Printf.ksprintf k
 
 external pushinteger : state -> int -> unit = "lua_pushinteger__stub"
 

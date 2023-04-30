@@ -1,0 +1,43 @@
+name: Main workflow
+
+on:
+  push:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        ocaml-compiler:
+          - "4.08"
+          - "4.09"
+          - "4.10"
+          - "4.11"
+          - "4.12"
+          - "4.13"
+          - "4.14"
+          - "5.0"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v3
+
+      - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - run: opam install . --deps-only --with-doc
+
+      - run: cd src/lua_c ; tar xf lua-5.1.5.tar.gz
+
+      - run: cd src/lua_c/lua-5.1.5 ; patch -p1 -i ../lua.patch
+
+      - run: cd src/lua_c ; mv lua-5.1.5 lua515
+
+      - run: opam exec -- dune build @install @doc

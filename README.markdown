@@ -1,3 +1,5 @@
+[![Main workflow](https://github.com/pdonadeo/ocaml-lua/actions/workflows/main.yml/badge.svg)](https://github.com/pdonadeo/ocaml-lua/actions/workflows/main.yml)
+
 ## What is ocaml-lua
 
 OCaml-lua provides bindings to the Lua programming language. Lua is a scripting

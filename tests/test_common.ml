@@ -12,7 +12,7 @@ let log =
       match debug, level with
       | User_info, Debug_only -> ()
       | _, _ -> Printf.printf "%s\n%!" m in
-    Printf.kprintf k
+    Printf.ksprintf k
 ;;
 
 let sleep_float n =

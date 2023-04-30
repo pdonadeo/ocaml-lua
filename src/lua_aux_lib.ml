@@ -93,7 +93,7 @@ external error_aux : state -> string -> 'a = "luaL_error__stub"
 
 let error state =
   let k s = error_aux state s in
-    Printf.kprintf k
+    Printf.ksprintf k
 ;;
 
 let checkstack ls space mes =
