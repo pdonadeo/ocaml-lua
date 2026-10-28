@@ -9,7 +9,7 @@ bug-reports: "https://github.com/pdonadeo/ocaml-lua/issues"
 dev-repo: "git+https://github.com/pdonadeo/ocaml-lua.git"
 license: "MIT"
 build: [
-  [ "sh" "-c" "cd src/lua_c ; tar xf lua-5.1.5.tar.gz" ]
+  [ "sh" "-c" "cd src/lua_c ; tar xzf lua-5.1.5.tar.gz" ]
   [ "sh" "-c" "cd src/lua_c/lua-5.1.5 ; patch -p1 -i ../lua.patch" ]
   [ "sh" "-c" "cd src/lua_c ; mv lua-5.1.5 lua515" ]
   [ "dune" "build" "-p" name "-j" jobs "@install" ]
