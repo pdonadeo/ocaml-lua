@@ -1,8 +1,11 @@
 (library
-  (name lua)
-  (wrapped false)
-  (public_name ocaml-lua)
-  (modules lua_api lua_api_lib lua_aux_lib)
-  (c_names lua_api_lib_stubs lua_aux_lib_stubs)
-  (c_flags -O3 -Ilua_c/lua515/src)
-  (libraries unix threads lua_c))
+ (name lua)
+ (wrapped false)
+ (public_name ocaml-lua)
+ (modules lua_api lua_api_lib lua_aux_lib)
+ (foreign_stubs
+  (language c)
+  (names lua_api_lib_stubs lua_aux_lib_stubs)
+  (flags :standard -O3 -Ilua_c)
+  (extra_deps lua_c/lua.h lua_c/luaconf.h lua_c/lauxlib.h lua_c/lualib.h))
+ (libraries unix threads lua_c))

@@ -1,10 +1,32 @@
-(library (name lua_c) (public_name ocaml-lua.c) (preprocess no_preprocessing)
- (self_build_stubs_archive (lua_c)))
+; Lua 5.1.5 is vendored as the original tarball plus a small patch to its
+; Makefiles. Everything happens inside a sandbox in _build: only the static
+; library, the shared library and the public headers come out of it.
+
+(library
+ (name lua_c)
+ (public_name ocaml-lua.c)
+ (foreign_archives lua_c_stubs))
 
 (rule
- (targets liblua_c_stubs.a dlllua_c_stubs.so)
- (deps (source_tree lua515))
- (action (progn
-            (chdir lua515 (run make %{system}))
-            (run cp lua515/src/liblua.a liblua_c_stubs.a)
-            (run cp lua515/src/liblua.so dlllua_c_stubs.so))))
+ (targets
+  liblua_c_stubs.a
+  dlllua_c_stubs.so
+  lua.h
+  luaconf.h
+  lauxlib.h
+  lualib.h)
+ (deps
+  (sandbox always)
+  lua-5.1.5.tar.gz
+  lua.patch)
+ (action
+  (progn
+   (run tar xzf lua-5.1.5.tar.gz)
+   (chdir
+    lua-5.1.5
+    (progn
+     (run patch -s -p1 -i ../lua.patch)
+     (run make %{system})))
+   (run cp lua-5.1.5/src/liblua.a liblua_c_stubs.a)
+   (run cp lua-5.1.5/src/liblua.so dlllua_c_stubs.so)
+   (run cp lua-5.1.5/src/lua.h lua-5.1.5/src/luaconf.h lua-5.1.5/src/lauxlib.h lua-5.1.5/src/lualib.h .))))
