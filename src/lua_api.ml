@@ -41,26 +41,26 @@
   functions like this:
 
       {[
-open Lua_api;;
+      open Lua_api;;
 
-let push_hello () =
-  let ls = LuaL.newstate () in
-  Lua.pushstring ls "hello";
-  ls
-;;
-    ]}
+      let push_hello () =
+        let ls = LuaL.newstate () in
+        Lua.pushstring ls "hello";
+        ls
+      ;;
+      ]}
   which is very close to what you would do in C:
       {[
-#include <lua.h>
-#include <lauxlib.h>
-#include <lualib.h>
+      #include <lua.h>
+      #include <lauxlib.h>
+      #include <lualib.h>
 
-lua_State* push_hello () {
-    lua_State *L = luaL_newstate();
-    lua_pushstring(L, "hello");
-    return L;
-}
-    ]}
+      lua_State* push_hello () {
+          lua_State *L = luaL_newstate();
+          lua_pushstring(L, "hello");
+          return L;
+      }
+      ]}
 
     Many functions, expecially in the [LuaL] module, are not real bindings,
     because sometimes it was faster to rewrite the function in OCaml than
