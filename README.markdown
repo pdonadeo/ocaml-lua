@@ -51,8 +51,8 @@ written by the author of the language, Roberto Ierusalimschy.
 The homepage of the project is hosted on
 [GitHub](https://pdonadeo.github.io/ocaml-lua/).
 
-The complete library reference (ocamldoc generated) is
-[here](https://pdonadeo.github.io/ocaml-lua/ocamldoc/).
+The complete library reference is
+[on ocaml.org](https://ocaml.org/p/ocaml-lua/latest/doc/index.html).
 
 The official GIT repository is
 [here](https://github.com/pdonadeo/ocaml-lua).
@@ -67,12 +67,12 @@ credits.
 
 ### Installing with OPAM
 
-Installing the library with OPAM should be as sismple as:
+Installing the library with OPAM should be as simple as:
 `opam install ocaml-lua`
 
 ### Compiling and installing from source
 
-To build the library you need dune (3.0 or later), a C compiler, `make`,
+To build the library you need dune (2.3 or later), a C compiler, `make`,
 `tar` and `patch`; odoc is needed only for the documentation. The bundled
 Lua 5.1.5 sources are unpacked, patched and compiled automatically by dune.
 
