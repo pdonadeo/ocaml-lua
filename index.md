@@ -1,6 +1,6 @@
 ## What is ocaml-lua
 
-[![Build Status](https://travis-ci.org/pdonadeo/ocaml-lua.svg?branch=master)](https://travis-ci.org/pdonadeo/ocaml-lua)
+[![Main workflow](https://github.com/pdonadeo/ocaml-lua/actions/workflows/main.yml/badge.svg)](https://github.com/pdonadeo/ocaml-lua/actions/workflows/main.yml)
 
 OCaml-lua provides bindings to the Lua programming language. Lua is a scripting
 language particularly useful when you need to embed a language in your
@@ -51,8 +51,8 @@ written by the author of the language, Roberto Ierusalimschy.
 The homepage of the project is hosted on
 [GitHub](https://pdonadeo.github.io/ocaml-lua/).
 
-The complete library reference (ocamldoc generated) is
-[here](https://pdonadeo.github.io/ocaml-lua/ocamldoc/).
+The complete library reference is
+[on ocaml.org](https://ocaml.org/p/ocaml-lua/latest/doc/index.html).
 
 The official GIT repository is
 [here](https://github.com/pdonadeo/ocaml-lua).
@@ -67,17 +67,16 @@ credits.
 
 ### Installing with OPAM
 
-Installing the library with OPAM should be as sismple as:
+Installing the library with OPAM should be as simple as:
 `opam install ocaml-lua`
 
 ### Compiling and installing from source
 
-To build the library you need dune and odoc (for documentation).
+To build the library you need dune (2.3 or later), a C compiler, `make`,
+`tar` and `patch`; odoc is needed only for the documentation. The bundled
+Lua 5.1.5 sources are unpacked, patched and compiled automatically by dune.
 
 To compile:
 
-1. cd src/lua_c ; tar xf lua-5.1.5.tar.gz
-2. cd ; patch -p1 -i ../lua.patch
-3. cd .. ; mv lua-5.1.5 lua515
-4. cd ../.. ; dune build @install
-5. dune build @doc
+1. dune build @install
+2. dune build @doc
