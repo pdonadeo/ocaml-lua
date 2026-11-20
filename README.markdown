@@ -72,7 +72,7 @@ Installing the library with OPAM should be as simple as:
 
 ### Compiling and installing from source
 
-To build the library you need dune (2.3 or later), a C compiler, `make`,
+To build the library you need dune (2.7 or later), a C compiler, `make`,
 `tar` and `patch`; odoc is needed only for the documentation. The bundled
 Lua 5.1.5 sources are unpacked, patched and compiled automatically by dune.
 

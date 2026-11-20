@@ -18,12 +18,12 @@ license: "MIT"
 homepage: "https://pdonadeo.github.io/ocaml-lua/"
 bug-reports: "https://github.com/pdonadeo/ocaml-lua/issues"
 depends: [
-  "dune" {>= "2.3"}
+  "dune" {>= "2.7"}
   "ocaml" {>= "4.11.0"}
   "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
@@ -37,3 +37,4 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/pdonadeo/ocaml-lua.git"
+x-maintenance-intent: ["(latest)"]

@@ -39,7 +39,7 @@ jobs:
       - run: opam exec -- dune build --profile release @doc
 
   # The runners' C compiler is too recent to build OCaml 4.11, so the declared
-  # lower bounds (OCaml 4.11, dune 2.3) are checked inside an official
+  # lower bounds (OCaml 4.11, dune 2.7) are checked inside an official
   # ocaml/opam image instead.
   lower-bounds:
     runs-on: ubuntu-latest
@@ -48,10 +48,10 @@ jobs:
       - name: Checkout tree
         uses: actions/checkout@v7
 
-      - name: Build with OCaml 4.11 and dune 2.3.0
+      - name: Build with OCaml 4.11 and dune 2.7.1
         run: |
           docker run --rm -v "$PWD:/src:ro" ocaml/opam:debian-11-ocaml-4.11 sh -exc '
-            opam install -y dune.2.3.0
+            opam install -y dune.2.7.1
             cp -r /src /tmp/w
             cd /tmp/w
             opam exec -- dune build -p ocaml-lua @install
