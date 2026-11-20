@@ -2,6 +2,7 @@ name: Main workflow
 
 on:
   push:
+  pull_request:
 
 jobs:
   build:
@@ -12,32 +13,48 @@ jobs:
           - macos-latest
           - ubuntu-latest
         ocaml-compiler:
-          - "4.08"
-          - "4.09"
-          - "4.10"
-          - "4.11"
-          - "4.12"
-          - "4.13"
           - "4.14"
-          - "5.0"
+          - "5.2"
+          - "5.3"
+          - "5.4"
+          - "5.5"
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout tree
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
-        uses: ocaml/setup-ocaml@v2
+        uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
       - run: opam install . --deps-only --with-doc
 
-      - run: cd src/lua_c ; tar xf lua-5.1.5.tar.gz
+      # Release profile: warnings in the (old, untouched) code must not
+      # become errors when a newer compiler adds new warnings.
+      - run: opam exec -- dune build --profile release
 
-      - run: cd src/lua_c/lua-5.1.5 ; patch -p1 -i ../lua.patch
+      - run: opam exec -- dune build --profile release @doc
 
-      - run: cd src/lua_c ; mv lua-5.1.5 lua515
+  # The runners' C compiler is too recent to build OCaml 4.11, so the declared
+  # lower bounds (OCaml 4.11, dune 2.3) are checked inside an official
+  # ocaml/opam image instead.
+  lower-bounds:
+    runs-on: ubuntu-latest
 
-      - run: opam exec -- dune build @install @doc
+    steps:
+      - name: Checkout tree
+        uses: actions/checkout@v7
+
+      - name: Build with OCaml 4.11 and dune 2.3.0
+        run: |
+          docker run --rm -v "$PWD:/src:ro" ocaml/opam:debian-11-ocaml-4.11 sh -exc '
+            opam install -y dune.2.3.0
+            cp -r /src /tmp/w
+            cd /tmp/w
+            opam exec -- dune build -p ocaml-lua @install
+            opam exec -- dune build --profile release tests/cpcall.exe tests/atpanic.exe tests/userdata.exe tests/fasta_threads.exe
+            timeout 60 ./_build/default/tests/fasta_threads.exe 4 1000 > /dev/null
+          '
