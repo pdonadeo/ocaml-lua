@@ -2,7 +2,7 @@
 
 (name ocaml-lua)
 
-(version 1.9)
+(version 1.10)
 
 (generate_opam_files true)
 
