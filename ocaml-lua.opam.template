@@ -1,1 +1,2 @@
 x-maintenance-intent: ["(latest)"]
+available: os != "win32"

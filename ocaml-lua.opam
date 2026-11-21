@@ -38,3 +38,4 @@ build: [
 ]
 dev-repo: "git+https://github.com/pdonadeo/ocaml-lua.git"
 x-maintenance-intent: ["(latest)"]
+available: os != "win32"
