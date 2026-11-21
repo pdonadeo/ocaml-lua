@@ -8,6 +8,11 @@
  (foreign_archives lua_c_stubs))
 
 (rule
+ (with-stdout-to
+  lua_platform
+  (run sh %{dep:lua_platform.sh})))
+
+(rule
  (targets
   liblua_c_stubs.a
   dlllua_c_stubs.so
@@ -26,7 +31,7 @@
     lua-5.1.5
     (progn
      (run patch -s -p1 -i ../lua.patch)
-     (run make %{system})))
+     (run make %{read-lines:lua_platform})))
    (run cp lua-5.1.5/src/liblua.a liblua_c_stubs.a)
    (run cp lua-5.1.5/src/liblua.so dlllua_c_stubs.so)
    (run cp lua-5.1.5/src/lua.h lua-5.1.5/src/luaconf.h lua-5.1.5/src/lauxlib.h lua-5.1.5/src/lualib.h .))))
